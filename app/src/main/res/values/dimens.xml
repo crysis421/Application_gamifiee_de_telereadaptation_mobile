@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="screen_margin">20dp</dimen>
+    <dimen name="block_spacing">16dp</dimen>
+
+    <dimen name="text_counter_huge">96sp</dimen>
+    <dimen name="text_stat_value">40sp</dimen>
+    <dimen name="text_title">28sp</dimen>
+    <dimen name="text_body_large">18sp</dimen>
+    <dimen name="button_text_large">22sp</dimen>
+
+    <dimen name="button_height_large">72dp</dimen>
+    <dimen name="button_height_medium">56dp</dimen>
+</resources>

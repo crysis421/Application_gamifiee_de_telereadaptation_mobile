@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SAE S5</string>
+    <string name="nav_home">Accueil</string>
+    <string name="nav_catalog">Catalogue</string>
+    <string name="apply">Appliquer</string>
+    <string name="reset">Réinitialiser</string>
+    <string name="hint_duration">Durée max (min)</string>
+    <string name="hint_equipment">Matériel</string>
+    <string name="start">Démarrer</string>
 </resources>

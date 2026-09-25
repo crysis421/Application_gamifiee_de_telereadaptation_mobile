@@ -1,5 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary (light) -->
+    <color name="colorPrimary">#006C4E</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorPrimaryContainer">#86F8C4</color>
+    <color name="colorOnPrimaryContainer">#002115</color>
+
+    <!-- Secondary / cards -->
+    <color name="colorSecondary">#4B635A</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSecondaryContainer">#CDE9DC</color>
+    <color name="colorOnSecondaryContainer">#072018</color>
+
+    <!-- Surface / text neutrals -->
+    <color name="colorSurface">#FBFDF9</color>
+    <color name="colorOnSurface">#191C1B</color>
+    <color name="colorSurfaceVariant">#DBE5DE</color>
+    <color name="colorOnSurfaceVariant">#3F4945</color>
+    <color name="colorOutline">#6F7975</color>
+
+    <!-- Error -->
+    <color name="colorError">#BA1A1A</color>
+    <color name="colorOnError">#FFFFFF</color>
+    <color name="colorErrorContainer">#FFDAD6</color>
+    <color name="colorOnErrorContainer">#410002</color>
+
+    <!-- App success (custom) -->
+    <color name="app_success">#2E7D32</color>
+    <color name="app_success_container">#C3F0C4</color>
+    <color name="app_on_success_container">#002204</color>
 </resources>

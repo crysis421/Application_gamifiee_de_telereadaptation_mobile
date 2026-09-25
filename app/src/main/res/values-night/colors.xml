@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary (dark) -->
+    <color name="colorPrimary">#69DBAA</color>
+    <color name="colorOnPrimary">#003825</color>
+    <color name="colorPrimaryContainer">#005138</color>
+    <color name="colorOnPrimaryContainer">#86F8C4</color>
+
+    <!-- Secondary / cards -->
+    <color name="colorSecondary">#B1CCC1</color>
+    <color name="colorOnSecondary">#1D352C</color>
+    <color name="colorSecondaryContainer">#344C42</color>
+    <color name="colorOnSecondaryContainer">#CDE9DC</color>
+
+    <!-- Surface / text neutrals -->
+    <color name="colorSurface">#191C1B</color>
+    <color name="colorOnSurface">#E1E3E0</color>
+    <color name="colorSurfaceVariant">#3F4945</color>
+    <color name="colorOnSurfaceVariant">#BFC9C4</color>
+    <color name="colorOutline">#899390</color>
+
+    <!-- Error -->
+    <color name="colorError">#FFB4AB</color>
+    <color name="colorOnError">#690005</color>
+    <color name="colorErrorContainer">#93000A</color>
+    <color name="colorOnErrorContainer">#FFDAD6</color>
+
+    <!-- App success (custom) -->
+    <color name="app_success">#7EDB85</color>
+    <color name="app_success_container">#12521B</color>
+    <color name="app_on_success_container">#C3F0C4</color>
+</resources>
