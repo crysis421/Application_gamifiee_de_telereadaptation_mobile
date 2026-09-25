@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="groupes_musculaires">
+        <item>Sélectionner...</item>
+        <item>Pectoraux</item>
+        <item>Dos</item>
+        <item>Épaules</item>
+        <item>Bras</item>
+        <item>Jambes</item>
+        <item>Fessiers</item>
+        <item>Abdominaux</item>
+        <item>Cardio / Full body</item>
+    </string-array>
+
+    <string-array name="niveaux_difficulte">
+        <item>Sélectionner...</item>
+        <item>Débutant</item>
+        <item>Intermédiaire</item>
+        <item>Avancé</item>
+    </string-array>
+</resources>

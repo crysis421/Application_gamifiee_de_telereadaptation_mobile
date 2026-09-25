@@ -1,0 +1,29 @@
+R_DEF: Internal format may change without notice
+local
+array groupes_musculaires
+array niveaux_difficulte
+color black
+color purple_500
+color purple_700
+color teal_200
+color white
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+id btn_creer_exercice
+id btn_enregistrer
+id et_description
+id et_duree
+id et_materiel
+id et_nom
+id spinner_difficulte
+id spinner_groupe_musculaire
+id til_description
+id til_duree
+id til_materiel
+id til_nom
+layout activity_creer_exercice
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Theme.MouveToi

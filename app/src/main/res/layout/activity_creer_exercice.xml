@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Créer un exercice"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Nom (obligatoire) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_nom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nom *">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_nom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Description (obligatoire) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Description *">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="3"
+                android:gravity="top"
+                android:inputType="textMultiLine" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Groupe musculaire (obligatoire) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Groupe musculaire *" />
+
+        <Spinner
+            android:id="@+id/spinner_groupe_musculaire"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/groupes_musculaires" />
+
+        <!-- Matériel -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_materiel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Matériel">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_materiel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Difficulté (obligatoire) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Difficulté *" />
+
+        <Spinner
+            android:id="@+id/spinner_difficulte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/niveaux_difficulte" />
+
+        <!-- Durée estimée (obligatoire) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_duree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Durée estimée (minutes) *">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_duree"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btn_enregistrer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="end"
+            android:text="Enregistrer" />
+
+    </LinearLayout>
+</ScrollView>
