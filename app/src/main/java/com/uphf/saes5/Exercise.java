@@ -8,7 +8,6 @@ public class Exercise {
     private final int durationMinutes;
     private final String equipment;
     private final int stars; // 0..5
-
     public Exercise(String id, String name, String muscleGroup, String difficulty, int durationMinutes, String equipment, int stars) {
         this.id = id;
         this.name = name;

@@ -29,5 +29,4 @@
             android:name=".ExercisePlayerActivity"
             android:exported="false" />
     </application>
-
 </manifest>

@@ -51,7 +51,6 @@ public class ExercisePlayerActivity extends AppCompatActivity {
             });
         }
     }
-
     private Exercise findById(String id) {
         if (id == null) return null;
         List<Exercise> list = ExerciseRepository.getAllExercises();

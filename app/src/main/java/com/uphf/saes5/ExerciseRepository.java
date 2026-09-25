@@ -5,7 +5,6 @@ import java.util.List;
 
 public class ExerciseRepository {
 
-    // Simple in-memory repository with sample exercises
     public static List<Exercise> getAllExercises() {
         List<Exercise> list = new ArrayList<>();
         list.add(new Exercise("ex1", "Squat", "Jambes", "Facile", 5, "Aucun", 3));

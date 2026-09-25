@@ -15,13 +15,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        // quick link to catalogue for this SAE feature
         findViewById(R.id.btn_catalog).setOnClickListener(v -> startActivity(new android.content.Intent(this, ExerciseCatalogActivity.class)));
 
-        // bottom nav handling
         com.google.android.material.bottomnavigation.BottomNavigationView bottom = findViewById(R.id.bottom_nav);
         if (bottom != null) {
-            // populate menu programmatically (no res/menu folder in repo)
             if (bottom.getMenu().size() == 0) {
                 bottom.getMenu().add(0, R.id.nav_home, 0, getString(R.string.nav_home)).setIcon(R.drawable.ic_home);
                 bottom.getMenu().add(0, R.id.nav_catalog, 1, getString(R.string.nav_catalog)).setIcon(R.drawable.ic_catalog);

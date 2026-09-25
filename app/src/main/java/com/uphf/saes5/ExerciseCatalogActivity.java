@@ -19,7 +19,6 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
 
     private ExerciseViewModel viewModel;
     private ExerciseAdapter adapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -34,7 +34,6 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.VH> {
         return new VH(v);
     }
 
-
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Exercise e = items.get(position);

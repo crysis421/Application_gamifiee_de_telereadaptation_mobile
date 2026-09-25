@@ -16,7 +16,6 @@ public class ExerciseViewModel extends ViewModel {
         all.addAll(ExerciseRepository.getAllExercises());
         exercises.setValue(new ArrayList<>(all));
     }
-
     public LiveData<List<Exercise>> getExercises() {
         return exercises;
     }
