@@ -1,7 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.SAES5" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">#69DBAA</item>
+        <item name="colorOnPrimary">#003825</item>
+        <item name="colorPrimaryContainer">#005138</item>
+        <item name="colorOnPrimaryContainer">#86F8C4</item>
+        <item name="colorSecondary">#B1CCC1</item>
+        <item name="colorOnSecondary">#1D352C</item>
+        <item name="colorSecondaryContainer">#344C42</item>
+        <item name="colorOnSecondaryContainer">#CDE9DC</item>
+        <item name="colorSurface">#191C1B</item>
+        <item name="colorOnSurface">#E1E3E0</item>
+        <item name="colorSurfaceVariant">#3F4945</item>
+        <item name="colorOnSurfaceVariant">#BFC9C4</item>
+        <item name="colorOutline">#899390</item>
     </style>
 </resources>
