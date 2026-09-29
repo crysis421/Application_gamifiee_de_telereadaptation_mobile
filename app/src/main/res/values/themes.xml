@@ -1,6 +1,6 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.SAES5" parent="Theme.Material3.DayNight.NoActionBar">
+<resources>
+    <!-- Thème sport sombre : noir + jaune (identique en mode nuit) -->
+    <style name="Base.Theme.SAES5" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
         <item name="colorPrimaryContainer">@color/colorPrimaryContainer</item>
@@ -14,6 +14,19 @@
         <item name="colorSurfaceVariant">@color/colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/colorOnSurfaceVariant</item>
         <item name="colorOutline">@color/colorOutline</item>
+        <item name="colorError">@color/colorError</item>
+        <item name="colorOnError">@color/colorOnError</item>
+
+        <item name="android:colorBackground">@color/app_background</item>
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:statusBarColor">@color/app_background</item>
+        <item name="android:navigationBarColor">@color/colorSurface</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <item name="materialButtonStyle">@style/Widget.SAES5.Button</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.SAES5.Headline</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.SAES5.Display</item>
     </style>
 
     <style name="Theme.SAES5" parent="Base.Theme.SAES5" />

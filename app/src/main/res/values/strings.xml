@@ -34,10 +34,10 @@
     <string name="statistics_exercise_details">%1$s • %2$d %% parfaites</string>
     <string name="nav_home">Accueil</string>
     <string name="nav_catalog">Catalogue</string>
-    <string name="catalog_title">Catalogue d exercices</string>
+    <string name="catalog_title">Catalogue d’exercices</string>
     <string name="apply_filters">Appliquer</string>
     <string name="reset_filters">Réinitialiser</string>
-    <string name="duration_hint">Durée maximum (minutes)</string>
+    <string name="duration_hint">Durée max. (min)</string>
     <string name="equipment_hint">Matériel</string>
     <string name="start_exercise">Démarrer</string>
     <string name="create_exercise">Créer un exercice</string>
@@ -53,4 +53,17 @@
     <string name="exercise_created">Exercice créé</string>
     <string name="error_name_required">Le nom est obligatoire</string>
     <string name="error_duration_invalid">Entre une durée supérieure à 0</string>
+    <string name="home_subtitle">Télé-réadaptation gamifiée</string>
+    <string name="home_statistics_subtitle">Progression et carte musculaire</string>
+    <string name="home_catalog_subtitle">Parcourir et créer des exercices</string>
+    <string name="filter_all_muscles">Tous</string>
+    <string name="filter_all_difficulties">Toutes</string>
+    <string name="muscle_legs">Jambes</string>
+    <string name="muscle_chest">Pectoraux</string>
+    <string name="muscle_arms">Bras</string>
+    <string name="muscle_core">Tronc</string>
+    <string name="muscle_back">Dos</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="difficulty_medium">Moyen</string>
+    <string name="difficulty_hard">Difficile</string>
 </resources>

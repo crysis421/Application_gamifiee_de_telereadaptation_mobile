@@ -2,24 +2,34 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="colorPrimary">#006C4E</color>
-    <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorPrimaryContainer">#86F8C4</color>
-    <color name="colorOnPrimaryContainer">#002115</color>
-    <color name="colorSecondary">#4B635A</color>
-    <color name="colorOnSecondary">#FFFFFF</color>
-    <color name="colorSecondaryContainer">#CDE9DC</color>
-    <color name="colorOnSecondaryContainer">#072018</color>
-    <color name="colorSurface">#FBFDF9</color>
-    <color name="colorOnSurface">#191C1B</color>
-    <color name="colorSurfaceVariant">#DBE5DE</color>
-    <color name="colorOnSurfaceVariant">#3F4945</color>
-    <color name="colorOutline">#6F7975</color>
-    <color name="muscle_progress_low">#D94B5F</color>
-    <color name="muscle_progress_medium">#F2A541</color>
-    <color name="muscle_progress_high">#2A9D78</color>
-    <color name="muscle_no_data">#D6DDD9</color>
-    <color name="muscle_body_outline">#31443D</color>
-    <color name="muscle_body_detail">#FFFFFF</color>
-    <color name="muscle_body_base">#EEF2F0</color>
+
+    <!-- Thème sport : noir + jaune -->
+    <color name="app_background">#0B0B0B</color>
+    <color name="card_stroke">#333333</color>
+    <color name="progress_track">#3A3A3A</color>
+
+    <color name="colorPrimary">#FFD600</color>
+    <color name="colorOnPrimary">#000000</color>
+    <color name="colorPrimaryContainer">#FFD600</color>
+    <color name="colorOnPrimaryContainer">#000000</color>
+    <color name="colorSecondary">#FFE55C</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="colorSecondaryContainer">#3D3400</color>
+    <color name="colorOnSecondaryContainer">#FFD600</color>
+    <color name="colorSurface">#161616</color>
+    <color name="colorOnSurface">#FFFFFF</color>
+    <color name="colorSurfaceVariant">#202020</color>
+    <color name="colorOnSurfaceVariant">#B3B3B3</color>
+    <color name="colorOutline">#555555</color>
+    <color name="colorError">#FF5A5F</color>
+    <color name="colorOnError">#000000</color>
+
+    <!-- Carte musculaire -->
+    <color name="muscle_progress_low">#FF4D4F</color>
+    <color name="muscle_progress_medium">#FF9F1C</color>
+    <color name="muscle_progress_high">#2ED47A</color>
+    <color name="muscle_no_data">#3D3D3D</color>
+    <color name="muscle_body_outline">#6B6B6B</color>
+    <color name="muscle_body_detail">#0B0B0B</color>
+    <color name="muscle_body_base">#262626</color>
 </resources>

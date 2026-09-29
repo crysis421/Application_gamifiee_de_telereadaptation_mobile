@@ -1,37 +1,40 @@
 package com.uphf.saes5;
 
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.RatingBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.TextInputLayout;
+
 public class CreateExerciseActivity extends AppCompatActivity {
-    private static final String[] MUSCLE_GROUPS = {"Jambes", "Pectoraux", "Tronc", "Dos"};
-    private static final String[] DIFFICULTIES = {"Facile", "Moyen", "Difficile"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_exercise);
 
+        TextInputLayout nameLayout = findViewById(R.id.create_name_layout);
+        TextInputLayout durationLayout = findViewById(R.id.create_duration_layout);
         EditText name = findViewById(R.id.create_name_input);
-        Spinner muscle = findViewById(R.id.create_muscle_spinner);
-        Spinner difficulty = findViewById(R.id.create_difficulty_spinner);
         EditText duration = findViewById(R.id.create_duration_input);
         EditText equipment = findViewById(R.id.create_equipment_input);
+        ChipGroup muscleGroup = findViewById(R.id.create_muscle_group);
+        ChipGroup difficultyGroup = findViewById(R.id.create_difficulty_group);
         RatingBar stars = findViewById(R.id.create_stars_bar);
 
-        muscle.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, MUSCLE_GROUPS));
-        difficulty.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, DIFFICULTIES));
-
         findViewById(R.id.create_save_button).setOnClickListener(v -> {
+            nameLayout.setError(null);
+            durationLayout.setError(null);
+
             String nameValue = name.getText().toString().trim();
             if (nameValue.isEmpty()) {
-                name.setError(getString(R.string.error_name_required));
+                nameLayout.setError(getString(R.string.error_name_required));
                 return;
             }
 
@@ -42,7 +45,7 @@ public class CreateExerciseActivity extends AppCompatActivity {
                 durationValue = 0;
             }
             if (durationValue <= 0) {
-                duration.setError(getString(R.string.error_duration_invalid));
+                durationLayout.setError(getString(R.string.error_duration_invalid));
                 return;
             }
 
@@ -54,16 +57,23 @@ public class CreateExerciseActivity extends AppCompatActivity {
             ExerciseRepository.add(new Exercise(
                     ExerciseRepository.newId(),
                     nameValue,
-                    muscle.getSelectedItem().toString(),
-                    difficulty.getSelectedItem().toString(),
+                    selectedText(muscleGroup),
+                    selectedText(difficultyGroup),
                     durationValue,
                     equipmentValue,
                     starsValue));
 
             Toast.makeText(this, R.string.exercise_created, Toast.LENGTH_SHORT).show();
-            finish();
+            finish(); // retour au catalogue, qui se rafraîchit dans onResume()
         });
 
         findViewById(R.id.create_cancel_button).setOnClickListener(v -> finish());
+    }
+
+    private String selectedText(ChipGroup group) {
+        int checkedId = group.getCheckedChipId();
+        if (checkedId == View.NO_ID) return "";
+        Chip chip = group.findViewById(checkedId);
+        return chip.getText().toString();
     }
 }

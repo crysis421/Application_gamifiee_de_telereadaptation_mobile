@@ -2,10 +2,8 @@ package com.uphf.saes5;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 public class ExerciseCatalogActivity extends AppCompatActivity {
     private ExerciseViewModel viewModel;
@@ -33,31 +33,30 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         recycler.setAdapter(adapter);
         viewModel.getExercises().observe(this, adapter::submitList);
 
-        Spinner muscle = findViewById(R.id.muscle_spinner);
-        Spinner difficulty = findViewById(R.id.difficulty_spinner);
-        muscle.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
-                new String[]{"Tous les groupes", "Jambes", "Pectoraux", "Tronc", "Dos"}));
-        difficulty.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
-                new String[]{"Toutes les difficultés", "Facile", "Moyen", "Difficile"}));
+        ChipGroup muscleGroup = findViewById(R.id.muscle_chip_group);
+        ChipGroup difficultyGroup = findViewById(R.id.difficulty_chip_group);
         EditText duration = findViewById(R.id.duration_input);
         EditText equipment = findViewById(R.id.equipment_input);
 
-        ((Button) findViewById(R.id.apply_button)).setOnClickListener(v -> {
-            String selectedMuscle = muscle.getSelectedItem().toString();
-            String selectedDifficulty = difficulty.getSelectedItem().toString();
+        findViewById(R.id.apply_button).setOnClickListener(v -> {
             Integer maxDuration = null;
-            if (!duration.getText().toString().trim().isEmpty()) {
-                maxDuration = Integer.parseInt(duration.getText().toString().trim());
+            String durationText = duration.getText().toString().trim();
+            if (!durationText.isEmpty()) {
+                try {
+                    maxDuration = Integer.parseInt(durationText);
+                } catch (NumberFormatException ignored) {
+                    // champ limité à 4 chiffres : on ignore une valeur invalide
+                }
             }
             viewModel.filter(
-                    selectedMuscle.startsWith("Tous") ? "" : selectedMuscle,
-                    selectedDifficulty.startsWith("Toutes") ? "" : selectedDifficulty,
+                    selectedFilter(muscleGroup, R.id.chip_muscle_all),
+                    selectedFilter(difficultyGroup, R.id.chip_difficulty_all),
                     maxDuration,
                     equipment.getText().toString().trim());
         });
-        ((Button) findViewById(R.id.reset_button)).setOnClickListener(v -> {
-            muscle.setSelection(0);
-            difficulty.setSelection(0);
+        findViewById(R.id.reset_button).setOnClickListener(v -> {
+            muscleGroup.check(R.id.chip_muscle_all);
+            difficultyGroup.check(R.id.chip_difficulty_all);
             duration.setText("");
             equipment.setText("");
             viewModel.reset();
@@ -71,7 +70,8 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 startActivity(new Intent(this, MainActivity.class));
-                return true;
+            } else if (item.getItemId() == R.id.nav_statistics) {
+                startActivity(new Intent(this, StatisticsActivity.class));
             }
             return true;
         });
@@ -80,6 +80,14 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.refresh();
+        viewModel.refresh(); // affiche les exercices créés depuis CreateExerciseActivity
+    }
+
+    /** Texte du chip sélectionné, ou "" si c'est le chip « Tous / Toutes » (= pas de filtre). */
+    private String selectedFilter(ChipGroup group, int allChipId) {
+        int checkedId = group.getCheckedChipId();
+        if (checkedId == View.NO_ID || checkedId == allChipId) return "";
+        Chip chip = group.findViewById(checkedId);
+        return chip.getText().toString();
     }
 }

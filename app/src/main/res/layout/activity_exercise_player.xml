@@ -5,35 +5,60 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/screen_margin">
+
     <TextView
         android:id="@+id/player_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceHeadlineMedium"
         android:textColor="?attr/colorOnSurface" />
-    <TextView
-        android:id="@+id/player_metadata"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
+    <View
+        android:layout_width="48dp"
+        android:layout_height="4dp"
         android:layout_marginTop="8dp"
-        android:textAppearance="?attr/textAppearanceBodyLarge"
-        android:textColor="?attr/colorOnSurfaceVariant" />
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/start_button"
+        android:background="?attr/colorPrimary" />
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/block_spacing"
-        android:text="@string/start_exercise" />
+        app:cardBackgroundColor="?attr/colorSurfaceVariant"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/card_stroke"
+        app:strokeWidth="1dp">
+
+        <TextView
+            android:id="@+id/player_metadata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/start_button"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginTop="@dimen/block_spacing"
+        android:text="@string/start_exercise"
+        android:textSize="18sp"
+        app:icon="@drawable/ic_play"
+        app:iconGravity="textStart" />
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="?attr/colorPrimary"
-        app:itemTextColor="?attr/colorOnSurface" />
+        app:itemIconTint="@color/bottom_nav_item"
+        app:itemTextColor="@color/bottom_nav_item"
+        app:menu="@menu/bottom_nav_menu" />
 </LinearLayout>

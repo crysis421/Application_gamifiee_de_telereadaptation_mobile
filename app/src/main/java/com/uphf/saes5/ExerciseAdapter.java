@@ -37,6 +37,7 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
     @Override
     public void onBindViewHolder(@NonNull ExerciseViewHolder holder, int position) {
         Exercise exercise = exercises.get(position);
+        holder.muscle.setText(exercise.getMuscleGroup());
         holder.name.setText(exercise.getName());
         holder.metadata.setText(exercise.getDifficulty() + " • " + exercise.getEquipment()
                 + " • " + exercise.getDurationMinutes() + " min");
@@ -54,12 +55,14 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
     public int getItemCount() { return exercises.size(); }
 
     static class ExerciseViewHolder extends RecyclerView.ViewHolder {
+        final TextView muscle;
         final TextView name;
         final TextView metadata;
         final TextView stars;
 
         ExerciseViewHolder(@NonNull View itemView) {
             super(itemView);
+            muscle = itemView.findViewById(R.id.exercise_muscle);
             name = itemView.findViewById(R.id.exercise_name);
             metadata = itemView.findViewById(R.id.exercise_metadata);
             stars = itemView.findViewById(R.id.exercise_stars);
