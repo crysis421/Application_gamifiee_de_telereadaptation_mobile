@@ -2,4 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@id/nav_home" android:icon="@drawable/ic_home" android:title="@string/nav_home" />
     <item android:id="@id/nav_statistics" android:icon="@drawable/ic_statistics" android:title="@string/nav_statistics" />
+    <item android:id="@id/nav_catalog" android:icon="@drawable/ic_catalog" android:title="@string/nav_catalog" />
 </menu>

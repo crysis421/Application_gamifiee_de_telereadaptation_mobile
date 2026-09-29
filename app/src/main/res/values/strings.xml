@@ -34,3 +34,25 @@
     </plurals>
     <string name="statistics_exercise_details">%1$s • %2$d %% parfaites</string>
 </resources>
+    <string name="nav_home">Accueil</string>
+    <string name="nav_catalog">Catalogue</string>
+    <string name="catalog_title">Catalogue d exercices</string>
+    <string name="apply_filters">Appliquer</string>
+    <string name="reset_filters">Réinitialiser</string>
+    <string name="duration_hint">Durée maximum (minutes)</string>
+    <string name="equipment_hint">Matériel</string>
+    <string name="start_exercise">Démarrer</string>
+    <string name="create_exercise">Créer un exercice</string>
+    <string name="create_title">Nouvel exercice</string>
+    <string name="name_hint">Nom de l\'exercice</string>
+    <string name="muscle_label">Groupe musculaire</string>
+    <string name="difficulty_label">Difficulté</string>
+    <string name="create_duration_hint">Durée (minutes)</string>
+    <string name="create_equipment_hint">Matériel (vide = Aucun)</string>
+    <string name="stars_label">Note</string>
+    <string name="save_exercise">Enregistrer</string>
+    <string name="cancel">Annuler</string>
+    <string name="exercise_created">Exercice créé</string>
+    <string name="error_name_required">Le nom est obligatoire</string>
+    <string name="error_duration_invalid">Entre une durée supérieure à 0</string>
+</resources>
