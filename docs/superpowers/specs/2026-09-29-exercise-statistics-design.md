@@ -8,7 +8,7 @@ Ajouter un écran Android permettant à l'utilisateur de comprendre ses points f
 
 - Une troisième destination « Statistiques » est ajoutée à la navigation inférieure existante.
 - Le haut de l'écran affiche le pourcentage global d'exercices réalisés parfaitement.
-- Un unique mannequin stylisé vu de face colore séparément les épaules/dos, pectoraux, bras, tronc et jambes.
+- Un unique mannequin stylisé vu de face colore séparément les épaules/dos, pectoraux, bras, tronc et jambes. Le groupe « Bras », absent du catalogue actuel, reste gris avec l'état « Aucune donnée » jusqu'à ce qu'un exercice lui soit associé.
 - La couleur traduit la progression : rouge de 0 à 39 %, orange de 40 à 69 %, vert de 70 à 100 %, gris lorsqu'aucune donnée n'existe.
 - Toucher une zone du mannequin sélectionne le groupe musculaire correspondant et filtre les détails affichés sous le mannequin.
 - Une liste « Par groupe musculaire » affiche le score agrégé et le nombre de séances de chaque groupe.
