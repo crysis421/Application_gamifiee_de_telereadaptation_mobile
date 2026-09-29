@@ -19,4 +19,5 @@
     <color name="muscle_no_data">#D6DDD9</color>
     <color name="muscle_body_outline">#31443D</color>
     <color name="muscle_body_detail">#FFFFFF</color>
+    <color name="muscle_body_base">#EEF2F0</color>
 </resources>

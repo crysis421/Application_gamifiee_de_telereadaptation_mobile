@@ -103,7 +103,7 @@
             <com.uphf.saes5.MuscleBodyView
                 android:id="@+id/statistics_muscle_body"
                 android:layout_width="match_parent"
-                android:layout_height="520dp"
+                android:layout_height="460dp"
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/muscle_body_description" />
 
