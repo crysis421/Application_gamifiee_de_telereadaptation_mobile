@@ -63,6 +63,9 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
             viewModel.reset();
         });
 
+        findViewById(R.id.create_exercise_button).setOnClickListener(v ->
+                startActivity(new Intent(this, CreateExerciseActivity.class)));
+
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
         navigation.setSelectedItemId(R.id.nav_catalog);
         navigation.setOnItemSelectedListener(item -> {
@@ -72,5 +75,11 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.refresh();
     }
 }
