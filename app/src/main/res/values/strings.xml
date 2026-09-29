@@ -1,3 +1,36 @@
 <resources>
     <string name="app_name">SAE S5</string>
+    <string name="open_statistics">Ouvrir les statistiques</string>
+    <string name="nav_home">Accueil</string>
+    <string name="muscle_body_description">Carte interactive de la progression musculaire</string>
+    <string name="muscle_accessibility_score">%1$s : %2$d %%</string>
+    <string name="muscle_accessibility_no_data">%1$s : aucune donnée</string>
+    <string name="legend_to_improve">À travailler</string>
+    <string name="legend_progressing">En progrès</string>
+    <string name="legend_mastered">Maîtrisé</string>
+    <string name="legend_no_data">Aucune donnée</string>
+    <string name="body_front_label">FACE</string>
+    <string name="body_back_label">DOS</string>
+    <string name="nav_statistics">Statistiques</string>
+    <string name="statistics_title">Statistiques d’exercices</string>
+    <string name="statistics_subtitle">Visualisez vos progrès et les zones à renforcer.</string>
+    <string name="statistics_global_label">Exercices parfaitement réalisés</string>
+    <string name="statistics_global_help">Une séance est parfaite à partir d’un score de 90.</string>
+    <string name="statistics_percentage">%1$d %%</string>
+    <string name="muscle_map_title">Carte musculaire</string>
+    <string name="muscle_map_help">Touchez une zone pour afficher ses résultats.</string>
+    <string name="statistics_by_muscle">Par muscle</string>
+    <string name="statistics_by_exercise">Par exercice</string>
+    <string name="statistics_muscle_heading">Progression par groupe musculaire</string>
+    <string name="statistics_selected_muscle_heading">Groupe musculaire — %1$s</string>
+    <string name="statistics_exercise_heading">Progression par exercice</string>
+    <string name="statistics_filtered_heading">Exercices — %1$s</string>
+    <string name="statistics_empty">Aucune donnée pour cette sélection.</string>
+    <string name="statistics_no_data">Aucune donnée</string>
+    <string name="statistics_score">%1$d %%</string>
+    <plurals name="statistics_sessions">
+        <item quantity="one">%1$d séance</item>
+        <item quantity="other">%1$d séances</item>
+    </plurals>
+    <string name="statistics_exercise_details">%1$s • %2$d %% parfaites</string>
 </resources>
