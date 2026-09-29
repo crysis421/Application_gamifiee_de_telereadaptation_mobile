@@ -26,6 +26,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ExerciseCatalogActivity.class));
                 return true;
             }
+            if (item.getItemId() == R.id.nav_statistics) {
+                startActivity(new Intent(this, StatisticsActivity.class));
+                return true;
+            }
             return true;
         });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

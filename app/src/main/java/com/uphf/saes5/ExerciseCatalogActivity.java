@@ -73,6 +73,10 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MainActivity.class));
                 return true;
             }
+            if (item.getItemId() == R.id.nav_statistics) {
+                startActivity(new Intent(this, StatisticsActivity.class));
+                return true;
+            }
             return true;
         });
     }
