@@ -4,12 +4,17 @@ public final class MuscleBodyGeometry {
     private MuscleBodyGeometry() {}
 
     public static String groupAt(float normalizedX, float normalizedY) {
-        if (inside(normalizedX, normalizedY, 0.30f, 0.16f, 0.70f, 0.24f)) return "Dos";
-        if (inside(normalizedX, normalizedY, 0.34f, 0.24f, 0.66f, 0.36f)) return "Pectoraux";
-        if (inside(normalizedX, normalizedY, 0.16f, 0.23f, 0.34f, 0.56f)
-                || inside(normalizedX, normalizedY, 0.66f, 0.23f, 0.84f, 0.56f)) return "Bras";
-        if (inside(normalizedX, normalizedY, 0.36f, 0.36f, 0.64f, 0.59f)) return "Tronc";
-        if (inside(normalizedX, normalizedY, 0.34f, 0.59f, 0.66f, 0.95f)) return "Jambes";
+        if (inside(normalizedX, normalizedY, .20f, .27f, .36f, .35f)) return "Pectoraux";
+        if (inside(normalizedX, normalizedY, .21f, .35f, .35f, .54f)) return "Tronc";
+        if (inside(normalizedX, normalizedY, .08f, .28f, .18f, .52f)
+                || inside(normalizedX, normalizedY, .38f, .28f, .48f, .52f)
+                || inside(normalizedX, normalizedY, .52f, .28f, .62f, .52f)
+                || inside(normalizedX, normalizedY, .82f, .28f, .92f, .52f)) return "Bras";
+        if (inside(normalizedX, normalizedY, .64f, .24f, .80f, .44f)) return "Dos";
+        if (inside(normalizedX, normalizedY, .20f, .57f, .27f, .92f)
+                || inside(normalizedX, normalizedY, .29f, .57f, .36f, .92f)
+                || inside(normalizedX, normalizedY, .64f, .56f, .71f, .92f)
+                || inside(normalizedX, normalizedY, .73f, .56f, .80f, .92f)) return "Jambes";
         return null;
     }
 

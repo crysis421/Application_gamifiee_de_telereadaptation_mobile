@@ -9,6 +9,8 @@
     <string name="legend_progressing">En progrès</string>
     <string name="legend_mastered">Maîtrisé</string>
     <string name="legend_no_data">Aucune donnée</string>
+    <string name="body_front_label">FACE</string>
+    <string name="body_back_label">DOS</string>
     <string name="nav_statistics">Statistiques</string>
     <string name="statistics_title">Statistiques d’exercices</string>
     <string name="statistics_subtitle">Visualisez vos progrès et les zones à renforcer.</string>
