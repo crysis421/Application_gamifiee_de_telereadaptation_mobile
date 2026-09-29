@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">SAE S5</string>
     <string name="open_statistics">Ouvrir les statistiques</string>
-    <string name="nav_home">Accueil</string>
     <string name="muscle_body_description">Carte interactive de la progression musculaire</string>
     <string name="muscle_accessibility_score">%1$s : %2$d %%</string>
     <string name="muscle_accessibility_no_data">%1$s : aucune donnée</string>
@@ -33,7 +32,6 @@
         <item quantity="other">%1$d séances</item>
     </plurals>
     <string name="statistics_exercise_details">%1$s • %2$d %% parfaites</string>
-</resources>
     <string name="nav_home">Accueil</string>
     <string name="nav_catalog">Catalogue</string>
     <string name="catalog_title">Catalogue d exercices</string>

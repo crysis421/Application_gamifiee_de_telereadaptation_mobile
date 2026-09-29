@@ -8,8 +8,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".StatisticsActivity" android:exported="false"/>
-    </application>
-</manifest>
         <activity android:name=".ExerciseCatalogActivity" android:exported="false"/>
         <activity android:name=".ExercisePlayerActivity" android:exported="false"/>
         <activity android:name=".CreateExerciseActivity" android:exported="false"/>
