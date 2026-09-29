@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.lifecycle.livedata)
     implementation(libs.recyclerview)
     testImplementation(libs.junit)
+    testImplementation(libs.arch.core.testing)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
 }
