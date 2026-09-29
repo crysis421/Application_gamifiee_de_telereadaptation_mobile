@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StatisticsCalculatorTest {
-    private static final Exercise SQUAT =
-            new Exercise("squat", "Squat", "Jambes", "Facile", 5, "Aucun", 3);
+    private static final StatisticsExercise SQUAT =
+            new StatisticsExercise("squat", "Squat", "Jambes");
 
     @Test
     public void calculate_countsScoresAtOrAboveNinetyAsPerfect() {

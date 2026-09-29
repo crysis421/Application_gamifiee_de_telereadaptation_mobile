@@ -8,10 +8,10 @@ import java.util.Map;
 public final class StatisticsCalculator {
     private StatisticsCalculator() {}
 
-    public static StatisticsSummary calculate(List<Exercise> exercises,
+    public static StatisticsSummary calculate(List<StatisticsExercise> exercises,
                                                List<ExerciseSession> sessions) {
-        Map<String, Exercise> exerciseById = new LinkedHashMap<>();
-        for (Exercise exercise : exercises) {
+        Map<String, StatisticsExercise> exerciseById = new LinkedHashMap<>();
+        for (StatisticsExercise exercise : exercises) {
             exerciseById.put(exercise.getId(), exercise);
         }
 
@@ -24,7 +24,7 @@ public final class StatisticsCalculator {
         int validSessionCount = 0;
         int perfectSessionCount = 0;
         for (ExerciseSession session : sessions) {
-            Exercise exercise = exerciseById.get(session.getExerciseId());
+            StatisticsExercise exercise = exerciseById.get(session.getExerciseId());
             if (exercise == null) continue;
 
             int score = session.getQualityScore();
@@ -36,7 +36,7 @@ public final class StatisticsCalculator {
         }
 
         List<ExerciseStatistic> exerciseStatistics = new ArrayList<>();
-        for (Exercise exercise : exercises) {
+        for (StatisticsExercise exercise : exercises) {
             List<Integer> scores = scoresByExercise.get(exercise.getId());
             if (scores == null || scores.isEmpty()) continue;
             exerciseStatistics.add(new ExerciseStatistic(

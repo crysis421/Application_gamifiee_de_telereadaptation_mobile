@@ -15,7 +15,7 @@ public class StatisticsViewModel extends ViewModel {
 
     public StatisticsViewModel() {
         summary = StatisticsCalculator.calculate(
-                ExerciseRepository.getAll(), StatisticsRepository.getAll());
+                StatisticsRepository.getExercises(), StatisticsRepository.getAll());
         publishState();
     }
 
