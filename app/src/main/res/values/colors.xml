@@ -13,4 +13,10 @@
     <color name="colorSurfaceVariant">#DBE5DE</color>
     <color name="colorOnSurfaceVariant">#3F4945</color>
     <color name="colorOutline">#6F7975</color>
+    <color name="muscle_progress_low">#D94B5F</color>
+    <color name="muscle_progress_medium">#F2A541</color>
+    <color name="muscle_progress_high">#2A9D78</color>
+    <color name="muscle_no_data">#D6DDD9</color>
+    <color name="muscle_body_outline">#31443D</color>
+    <color name="muscle_body_detail">#FFFFFF</color>
 </resources>
