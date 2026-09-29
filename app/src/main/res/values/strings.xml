@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SAE S5</string>
+    <string name="muscle_body_description">Carte interactive de la progression musculaire</string>
+    <string name="muscle_accessibility_score">%1$s : %2$d %%</string>
+    <string name="muscle_accessibility_no_data">%1$s : aucune donnée</string>
+    <string name="legend_to_improve">À travailler</string>
+    <string name="legend_progressing">En progrès</string>
+    <string name="legend_mastered">Maîtrisé</string>
+    <string name="legend_no_data">Aucune donnée</string>
 </resources>
