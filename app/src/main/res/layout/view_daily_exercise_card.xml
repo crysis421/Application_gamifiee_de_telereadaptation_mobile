@@ -7,13 +7,15 @@
     Carte pleine couleur primaire, comme la carte de synthèse de l'écran Statistiques : c'est
     le bloc le plus important de l'accueil. Tout le contenu est donc sur colorOnPrimaryContainer.
 
-    La carte est déroulante, sans chevron : c'est le lien « Voir le détail » qui porte
-    l'action (motif Google Play / YouTube), volontairement explicite plutôt qu'une flèche à
-    interpréter. Repliée, la carte garde tout ce qui permet de décider : le libellé
-    « Exercice du jour », le nom de l'exercice, sa ligne de métadonnées et le bouton de
-    lancement. Seul le détail (consigne, objectif) est masqué, pour que l'accueil reste
-    compact quand les blocs « pas » et « exercices réalisés » (US-5.1 / US-5.2) s'y
-    ajouteront.
+    Repliée, la carte se limite à son en-tête : de quoi décider (libellé, nom, métadonnées,
+    favori) et rien de plus, pour laisser la place aux blocs « nombre de pas » (US-5.1) et
+    « exercices réalisés » (US-5.2) qui viendront s'ajouter à l'accueil. Dépliée, elle révèle
+    la consigne, l'objectif, l'état du jour et le bouton de lancement.
+
+    Il n'y a pas de chevron : c'est le libellé du lien qui porte l'information (« Voir le
+    détail » / « Réduire »), volontairement explicite plutôt qu'une flèche à interpréter. Toute
+    la carte est cliquable pour plier / déplier, le lien n'est que le repère visuel. Le pliage
+    est animé par animateLayoutChanges.
 -->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -21,9 +23,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
     app:cardBackgroundColor="?attr/colorPrimaryContainer"
     app:cardCornerRadius="24dp"
     app:cardElevation="0dp"
+    app:rippleColor="?attr/colorOnPrimaryContainer"
     app:strokeWidth="0dp">
 
     <LinearLayout
@@ -31,7 +36,10 @@
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,66 +47,57 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/dailyLabel"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:letterSpacing="0.12"
-                android:text="@string/daily_exercise_label"
-                android:textAllCaps="true"
-                android:textAppearance="?attr/textAppearanceLabelMedium"
-                android:textColor="?attr/colorOnPrimaryContainer"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/dailyLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.12"
+                    android:text="@string/daily_exercise_label"
+                    android:textAllCaps="true"
+                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/exerciseName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    android:textStyle="bold"
+                    tools:text="Squat" />
+
+                <TextView
+                    android:id="@+id/exerciseMeta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    tools:text="Jambes · Facile · 5 min" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/favoriteButton"
                 style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
                 android:contentDescription="@string/summary_add_favorite"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 app:icon="@drawable/ic_favorite_border"
-                app:iconSize="28dp"
+                app:iconSize="26dp"
                 app:iconTint="?attr/colorOnPrimaryContainer"
                 app:rippleColor="?attr/colorOnPrimaryContainer" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/exerciseName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
-            android:textColor="?attr/colorOnPrimaryContainer"
-            android:textStyle="bold"
-            tools:text="Élévations latérales" />
-
-        <TextView
-            android:id="@+id/exerciseMeta"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="?attr/colorOnPrimaryContainer"
-            tools:text="Épaules · Facile · 2 min" />
-
-        <!--
-            Lien qui plie / déplie le détail. Le libellé bascule entre « Voir le détail » et
-            « Réduire » : il annonce l'action, il n'y a donc rien à deviner.
-            Marge négative : elle compense le padding interne du TextButton pour que le texte
-            s'aligne avec le reste du contenu de la carte.
-        -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/toggleDetailsButton"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="-8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/daily_exercise_expand"
-            android:textColor="?attr/colorOnPrimaryContainer"
-            android:textSize="@dimen/text_body_large"
-            app:rippleColor="?attr/colorOnPrimaryContainer" />
 
         <!-- Contenu déroulant : masqué quand la carte est repliée. -->
         <LinearLayout
@@ -113,10 +112,10 @@
                 android:id="@+id/exerciseDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="12dp"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="?attr/colorOnPrimaryContainer"
-                tools:text="Debout, bras le long du corps. Monte les bras tendus sur les côtés." />
+                tools:text="Pieds écartés à la largeur des épaules, descends en fléchissant les genoux." />
 
             <TextView
                 android:id="@+id/exerciseGoal"
@@ -126,7 +125,7 @@
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:textStyle="bold"
-                tools:text="Objectif : 12 répétitions" />
+                tools:text="Objectif : 10 répétitions" />
 
             <LinearLayout
                 android:id="@+id/doneBadge"
@@ -154,23 +153,40 @@
                     android:textColor="?attr/colorOnPrimaryContainer"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <!--
+                Bouton inversé : sur la carte jaune, un bouton jaune serait invisible. Il reprend
+                donc les couleurs de la carte à l'envers (fond sombre, texte jaune).
+            -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/startButton"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/daily_exercise_start"
+                android:textColor="?attr/colorPrimaryContainer"
+                android:textSize="20sp"
+                app:backgroundTint="?attr/colorOnPrimaryContainer"
+                app:icon="@drawable/ic_play"
+                app:iconGravity="textStart"
+                app:iconTint="?attr/colorPrimaryContainer" />
         </LinearLayout>
 
         <!--
-            Bouton inversé : sur la carte jaune, un bouton jaune serait invisible. Il reprend
-            donc les couleurs de la carte à l'envers (fond sombre, texte jaune).
+            Marge négative : elle compense le padding interne du TextButton pour que le texte
+            s'aligne avec le reste du contenu de la carte.
         -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/startButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height_large"
-            android:layout_marginTop="16dp"
-            android:text="@string/daily_exercise_start"
-            android:textColor="?attr/colorPrimaryContainer"
-            android:textSize="@dimen/button_text_large"
-            app:backgroundTint="?attr/colorOnPrimaryContainer"
-            app:icon="@drawable/ic_play"
-            app:iconGravity="textStart"
-            app:iconTint="?attr/colorPrimaryContainer" />
+            android:id="@+id/toggleDetailsButton"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="-8dp"
+            android:layout_marginTop="4dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="@string/daily_exercise_expand"
+            android:textColor="?attr/colorOnPrimaryContainer"
+            app:rippleColor="?attr/colorOnPrimaryContainer" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -2,11 +2,11 @@ package com.uphf.saes5.accueil.ui;
 
 import android.content.Context;
 
+import com.uphf.saes5.Exercise;
+import com.uphf.saes5.R;
+
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
-import com.uphf.saes5.R;
-import com.uphf.saes5.accueil.model.Exercise;
 
 /** Mise en forme des métadonnées d'exercice pour l'affichage. */
 public final class ExerciseFormatter {
@@ -14,27 +14,18 @@ public final class ExerciseFormatter {
     private ExerciseFormatter() {
     }
 
-    /** Libellé lisible de la difficulté. */
-    public static String difficultyLabel(Context context, int difficulty) {
-        switch (difficulty) {
-            case Exercise.DIFFICULTY_HARD:
-                return context.getString(R.string.difficulty_hard);
-            case Exercise.DIFFICULTY_MEDIUM:
-                return context.getString(R.string.difficulty_medium);
-            case Exercise.DIFFICULTY_EASY:
-            default:
-                return context.getString(R.string.difficulty_easy);
-        }
-    }
-
-    /** Ligne « Groupe musculaire · Difficulté · Durée estimée ». */
+    /**
+     * Ligne « Groupe musculaire · Difficulté · Durée estimée ».
+     *
+     * <p>La difficulté est déjà un libellé lisible dans le catalogue (« Facile », « Moyen »,
+     * « Difficile »), il n'y a donc rien à traduire ici.</p>
+     */
     public static String metaLine(Context context, Exercise exercise) {
-        int minutes = Math.max(1, Math.round(exercise.getEstimatedDurationSeconds() / 60f));
         return context.getString(
                 R.string.exercise_meta,
                 exercise.getMuscleGroup(),
-                difficultyLabel(context, exercise.getDifficulty()),
-                context.getString(R.string.duration_minutes, minutes));
+                exercise.getDifficulty(),
+                context.getString(R.string.duration_minutes, exercise.getDurationMinutes()));
     }
 
     /** Durée au format {@code mm:ss} (ou {@code h:mm:ss} au-delà d'une heure). */

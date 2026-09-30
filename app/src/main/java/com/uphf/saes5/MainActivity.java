@@ -11,9 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.uphf.saes5.accueil.data.DailyExerciseProvider;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
-import com.uphf.saes5.accueil.data.ExerciseRepositoryProvider;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
-import com.uphf.saes5.accueil.model.Exercise;
 import com.uphf.saes5.accueil.ui.EdgeToEdgeSupport;
 import com.uphf.saes5.accueil.ui.ExerciseActivity;
 import com.uphf.saes5.accueil.ui.ExerciseFormatter;
@@ -68,16 +66,7 @@ public class MainActivity extends AppCompatActivity {
         favoritesRepository = new FavoritesRepository(this);
         dailyExerciseTracker = new DailyExerciseTracker(this);
 
-        exerciseOfTheDay = new DailyExerciseProvider(ExerciseRepositoryProvider.get())
-                .getExerciseOfTheDay();
-
-        if (exerciseOfTheDay == null) {
-            binding.dailyExerciseCard.getRoot().setVisibility(View.GONE);
-            binding.emptyCatalogMessage.setVisibility(View.VISIBLE);
-            return;
-        }
-
-        bindExercise(exerciseOfTheDay);
+        bindExerciseOfTheDay();
     }
 
     @Override
@@ -92,19 +81,39 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // L'accueil reste l'onglet sélectionné au retour d'un autre écran.
         binding.bottomNav.setSelectedItemId(R.id.nav_home);
-        // L'état favori et la réalisation du jour peuvent avoir changé sur l'écran de récapitulatif.
-        if (exerciseOfTheDay != null) {
-            refreshFavoriteIcon(exerciseOfTheDay);
-            refreshCompletionState();
+        // Le catalogue a pu changer entre-temps : un exercice créé devient éligible aussitôt.
+        bindExerciseOfTheDay();
+    }
+
+    /**
+     * Relit l'exercice du jour dans le catalogue et rafraîchit la carte.
+     *
+     * <p>Appelé aussi depuis {@code onResume} : l'état favori, la réalisation du jour et le
+     * catalogue lui-même ont pu changer sur un autre écran.</p>
+     */
+    private void bindExerciseOfTheDay() {
+        exerciseOfTheDay = DailyExerciseProvider.ofTheDay();
+
+        boolean hasExercise = exerciseOfTheDay != null;
+        binding.dailyExerciseCard.getRoot().setVisibility(hasExercise ? View.VISIBLE : View.GONE);
+        binding.emptyCatalogMessage.setVisibility(hasExercise ? View.GONE : View.VISIBLE);
+        if (!hasExercise) {
+            return;
         }
+
+        bindExercise(exerciseOfTheDay);
     }
 
     private void bindExercise(Exercise exercise) {
         binding.dailyExerciseCard.exerciseName.setText(exercise.getName());
         binding.dailyExerciseCard.exerciseMeta.setText(ExerciseFormatter.metaLine(this, exercise));
-        binding.dailyExerciseCard.exerciseDescription.setText(exercise.getDescription());
         binding.dailyExerciseCard.exerciseGoal.setText(
                 getString(R.string.daily_exercise_goal, exercise.getTargetReps()));
+
+        // Les exercices créés par l'utilisateur n'ont pas de consigne : on n'affiche pas un vide.
+        binding.dailyExerciseCard.exerciseDescription.setText(exercise.getDescription());
+        binding.dailyExerciseCard.exerciseDescription.setVisibility(
+                exercise.hasDescription() ? View.VISIBLE : View.GONE);
 
         binding.dailyExerciseCard.favoriteButton.setOnClickListener(view -> {
             favoritesRepository.toggleFavorite(exercise.getId());
@@ -114,14 +123,18 @@ public class MainActivity extends AppCompatActivity {
         binding.dailyExerciseCard.startButton.setOnClickListener(view ->
                 startActivity(ExerciseActivity.newIntent(this, exercise.getId())));
 
-        binding.dailyExerciseCard.toggleDetailsButton.setOnClickListener(view -> {
-            detailsExpanded = !detailsExpanded;
-            applyDetailsState();
-        });
+        // Toute la carte plie / déplie, le lien n'est que le repère visuel de l'action.
+        binding.dailyExerciseCard.getRoot().setOnClickListener(view -> toggleDetails());
+        binding.dailyExerciseCard.toggleDetailsButton.setOnClickListener(view -> toggleDetails());
 
         applyDetailsState();
         refreshFavoriteIcon(exercise);
         refreshCompletionState();
+    }
+
+    private void toggleDetails() {
+        detailsExpanded = !detailsExpanded;
+        applyDetailsState();
     }
 
     /**

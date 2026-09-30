@@ -11,10 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.accueil.data.ExerciseRepositoryProvider;
+import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
 import com.uphf.saes5.databinding.ActivitySummaryBinding;
-import com.uphf.saes5.accueil.model.Exercise;
+import com.uphf.saes5.Exercise;
 import com.uphf.saes5.accueil.model.ExerciseSession;
 
 /**
@@ -53,7 +53,7 @@ public class SummaryActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         String exerciseId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
-        exercise = ExerciseRepositoryProvider.get().findById(exerciseId);
+        exercise = ExerciseRepository.findById(exerciseId);
         if (exercise == null) {
             finish();
             return;

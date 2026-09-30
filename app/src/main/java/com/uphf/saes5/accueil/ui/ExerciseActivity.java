@@ -20,9 +20,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
-import com.uphf.saes5.accueil.data.ExerciseRepositoryProvider;
+import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.databinding.ActivityExerciseBinding;
-import com.uphf.saes5.accueil.model.Exercise;
+import com.uphf.saes5.Exercise;
 
 /**
  * Écran d'exécution d'un exercice.
@@ -68,7 +68,7 @@ public class ExerciseActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         String exerciseId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
-        exercise = ExerciseRepositoryProvider.get().findById(exerciseId);
+        exercise = ExerciseRepository.findById(exerciseId);
         if (exercise == null) {
             // L'exercice n'existe plus (catalogue modifié) : on ne peut rien afficher.
             finish();
