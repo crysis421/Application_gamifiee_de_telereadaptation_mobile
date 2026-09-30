@@ -11,8 +11,13 @@ import java.util.Set;
  * Exercices mis en favori par l'utilisateur.
  *
  * <p>Stockage volontairement simple (SharedPreferences) : il suffit pour la fonctionnalité et
- * sera migré vers la base de données en même temps que le reste. Le catalogue (US-6.1) pourra
- * lire ces identifiants pour afficher/filtrer les favoris.</p>
+ * sera migré vers la base de données en même temps que le reste.</p>
+ *
+ * <p><strong>Fonctionnalité incomplète.</strong> Marquer un favori fonctionne et l'état est
+ * conservé d'une session à l'autre, mais aucun écran ne permet de consulter ses favoris :
+ * {@link #getFavoriteIds()} n'est appelé nulle part dans l'application. Il reste à les
+ * afficher et à les filtrer dans le catalogue (US-6.1) pour que la fonctionnalité serve à
+ * quelque chose.</p>
  */
 public class FavoritesRepository {
 
