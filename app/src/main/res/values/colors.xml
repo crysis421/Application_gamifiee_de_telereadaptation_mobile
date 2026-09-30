@@ -33,10 +33,11 @@
     <color name="muscle_body_detail">#0B0B0B</color>
     <color name="muscle_body_base">#262626</color>
 
-    <!-- Feedback de validation du mouvement (US-3.2), accordé au thème sombre -->
+    <!--
+        Feedback de validation du mouvement (US-3.2). Mêmes vert et rouge que la carte
+        musculaire, pour que l'application n'ait qu'un seul couple « réussi / à corriger ».
+        Le texte posé dessus est toujours colorOnPrimary (noir).
+    -->
     <color name="app_success">#2ED47A</color>
-    <color name="app_success_container">#12401F</color>
-    <color name="app_on_success_container">#9BF0BC</color>
-    <color name="app_error_container">#4A1417</color>
-    <color name="app_on_error_container">#FFB3B5</color>
+    <color name="app_error">#FF4D4F</color>
 </resources>

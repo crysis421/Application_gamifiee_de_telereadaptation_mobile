@@ -17,17 +17,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/summary_title"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="@dimen/text_title"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textColor="?attr/colorOnSurface"
             android:textStyle="bold" />
+
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:background="?attr/colorPrimary" />
 
         <TextView
             android:id="@+id/exerciseName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="@dimen/text_body_large"
+            android:layout_marginTop="12dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurfaceVariant"
             tools:text="Élévations latérales" />
 
         <LinearLayout
@@ -35,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@color/app_success_container"
+            android:background="@drawable/bg_badge_success"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="12dp"
@@ -50,14 +56,14 @@
                 android:layout_height="24dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_check_circle"
-                app:tint="@color/app_on_success_container" />
+                app:tint="@color/colorOnPrimary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="@string/summary_goal_reached"
-                android:textColor="@color/app_on_success_container"
+                android:textColor="@color/colorOnPrimary"
                 android:textSize="@dimen/text_body_large"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -132,14 +138,14 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/favoriteButton"
-            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+            style="@style/Widget.SAES5.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_height_large"
             android:layout_marginTop="@dimen/block_spacing"
             android:text="@string/summary_add_favorite"
             android:textSize="@dimen/button_text_large"
-            app:cornerRadius="20dp"
             app:icon="@drawable/ic_favorite_border"
+            app:iconGravity="textStart"
             app:iconSize="28dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -157,7 +163,6 @@
             android:layout_height="@dimen/button_height_large"
             android:layout_marginTop="4dp"
             android:text="@string/summary_back_home"
-            android:textSize="@dimen/button_text_large"
-            app:cornerRadius="20dp" />
+            android:textSize="@dimen/button_text_large" />
     </LinearLayout>
 </ScrollView>

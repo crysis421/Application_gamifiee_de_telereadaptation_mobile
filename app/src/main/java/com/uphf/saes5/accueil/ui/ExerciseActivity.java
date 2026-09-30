@@ -2,6 +2,7 @@ package com.uphf.saes5.accueil.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -119,15 +120,13 @@ public class ExerciseActivity extends AppCompatActivity {
     private void onRepetitionValidated() {
         validatedReps++;
         updateRepCounter();
-        showFeedback(R.string.exercise_feedback_valid,
-                R.color.app_success_container, R.color.app_on_success_container);
+        showFeedback(R.string.exercise_feedback_valid, R.color.app_success);
     }
 
     /** Un mouvement a été tenté mais n'est pas conforme à la référence : il n'est pas compté. */
     private void onRepetitionFailed() {
         failedReps++;
-        showFeedback(R.string.exercise_feedback_failed,
-                R.color.app_error_container, R.color.app_on_error_container);
+        showFeedback(R.string.exercise_feedback_failed, R.color.app_error);
     }
 
     private void updateRepCounter() {
@@ -143,12 +142,17 @@ public class ExerciseActivity extends AppCompatActivity {
         return SystemClock.elapsedRealtime() - startElapsedRealtime;
     }
 
-    private void showFeedback(@StringRes int messageRes,
-                             @ColorRes int backgroundRes,
-                             @ColorRes int textColorRes) {
+    /**
+     * Affiche le bandeau de feedback dans la couleur demandée.
+     *
+     * <p>C'est un tint et non une couleur de fond : le fond arrondi défini dans le layout est
+     * ainsi conservé. Le texte reste toujours sur {@code colorOnPrimary} (noir), lisible aussi
+     * bien sur le vert que sur le rouge.</p>
+     */
+    private void showFeedback(@StringRes int messageRes, @ColorRes int backgroundRes) {
         binding.feedbackBanner.setText(messageRes);
-        binding.feedbackBanner.setBackgroundColor(ContextCompat.getColor(this, backgroundRes));
-        binding.feedbackBanner.setTextColor(ContextCompat.getColor(this, textColorRes));
+        binding.feedbackBanner.setBackgroundTintList(
+                ColorStateList.valueOf(ContextCompat.getColor(this, backgroundRes)));
         binding.feedbackBanner.setVisibility(View.VISIBLE);
 
         handler.removeCallbacks(hideFeedback);
