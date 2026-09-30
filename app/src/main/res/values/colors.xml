@@ -32,4 +32,11 @@
     <color name="muscle_body_outline">#6B6B6B</color>
     <color name="muscle_body_detail">#0B0B0B</color>
     <color name="muscle_body_base">#262626</color>
+
+    <!-- Feedback de validation du mouvement (US-3.2), accordé au thème sombre -->
+    <color name="app_success">#2ED47A</color>
+    <color name="app_success_container">#12401F</color>
+    <color name="app_on_success_container">#9BF0BC</color>
+    <color name="app_error_container">#4A1417</color>
+    <color name="app_on_error_container">#FFB3B5</color>
 </resources>

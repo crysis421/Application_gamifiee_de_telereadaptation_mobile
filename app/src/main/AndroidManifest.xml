@@ -11,5 +11,7 @@
         <activity android:name=".ExerciseCatalogActivity" android:exported="false"/>
         <activity android:name=".ExercisePlayerActivity" android:exported="false"/>
         <activity android:name=".CreateExerciseActivity" android:exported="false"/>
+        <activity android:name=".accueil.ui.ExerciseActivity" android:exported="false" android:keepScreenOn="true" android:parentActivityName=".MainActivity" android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".accueil.ui.SummaryActivity" android:exported="false" android:parentActivityName=".MainActivity"/>
     </application>
 </manifest>

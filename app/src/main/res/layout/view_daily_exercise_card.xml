@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Carte « Exercice du jour » (US-4.2).
+    Extraite dans son propre layout pour pouvoir être incluse telle quelle dans l'accueil
+    définitif, quel que soit l'écran qui l'héberge.
+
+    La carte est déroulante, sans chevron : c'est le lien « Voir le détail » qui porte
+    l'action (motif Google Play / YouTube), volontairement explicite plutôt qu'une flèche à
+    interpréter. Repliée, la carte garde tout ce qui permet de décider : le libellé
+    « Exercice du jour », le nom de l'exercice, sa ligne de métadonnées et le bouton de
+    lancement. Seul le détail (consigne, objectif) est masqué, pour que l'accueil reste
+    compact quand les blocs « pas » et « exercices réalisés » (US-5.1 / US-5.2) s'y
+    ajouteront.
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="?attr/colorSecondaryContainer"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/dailyLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="0.12"
+                android:text="@string/daily_exercise_label"
+                android:textAllCaps="true"
+                android:textColor="?attr/colorOnSecondaryContainer"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/favoriteButton"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:contentDescription="@string/summary_add_favorite"
+                app:icon="@drawable/ic_favorite_border"
+                app:iconSize="28dp"
+                app:iconTint="?attr/colorOnSecondaryContainer" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/exerciseName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="?attr/colorOnSecondaryContainer"
+            android:textSize="@dimen/text_title"
+            android:textStyle="bold"
+            tools:text="Élévations latérales" />
+
+        <TextView
+            android:id="@+id/exerciseMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSecondaryContainer"
+            android:textSize="@dimen/text_body_large"
+            tools:text="Épaules · Facile · 2 min" />
+
+        <!--
+            Lien qui plie / déplie le détail. Le libellé bascule entre « Voir le détail » et
+            « Réduire » : il annonce l'action, il n'y a donc rien à deviner.
+            Marge négative : elle compense le padding interne du TextButton pour que le texte
+            s'aligne avec le reste du contenu de la carte.
+        -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toggleDetailsButton"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="-8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/daily_exercise_expand"
+            android:textSize="@dimen/text_body_large" />
+
+        <!-- Contenu déroulant : masqué quand la carte est repliée. -->
+        <LinearLayout
+            android:id="@+id/dailyDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/exerciseDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="?attr/colorOnSecondaryContainer"
+                android:textSize="@dimen/text_body_large"
+                tools:text="Debout, bras le long du corps. Monte les bras tendus sur les côtés." />
+
+            <TextView
+                android:id="@+id/exerciseGoal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="?attr/colorOnSecondaryContainer"
+                android:textSize="@dimen/text_body_large"
+                android:textStyle="bold"
+                tools:text="Objectif : 12 répétitions" />
+
+            <LinearLayout
+                android:id="@+id/doneBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/app_success" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/daily_exercise_done_today"
+                    android:textColor="@color/app_success"
+                    android:textSize="@dimen/text_body_large"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/startButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_marginTop="16dp"
+            android:text="@string/daily_exercise_start"
+            android:textSize="@dimen/button_text_large"
+            app:cornerRadius="20dp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
