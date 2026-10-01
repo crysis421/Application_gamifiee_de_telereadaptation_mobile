@@ -46,8 +46,17 @@ dependencies {
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.livedata)
     implementation(libs.recyclerview)
+    val cameraxVersion = "1.3.4"
+
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
+    implementation("androidx.fragment:fragment-ktx:1.8.3")
+    implementation("com.google.guava:guava:31.1-android")
     testImplementation(libs.junit)
-    testImplementation(libs.arch.core.testing)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
 }
