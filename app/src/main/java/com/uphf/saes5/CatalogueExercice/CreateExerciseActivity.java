@@ -1,5 +1,6 @@
 package com.uphf.saes5;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -8,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputLayout;
@@ -27,6 +29,12 @@ public class CreateExerciseActivity extends AppCompatActivity {
         ChipGroup muscleGroup = findViewById(R.id.create_muscle_group);
         ChipGroup difficultyGroup = findViewById(R.id.create_difficulty_group);
         RatingBar stars = findViewById(R.id.create_stars_bar);
+        MaterialButton btnHolisticCamera = findViewById(R.id.btn_holistic_camera);
+
+        btnHolisticCamera.setOnClickListener(v -> {
+            Intent intent = new Intent(this, HolisticCameraActivity.class);
+            startActivity(intent);
+        });
 
         findViewById(R.id.create_save_button).setOnClickListener(v -> {
             nameLayout.setError(null);
