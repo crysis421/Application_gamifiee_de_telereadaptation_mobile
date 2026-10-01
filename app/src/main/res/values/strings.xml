@@ -66,4 +66,63 @@
     <string name="difficulty_easy">Facile</string>
     <string name="difficulty_medium">Moyen</string>
     <string name="difficulty_hard">Difficile</string>
+
+    <!-- Accueil : carte « Exercice du jour » (US-4.2) -->
+    <string name="daily_exercise_label">Exercice du jour</string>
+    <string name="daily_exercise_done_today">Déjà réalisé aujourd\'hui</string>
+    <string name="daily_exercise_goal">Objectif : %1$d répétitions</string>
+    <string name="daily_exercise_start">Commencer l\'exercice</string>
+    <string name="daily_exercise_restart">Refaire l\'exercice</string>
+    <string name="daily_exercise_empty">Aucun exercice disponible pour le moment.</string>
+    <string name="daily_exercise_expand">Voir le détail</string>
+    <string name="daily_exercise_collapse">Réduire</string>
+
+    <!-- Métadonnées d\'exercice : les libellés de difficulté sont définis plus haut -->
+    <string name="exercise_meta">%1$s · %2$s · %3$s</string>
+    <string name="duration_minutes">%1$d min</string>
+
+    <!-- Écran d\'exécution d\'un exercice -->
+    <string name="exercise_camera_placeholder">Aperçu caméra\n(détection de pose à venir)</string>
+    <string name="exercise_rep_counter">%1$d / %2$d</string>
+    <string name="exercise_reps_label">Répétitions</string>
+    <string name="exercise_validate_rep">Valider la répétition</string>
+    <string name="exercise_fail_rep">Répétition ratée</string>
+    <string name="exercise_finish">Terminer l\'exercice</string>
+    <string name="exercise_feedback_valid">Répétition validée</string>
+    <string name="exercise_feedback_failed">Mouvement à corriger</string>
+    <string name="exercise_quit_title">Abandonner l\'exercice ?</string>
+    <string name="exercise_quit_message">Ta progression sur cet exercice ne sera pas enregistrée.</string>
+    <string name="exercise_quit_confirm">Abandonner</string>
+    <string name="exercise_quit_cancel">Continuer</string>
+
+    <!-- Récapitulatif de fin d\'exercice -->
+    <string name="summary_title">Exercice terminé !</string>
+    <string name="summary_goal_reached">Objectif atteint</string>
+    <string name="summary_goal_missed">Objectif : %1$d répétitions</string>
+    <string name="summary_stat_reps">Répétitions validées</string>
+    <string name="summary_stat_success_rate">Réussite</string>
+    <string name="summary_stat_total_time">Temps total</string>
+    <string name="summary_stat_average_time">Temps moyen / rép.</string>
+    <string name="summary_stat_failed_reps">Mouvements à corriger</string>
+    <string name="summary_percent">%1$d %%</string>
+    <string name="summary_add_favorite">Ajouter aux favoris</string>
+    <string name="summary_remove_favorite">Retirer des favoris</string>
+    <string name="summary_favorite_added">Ajouté à tes favoris</string>
+    <string name="summary_favorite_removed">Retiré de tes favoris</string>
+    <string name="summary_restart">Recommencer</string>
+    <string name="summary_back_home">Retour à l\'accueil</string>
+
+    <!-- Catalogue : modification et suppression d'un exercice -->
+    <string name="edit_title">Modifier l\'exercice</string>
+    <string name="edit_exercise">Modifier</string>
+    <string name="delete_exercise">Supprimer</string>
+    <string name="save_changes">Enregistrer les modifications</string>
+    <string name="exercise_options">Options de %1$s</string>
+    <string name="exercise_updated">Exercice modifié</string>
+    <string name="exercise_deleted">Exercice supprimé</string>
+    <string name="delete_exercise_title">Supprimer cet exercice ?</string>
+    <string name="delete_exercise_message">« %1$s » sera retiré du catalogue.</string>
+    <string name="create_target_reps_hint">Objectif (répétitions)</string>
+    <string name="create_description_hint">Consigne d\'exécution (facultatif)</string>
+    <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
 </resources>

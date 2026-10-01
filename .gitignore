@@ -1,16 +1,35 @@
+# Signature de l'application : une clé publiée est compromise pour de bon,
+# elle ne peut pas être révoquée. Rien de tout ceci ne doit partir sur le dépôt.
+*.jks
+*.keystore
+keystore.properties
+
+# Android Studio / IntelliJ
 *.iml
-.gradle
-/local.properties
-/.idea/
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+.idea/
 .DS_Store
-/build
+
+# Gradle
+# « build/ » sans barre oblique initiale couvre aussi les futurs modules,
+# pas seulement /build et app/build.
+.gradle/
+build/
+local.properties
+.kotlin/
+
+# Sorties de build et artefacts
 /captures
+release/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+output-metadata.json
+
+# NDK
 .externalNativeBuild
 .cxx
-local.properties
+
+# Journaux
+*.log

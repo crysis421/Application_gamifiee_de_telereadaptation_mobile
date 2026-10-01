@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class ExerciseCatalogActivity extends AppCompatActivity {
     private ExerciseViewModel viewModel;
@@ -25,11 +28,13 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
 
         RecyclerView recycler = findViewById(R.id.exercises_recycler);
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        ExerciseAdapter adapter = new ExerciseAdapter(exercise -> {
-            Intent intent = new Intent(this, ExercisePlayerActivity.class);
-            intent.putExtra("exercise_id", exercise.getId());
-            startActivity(intent);
-        });
+        ExerciseAdapter adapter = new ExerciseAdapter(
+                exercise -> {
+                    Intent intent = new Intent(this, ExercisePlayerActivity.class);
+                    intent.putExtra("exercise_id", exercise.getId());
+                    startActivity(intent);
+                },
+                this::showExerciseMenu);
         recycler.setAdapter(adapter);
         viewModel.getExercises().observe(this, adapter::submitList);
 
@@ -63,7 +68,7 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.create_exercise_button).setOnClickListener(v ->
-                startActivity(new Intent(this, CreateExerciseActivity.class)));
+                startActivity(CreateExerciseActivity.newIntent(this)));
 
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
         navigation.setSelectedItemId(R.id.nav_catalog);
@@ -80,7 +85,44 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.refresh(); // affiche les exercices créés depuis CreateExerciseActivity
+        viewModel.refresh(); // reflète les créations, modifications et suppressions
+    }
+
+    /** Menu « modifier / supprimer » d'un exercice, ancré sur son bouton. */
+    private void showExerciseMenu(Exercise exercise, View anchor) {
+        PopupMenu menu = new PopupMenu(this, anchor);
+        menu.inflate(R.menu.exercise_item_menu);
+        menu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_edit_exercise) {
+                startActivity(CreateExerciseActivity.editIntent(this, exercise.getId()));
+                return true;
+            }
+            if (item.getItemId() == R.id.action_delete_exercise) {
+                confirmDelete(exercise);
+                return true;
+            }
+            return false;
+        });
+        menu.show();
+    }
+
+    /**
+     * Demande confirmation avant de retirer un exercice.
+     *
+     * <p>La suppression est irréversible — le catalogue n'a pas d'historique — d'où la
+     * confirmation explicite, avec le nom de l'exercice concerné.</p>
+     */
+    private void confirmDelete(Exercise exercise) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.delete_exercise_title)
+                .setMessage(getString(R.string.delete_exercise_message, exercise.getName()))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.delete_exercise, (dialog, which) -> {
+                    ExerciseRepository.remove(exercise.getId());
+                    viewModel.refresh();
+                    Toast.makeText(this, R.string.exercise_deleted, Toast.LENGTH_SHORT).show();
+                })
+                .show();
     }
 
     /** Texte du chip sélectionné, ou "" si c'est le chip « Tous / Toutes » (= pas de filtre). */

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Écran d'exécution de l'exercice.
+    Tous les éléments clés (compteur, chrono, feedback, boutons) sont surdimensionnés :
+    l'utilisateur doit pouvoir les lire et les atteindre à plusieurs mètres de l'écran (US-3.1).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/screen_margin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/exerciseName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold"
+            tools:text="Élévations latérales" />
+
+        <TextView
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="@dimen/text_title"
+            tools:text="01:24" />
+    </LinearLayout>
+
+    <!-- Filet primaire sous le titre, comme sur les autres écrans de l'application. -->
+    <View
+        android:layout_width="48dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/colorPrimary" />
+
+    <!-- TODO (US-1.1) : remplacer ce bloc par le PreviewView de CameraX surmonté de la vue
+         custom qui dessine le squelette MediaPipe. -->
+    <FrameLayout
+        android:id="@+id/cameraPlaceholder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/block_spacing"
+        android:layout_weight="1"
+        android:background="@drawable/bg_camera_placeholder">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/exercise_camera_placeholder"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="@dimen/text_body_large" />
+
+        <!--
+            Bandeau de feedback (US-3.2). La couleur est posée par le code via un tint : le
+            fond reste donc arrondi comme les cartes du reste de l'application.
+        -->
+        <TextView
+            android:id="@+id/feedbackBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_feedback_banner"
+            android:backgroundTint="@color/app_success"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textColor="@color/colorOnPrimary"
+            android:textSize="@dimen/text_body_large"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            tools:text="Répétition validée"
+            tools:visibility="visible" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/repCounter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/block_spacing"
+        android:gravity="center"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="@dimen/text_counter_huge"
+        android:textStyle="bold"
+        tools:text="7 / 12" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/exercise_reps_label"
+        android:textAppearance="@style/TextAppearance.SAES5.Label"
+        android:textSize="16sp" />
+
+    <!-- TODO (US-1.2 / US-1.3) : ces deux boutons remplacent temporairement la validation
+         automatique par estimation de pose. Ils seront supprimés une fois le moteur de
+         reconnaissance branché. -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/validateRepButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height_large"
+        android:layout_marginTop="@dimen/block_spacing"
+        android:text="@string/exercise_validate_rep"
+        android:textSize="@dimen/button_text_large" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/failRepButton"
+        style="@style/Widget.SAES5.Button.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/exercise_fail_rep"
+        android:textSize="18sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/finishButton"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/exercise_finish"
+        android:textSize="18sp" />
+</LinearLayout>

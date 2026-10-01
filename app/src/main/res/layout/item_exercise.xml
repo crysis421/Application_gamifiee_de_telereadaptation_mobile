@@ -64,5 +64,20 @@
                 android:textColor="?attr/colorPrimary"
                 android:textSize="18sp" />
         </LinearLayout>
+
+        <!--
+            Menu « modifier / supprimer » de l'exercice. Bouton distinct plutôt qu'un appui
+            long sur la carte : l'action reste visible, et l'appui simple garde son rôle de
+            lancement de l'exercice.
+        -->
+        <ImageButton
+            android:id="@+id/exercise_menu_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_more_vert"
+            app:tint="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
