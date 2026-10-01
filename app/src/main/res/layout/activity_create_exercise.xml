@@ -12,6 +12,7 @@
         android:padding="@dimen/screen_margin">
 
         <TextView
+            android:id="@+id/create_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/create_title"
@@ -153,6 +154,45 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!--
+            Objectif de répétitions : repris par la séance et par la carte « Exercice du jour ».
+        -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/create_target_reps_layout"
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_target_reps_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_target_reps_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!--
+            Consigne d'exécution, facultative : affichée dans le détail de l'exercice du jour,
+            masquée quand elle est vide.
+        -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_description_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_description_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

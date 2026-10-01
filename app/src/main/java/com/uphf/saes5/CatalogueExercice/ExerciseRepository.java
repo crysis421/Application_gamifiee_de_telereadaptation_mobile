@@ -37,6 +37,42 @@ public final class ExerciseRepository {
         exercises.add(exercise);
     }
 
+    /**
+     * Remplace l'exercice portant le même identifiant, en conservant sa place dans la liste.
+     *
+     * @return {@code false} si l'exercice n'est plus au catalogue, auquel cas rien n'est modifié.
+     */
+    public static boolean update(Exercise exercise) {
+        if (exercise == null) {
+            return false;
+        }
+        for (int i = 0; i < exercises.size(); i++) {
+            if (exercises.get(i).getId().equals(exercise.getId())) {
+                exercises.set(i, exercise);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Retire un exercice du catalogue.
+     *
+     * @return {@code false} s'il n'y était déjà plus.
+     */
+    public static boolean remove(String id) {
+        if (id == null) {
+            return false;
+        }
+        for (int i = 0; i < exercises.size(); i++) {
+            if (id.equals(exercises.get(i).getId())) {
+                exercises.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** L'exercice portant cet identifiant, ou {@code null} s'il n'est plus au catalogue. */
     @Nullable
     public static Exercise findById(String id) {

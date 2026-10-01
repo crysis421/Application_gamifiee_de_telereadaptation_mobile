@@ -111,4 +111,18 @@
     <string name="summary_favorite_removed">Retiré de tes favoris</string>
     <string name="summary_restart">Recommencer</string>
     <string name="summary_back_home">Retour à l\'accueil</string>
+
+    <!-- Catalogue : modification et suppression d'un exercice -->
+    <string name="edit_title">Modifier l\'exercice</string>
+    <string name="edit_exercise">Modifier</string>
+    <string name="delete_exercise">Supprimer</string>
+    <string name="save_changes">Enregistrer les modifications</string>
+    <string name="exercise_options">Options de %1$s</string>
+    <string name="exercise_updated">Exercice modifié</string>
+    <string name="exercise_deleted">Exercice supprimé</string>
+    <string name="delete_exercise_title">Supprimer cet exercice ?</string>
+    <string name="delete_exercise_message">« %1$s » sera retiré du catalogue.</string>
+    <string name="create_target_reps_hint">Objectif (répétitions)</string>
+    <string name="create_description_hint">Consigne d\'exécution (facultatif)</string>
+    <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
 </resources>
