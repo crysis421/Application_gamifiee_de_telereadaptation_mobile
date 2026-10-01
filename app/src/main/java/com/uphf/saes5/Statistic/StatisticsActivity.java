@@ -100,12 +100,12 @@ public class StatisticsActivity extends AppCompatActivity {
         navigation.setSelectedItemId(R.id.nav_statistics);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
+                Navigation.openTab(this, MainActivity.class);
                 finish();
                 return true;
             }
             if (item.getItemId() == R.id.nav_catalog) {
-                startActivity(new Intent(this, ExerciseCatalogActivity.class));
+                Navigation.openTab(this, ExerciseCatalogActivity.class);
                 finish();
                 return true;
             }

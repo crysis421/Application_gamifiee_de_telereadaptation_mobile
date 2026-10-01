@@ -74,9 +74,9 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         navigation.setSelectedItemId(R.id.nav_catalog);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
+                Navigation.openTab(this, MainActivity.class);
             } else if (item.getItemId() == R.id.nav_statistics) {
-                startActivity(new Intent(this, StatisticsActivity.class));
+                Navigation.openTab(this, StatisticsActivity.class);
             }
             return true;
         });

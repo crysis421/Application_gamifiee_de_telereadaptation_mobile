@@ -65,7 +65,16 @@ public class CreateExerciseActivity extends AppCompatActivity {
         TextView saveButton = findViewById(R.id.create_save_button);
 
         // En modification, l'exercice d'origine ; null en création.
-        final Exercise edited = ExerciseRepository.findById(getIntent().getStringExtra(EXTRA_EXERCISE_ID));
+        String editedId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
+        final Exercise edited = ExerciseRepository.findById(editedId);
+
+        // Modification demandée sur un exercice qui n'est plus au catalogue : sans ce garde-fou
+        // le formulaire basculerait silencieusement en création et enregistrerait un doublon.
+        if (editedId != null && edited == null) {
+            Toast.makeText(this, R.string.exercise_no_longer_available, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         if (edited != null) {
             screenTitle.setText(R.string.edit_title);

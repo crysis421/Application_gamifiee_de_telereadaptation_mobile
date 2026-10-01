@@ -49,16 +49,16 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdgeSupport.applySystemBarInsets(binding.main);
 
         binding.openStatisticsButton.setOnClickListener(view ->
-                startActivity(new Intent(this, StatisticsActivity.class)));
+                Navigation.openTab(this, StatisticsActivity.class));
         binding.openCatalogButton.setOnClickListener(view ->
-                startActivity(new Intent(this, ExerciseCatalogActivity.class)));
+                Navigation.openTab(this, ExerciseCatalogActivity.class));
 
         binding.bottomNav.setSelectedItemId(R.id.nav_home);
         binding.bottomNav.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_catalog) {
-                startActivity(new Intent(this, ExerciseCatalogActivity.class));
+                Navigation.openTab(this, ExerciseCatalogActivity.class);
             } else if (item.getItemId() == R.id.nav_statistics) {
-                startActivity(new Intent(this, StatisticsActivity.class));
+                Navigation.openTab(this, StatisticsActivity.class);
             }
             return true;
         });
