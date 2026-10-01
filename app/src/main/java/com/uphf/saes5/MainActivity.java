@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private FavoritesRepository favoritesRepository;
     private DailyExerciseTracker dailyExerciseTracker;
+    private DailyExerciseProvider dailyExerciseProvider;
 
     @Nullable
     private Exercise exerciseOfTheDay;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         favoritesRepository = new FavoritesRepository(this);
         dailyExerciseTracker = new DailyExerciseTracker(this);
+        dailyExerciseProvider = new DailyExerciseProvider(this);
 
         bindExerciseOfTheDay();
     }
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
      * catalogue lui-même ont pu changer sur un autre écran.</p>
      */
     private void bindExerciseOfTheDay() {
-        exerciseOfTheDay = DailyExerciseProvider.ofTheDay();
+        exerciseOfTheDay = dailyExerciseProvider.ofTheDay();
 
         boolean hasExercise = exerciseOfTheDay != null;
         binding.dailyExerciseCard.getRoot().setVisibility(hasExercise ? View.VISIBLE : View.GONE);

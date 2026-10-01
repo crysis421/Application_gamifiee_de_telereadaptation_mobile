@@ -367,13 +367,9 @@ Critères d'acceptation :
 
 ## État d'implémentation — limites connues
 
-1. **La mise en favori n'est pas terminée.** Marquer un exercice en favori fonctionne et
-   l'état est conservé d'une session à l'autre : le cœur de la carte « Exercice du jour » et
-   le bouton du récapitulatif de fin de séance écrivent bien dans `FavoritesRepository`
-   (SharedPreferences). Mais **aucun écran ne permet de consulter ses favoris** : le catalogue
-   ne les affiche pas et n'offre pas de filtre « favoris ». `getFavoriteIds()` n'est appelé
-   nulle part dans l'application. La fonctionnalité est donc à compléter côté catalogue
-   (US-6.1) avant d'être annoncée comme disponible.
+Les écarts entre ce qui est annoncé et ce qui fonctionne réellement sont recensés dans
+[problemes-connus.md](problemes-connus.md), tenu à jour à part pour ne pas alourdir ce
+backlog.
 
 ## Remaniements demandés (à appliquer — pas encore faits)
 
