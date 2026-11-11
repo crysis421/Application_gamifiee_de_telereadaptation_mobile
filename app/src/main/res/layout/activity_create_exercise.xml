@@ -212,12 +212,21 @@
             android:rating="3"
             android:secondaryProgressTint="@color/colorPrimary"
             android:stepSize="1" />
+
+
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_holistic_camera"
-            android:layout_width="match_parent"
+            android:id="@+id/btn_record_movement"
+            android:layout_width="185dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Ouvrir la caméra Holistic" />
+            android:text="Enregistrer un mouvement" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_compare_movement"
+            android:layout_width="188dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Tester un mouvement" />
 
         <LinearLayout
             android:layout_width="match_parent"

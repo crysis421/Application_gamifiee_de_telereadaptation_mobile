@@ -56,12 +56,12 @@ public class CreateExerciseActivity extends AppCompatActivity {
         ChipGroup muscleGroup = findViewById(R.id.create_muscle_group);
         ChipGroup difficultyGroup = findViewById(R.id.create_difficulty_group);
         RatingBar stars = findViewById(R.id.create_stars_bar);
-        MaterialButton btnHolisticCamera = findViewById(R.id.btn_holistic_camera);
 
-        btnHolisticCamera.setOnClickListener(v -> {
-            Intent intent = new Intent(this, HolisticCameraActivity.class);
-            startActivity(intent);
-        });
+        findViewById(R.id.btn_record_movement)
+                .setOnClickListener(v -> HolisticLauncher.startRecordFlow(this));
+
+        findViewById(R.id.btn_compare_movement)
+                .setOnClickListener(v -> HolisticLauncher.startCompareFlow(this));
         TextView saveButton = findViewById(R.id.create_save_button);
 
         // En modification, l'exercice d'origine ; null en création.

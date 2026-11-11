@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.livedata)
     implementation(libs.recyclerview)
+    implementation("com.google.code.gson:gson:2.10.1")
     val cameraxVersion = "1.3.4"
 
     implementation("androidx.camera:camera-core:$cameraxVersion")
