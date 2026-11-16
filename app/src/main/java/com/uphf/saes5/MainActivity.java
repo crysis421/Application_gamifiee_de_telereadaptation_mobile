@@ -9,6 +9,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -18,10 +20,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         findViewById(R.id.open_statistics_button).setOnClickListener(v ->
                 startActivity(new Intent(this, StatisticsActivity.class)));
+        configureNavigation();
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+    }
+
+    private void configureNavigation() {
+        BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        navigation.setSelectedItemId(R.id.nav_home);
+        navigation.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_statistics) {
+                startActivity(new Intent(this, StatisticsActivity.class));
+                finish();
+                return true;
+            }
+            if (item.getItemId() == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
+                return true;
+            }
+            return item.getItemId() == R.id.nav_home;
         });
     }
 }

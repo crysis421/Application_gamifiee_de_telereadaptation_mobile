@@ -104,6 +104,11 @@ public class StatisticsActivity extends AppCompatActivity {
                 finish();
                 return true;
             }
+            if (item.getItemId() == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
+                return true;
+            }
             return item.getItemId() == R.id.nav_statistics;
         });
     }

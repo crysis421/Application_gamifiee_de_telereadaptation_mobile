@@ -12,6 +12,17 @@
     <string name="body_front_label">FACE</string>
     <string name="body_back_label">DOS</string>
     <string name="nav_statistics">Statistiques</string>
+    <string name="nav_profile">Profil</string>
+    <string name="profile_title">Mon profil</string>
+    <string name="profile_subtitle">Suivez vos progrès et vos réussites.</string>
+    <string name="profile_star_icon">★</string>
+    <string name="profile_stars_count">%1$d</string>
+    <string name="profile_stars_label">étoiles gagnées</string>
+    <string name="profile_stars_help">Une étoile par séance parfaite avec un score de 90 ou plus.</string>
+    <string name="profile_muscles_heading">Rangs par muscle</string>
+    <string name="profile_history_heading">Historique des séances</string>
+    <string name="profile_history_empty">Aucune séance pour le moment.</string>
+    <string name="profile_history_details">%1$s • %2$s</string>
     <string name="statistics_title">Statistiques d’exercices</string>
     <string name="statistics_subtitle">Visualisez vos progrès et les zones à renforcer.</string>
     <string name="statistics_global_label">Exercices parfaitement réalisés</string>
