@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.SoundFeedback;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
 import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.databinding.ActivityExerciseBinding;
@@ -41,6 +42,7 @@ public class ExerciseActivity extends AppCompatActivity {
     private ActivityExerciseBinding binding;
     private Exercise exercise;
     private DailyExerciseTracker dailyExerciseTracker;
+    private SoundFeedback soundFeedback;
 
     private int validatedReps;
     private int failedReps;
@@ -80,6 +82,7 @@ public class ExerciseActivity extends AppCompatActivity {
         EdgeToEdgeSupport.applySystemBarInsets(binding.main);
 
         dailyExerciseTracker = new DailyExerciseTracker(this);
+        soundFeedback = new SoundFeedback(this);
         startElapsedRealtime = SystemClock.elapsedRealtime();
 
         binding.exerciseName.setText(exercise.getName());
@@ -114,6 +117,9 @@ public class ExerciseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
+        if (soundFeedback != null) {
+            soundFeedback.release();
+        }
     }
 
     /** Une répétition complète et correcte vient d'être détectée. */
@@ -121,12 +127,14 @@ public class ExerciseActivity extends AppCompatActivity {
         validatedReps++;
         updateRepCounter();
         showFeedback(R.string.exercise_feedback_valid, R.color.app_success);
+        soundFeedback.playValid();
     }
 
     /** Un mouvement a été tenté mais n'est pas conforme à la référence : il n'est pas compté. */
     private void onRepetitionFailed() {
         failedReps++;
         showFeedback(R.string.exercise_feedback_failed, R.color.app_error);
+        soundFeedback.playFailed();
     }
 
     private void updateRepCounter() {
@@ -170,6 +178,7 @@ public class ExerciseActivity extends AppCompatActivity {
 
     private void finishExercise() {
         long duration = elapsedMillis();
+        soundFeedback.playFinish();
 
         // Une session sans aucune répétition validée n'est pas comptée comme réalisée (US-4.2).
         if (validatedReps > 0) {
