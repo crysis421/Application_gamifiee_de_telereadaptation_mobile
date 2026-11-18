@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -92,6 +93,49 @@ public class ExerciseRepositoryTest {
     public void remove_returnsFalse_whenAlreadyGone() {
         assertFalse(ExerciseRepository.remove(ID));
         assertFalse(ExerciseRepository.remove(null));
+    }
+
+    @Test
+    public void serialize_roundTripPreservesReferenceMovementAndThreshold() {
+        Exercise original = new Exercise(
+                ID, "Squat test", "Jambes", "Facile", 5, "Aucun", 3,
+                "Descendre puis remonter.", 10, "reference_squat_test", 73);
+
+        List<Exercise> restored = ExerciseRepository.deserialize(
+                ExerciseRepository.serialize(Collections.singletonList(original)));
+
+        assertNotNull(restored);
+        assertEquals(1, restored.size());
+        assertEquals("reference_squat_test", restored.get(0).getReferenceMovementId());
+        assertEquals(73, restored.get(0).getSimilarityThreshold());
+    }
+
+    @Test
+    public void exercise_clampsSimilarityThresholdToPercentageRange() {
+        Exercise belowRange = new Exercise(
+                ID, "Bas", "Jambes", "Facile", 5, "Aucun", 3,
+                "", 10, "reference", -10);
+        Exercise aboveRange = new Exercise(
+                ID, "Haut", "Jambes", "Facile", 5, "Aucun", 3,
+                "", 10, "reference", 140);
+
+        assertEquals(1, belowRange.getSimilarityThreshold());
+        assertEquals(100, aboveRange.getSimilarityThreshold());
+    }
+
+    @Test
+    public void deserialize_legacyExerciseUsesIdAndDefaultThreshold() {
+        String legacy = "[{\"id\":\"legacy_squat\",\"name\":\"Squat\","
+                + "\"muscleGroup\":\"Jambes\",\"difficulty\":\"Facile\","
+                + "\"durationMinutes\":5,\"equipment\":\"Aucun\",\"stars\":3,"
+                + "\"description\":\"\",\"targetReps\":10}]";
+
+        List<Exercise> restored = ExerciseRepository.deserialize(legacy);
+
+        assertNotNull(restored);
+        assertEquals("legacy_squat", restored.get(0).getReferenceMovementId());
+        assertEquals(Exercise.DEFAULT_SIMILARITY_THRESHOLD,
+                restored.get(0).getSimilarityThreshold());
     }
 
     private int indexOf(String id) {
