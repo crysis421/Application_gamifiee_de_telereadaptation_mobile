@@ -35,6 +35,7 @@ public class ExercisePlayerActivity extends AppCompatActivity {
                     startActivity(ExerciseActivity.newIntent(this, selected.getId())));
         }
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        Navigation.applyGameSettings(navigation);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 Navigation.openTab(this, MainActivity.class);

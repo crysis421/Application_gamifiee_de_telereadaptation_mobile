@@ -97,6 +97,7 @@ public class StatisticsActivity extends AppCompatActivity {
 
     private void configureNavigation() {
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        Navigation.applyGameSettings(navigation);
         navigation.setSelectedItemId(R.id.nav_statistics);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {

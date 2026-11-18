@@ -71,6 +71,7 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
                 startActivity(CreateExerciseActivity.newIntent(this)));
 
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        Navigation.applyGameSettings(navigation);
         navigation.setSelectedItemId(R.id.nav_catalog);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {

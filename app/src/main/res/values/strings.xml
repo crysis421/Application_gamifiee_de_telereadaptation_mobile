@@ -126,4 +126,22 @@
     <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
 
     <string name="exercise_no_longer_available">Cet exercice n\'est plus au catalogue.</string>
+
+    <!-- Réglages des éléments de gamification (US-4.1) -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_subtitle">Activez ou désactivez chaque élément de jeu pour composer une condition de test.</string>
+    <string name="settings_condition_label">Condition de test</string>
+    <string name="settings_back">Retour</string>
+    <string name="settings_open">Ouvrir les paramètres</string>
+
+    <string name="setting_daily_exercise">Exercice du jour</string>
+    <string name="setting_daily_exercise_help">La carte mise en avant sur l\'accueil.</string>
+    <string name="setting_favorites">Favoris</string>
+    <string name="setting_favorites_help">Le cœur pour marquer un exercice préféré.</string>
+    <string name="setting_stars">Rangs et étoiles</string>
+    <string name="setting_stars_help">La note affichée sur chaque exercice du catalogue.</string>
+    <string name="setting_statistics">Statistiques</string>
+    <string name="setting_statistics_help">L\'onglet de progression et la carte musculaire.</string>
+    <string name="setting_sounds">Retours sonores</string>
+    <string name="setting_sounds_help">Les sons de validation, d\'erreur et de fin d\'exercice.</string>
 </resources>

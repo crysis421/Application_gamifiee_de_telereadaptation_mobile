@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.uphf.saes5.R;
 import com.uphf.saes5.ExerciseRepository;
+import com.uphf.saes5.GameSettings;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
 import com.uphf.saes5.databinding.ActivitySummaryBinding;
 import com.uphf.saes5.Exercise;
@@ -111,6 +112,12 @@ public class SummaryActivity extends AppCompatActivity {
     }
 
     private void bindFavoriteButton() {
+        // Les favoris sont un élément de jeu désactivable (US-4.1).
+        if (!GameSettings.isEnabled(GameSettings.Feature.FAVORITES)) {
+            binding.favoriteButton.setVisibility(View.GONE);
+            return;
+        }
+        binding.favoriteButton.setVisibility(View.VISIBLE);
         refreshFavoriteButton();
         binding.favoriteButton.setOnClickListener(view -> {
             boolean favorite = favoritesRepository.toggleFavorite(exercise.getId());
