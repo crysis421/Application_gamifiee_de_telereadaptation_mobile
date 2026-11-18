@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
                 Navigation.openTab(this, ExerciseCatalogActivity.class);
             } else if (item.getItemId() == R.id.nav_statistics) {
                 Navigation.openTab(this, StatisticsActivity.class);
+            } else if (item.getItemId() == R.id.nav_profile) {
+                Navigation.openTab(this, ProfileActivity.class);
             }
             return true;
         });

@@ -15,6 +15,7 @@
         </activity>
         <activity android:name=".StatisticsActivity" android:exported="false" android:launchMode="singleTop"/>
         <activity android:name=".ExerciseCatalogActivity" android:exported="false" android:launchMode="singleTop"/>
+        <activity android:name=".ProfileActivity" android:exported="false" android:launchMode="singleTop"/>
         <activity android:name=".ExercisePlayerActivity" android:exported="false"/>
         <activity android:name=".CreateExerciseActivity" android:exported="false"/>
         <activity android:name=".SettingsActivity" android:exported="false"/>

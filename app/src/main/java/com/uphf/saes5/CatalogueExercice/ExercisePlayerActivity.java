@@ -45,6 +45,14 @@ public class ExercisePlayerActivity extends AppCompatActivity {
                 Navigation.openTab(this, ExerciseCatalogActivity.class);
                 return true;
             }
+            if (item.getItemId() == R.id.nav_statistics) {
+                Navigation.openTab(this, StatisticsActivity.class);
+                return true;
+            }
+            if (item.getItemId() == R.id.nav_profile) {
+                Navigation.openTab(this, ProfileActivity.class);
+                return true;
+            }
             return true;
         });
     }
