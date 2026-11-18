@@ -35,6 +35,8 @@
     <string name="nav_catalog">Catalogue</string>
     <string name="catalog_title">Catalogue d’exercices</string>
     <string name="apply_filters">Appliquer</string>
+    <string name="open_filters">Ouvrir les filtres</string>
+    <string name="close_filters">Fermer les filtres</string>
     <string name="reset_filters">Réinitialiser</string>
     <string name="duration_hint">Durée max. (min)</string>
     <string name="equipment_hint">Matériel</string>

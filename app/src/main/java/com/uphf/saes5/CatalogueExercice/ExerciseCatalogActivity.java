@@ -43,6 +43,16 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         EditText duration = findViewById(R.id.duration_input);
         EditText equipment = findViewById(R.id.equipment_input);
 
+        View filtersContainer = findViewById(R.id.filters_container);
+        View filterMenuButton = findViewById(R.id.filter_menu_button);
+        filterMenuButton.setOnClickListener(v -> {
+            boolean willOpen = filtersContainer.getVisibility() != View.VISIBLE;
+            filtersContainer.setVisibility(willOpen ? View.VISIBLE : View.GONE);
+            filterMenuButton.setContentDescription(getString(willOpen
+                    ? R.string.close_filters
+                    : R.string.open_filters));
+        });
+
         findViewById(R.id.apply_button).setOnClickListener(v -> {
             Integer maxDuration = null;
             String durationText = duration.getText().toString().trim();
@@ -58,6 +68,8 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
                     selectedFilter(difficultyGroup, R.id.chip_difficulty_all),
                     maxDuration,
                     equipment.getText().toString().trim());
+            filtersContainer.setVisibility(View.GONE);
+            filterMenuButton.setContentDescription(getString(R.string.open_filters));
         });
         findViewById(R.id.reset_button).setOnClickListener(v -> {
             muscleGroup.check(R.id.chip_muscle_all);
@@ -65,6 +77,8 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
             duration.setText("");
             equipment.setText("");
             viewModel.reset();
+            filtersContainer.setVisibility(View.GONE);
+            filterMenuButton.setContentDescription(getString(R.string.open_filters));
         });
 
         findViewById(R.id.create_exercise_button).setOnClickListener(v ->
