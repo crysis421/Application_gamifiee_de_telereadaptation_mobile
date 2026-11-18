@@ -21,12 +21,11 @@ private static final List<ExerciseSession> SESSIONS = Arrays.asList(
 ```
 
 Rien n'écrit jamais dans ce dépôt — aucune classe en dehors de `StatisticsViewModel`
-ne le référence. Et à la fin d'une vraie séance, `accueil/ui/SummaryActivity.java`
-s'arrête sur un commentaire :
+ne le référence.
 
-```java
-// TODO (US-7.1) : c'est ici que la session devra être envoyée au journal de recherche.
-```
+À noter : depuis US-7.1, une vraie séance **est** journalisée, par `SessionLog`. Mais ce
+journal sert la recherche, pas l'écran Statistiques, qui reste branché sur ses données
+en dur. Les deux sources existent désormais côte à côte.
 
 **Conséquence.** La carte musculaire, le pourcentage global et les classements par
 muscle et par exercice ne reflètent rien de réel. C'est le point le plus visible lors

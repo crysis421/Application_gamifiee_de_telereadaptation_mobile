@@ -85,12 +85,16 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
                 startActivity(CreateExerciseActivity.newIntent(this)));
 
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        Navigation.applyGameSettings(navigation);
         navigation.setSelectedItemId(R.id.nav_catalog);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 Navigation.openTab(this, MainActivity.class);
             } else if (item.getItemId() == R.id.nav_statistics) {
                 Navigation.openTab(this, StatisticsActivity.class);
+
+            } else if (item.getItemId() == R.id.nav_profile) {
+                Navigation.openTab(this, ProfileActivity.class);
             }
             return true;
         });

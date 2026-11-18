@@ -52,6 +52,9 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
         holder.name.setText(exercise.getName());
         holder.metadata.setText(exercise.getDifficulty() + " • " + exercise.getEquipment()
                 + " • " + exercise.getDurationMinutes() + " min");
+        // Les rangs sont un élément de jeu désactivable (US-4.1).
+        boolean showStars = GameSettings.isEnabled(GameSettings.Feature.STARS);
+        holder.stars.setVisibility(showStars ? View.VISIBLE : View.GONE);
         holder.stars.setText(stars(exercise.getStars()));
         holder.itemView.setOnClickListener(view -> listener.onClick(exercise));
         holder.menuButton.setOnClickListener(view -> menuListener.onMenuClick(exercise, view));

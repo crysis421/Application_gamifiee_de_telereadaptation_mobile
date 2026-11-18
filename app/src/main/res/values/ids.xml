@@ -3,4 +3,5 @@
     <item name="nav_home" type="id" />
     <item name="nav_statistics" type="id" />
     <item name="nav_catalog" type="id" />
+    <item name="nav_profile" type="id" />
 </resources>
