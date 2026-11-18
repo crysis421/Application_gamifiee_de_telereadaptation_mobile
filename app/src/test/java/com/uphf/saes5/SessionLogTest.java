@@ -85,6 +85,21 @@ public class SessionLogTest {
     }
 
     @Test
+    public void measuredSimilarityScore_isPreservedAndBoundedAsAPercentage() {
+        SessionEntry measured = new SessionEntry(0, "id", "nom", 1, 0, 1, 0,
+                87, "", "");
+        SessionEntry aboveRange = new SessionEntry(0, "id", "nom", 1, 0, 1, 0,
+                140, "", "");
+        SessionEntry belowRange = new SessionEntry(0, "id", "nom", 1, 0, 1, 0,
+                -20, "", "");
+
+        assertTrue(measured.hasSimilarityScore());
+        assertEquals(87, measured.getSimilarityScore());
+        assertEquals(100, aboveRange.getSimilarityScore());
+        assertEquals(0, belowRange.getSimilarityScore());
+    }
+
+    @Test
     public void nullTextFields_becomeEmptyStrings() {
         // Le journal ne doit jamais contenir la chaîne "null".
         SessionEntry entry = new SessionEntry(0, "id", "nom", 1, 0, 1, 0, 0, null, null);

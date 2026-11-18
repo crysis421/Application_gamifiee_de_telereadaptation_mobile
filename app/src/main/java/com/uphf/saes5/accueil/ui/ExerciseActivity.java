@@ -31,6 +31,7 @@ import com.uphf.saes5.MovementComparisonResult;
 import com.uphf.saes5.MovementMath;
 import com.uphf.saes5.MovementStorage;
 import com.uphf.saes5.PoseCameraController;
+import com.uphf.saes5.SessionEntry;
 import com.uphf.saes5.SoundFeedback;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
 import com.uphf.saes5.ExerciseRepository;
@@ -61,6 +62,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     private int validatedReps;
     private int failedReps;
+    private int completedSimilarityTotal;
+    private int completedSimilarityCount;
     private long startElapsedRealtime;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -236,6 +239,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
             showComparisonStatus(R.string.exercise_similarity_correct, R.color.app_error);
         }
         if (result.isRepetitionValidated()) {
+            completedSimilarityTotal += result.getMovementScore();
+            completedSimilarityCount++;
             onRepetitionValidated();
         }
     }
@@ -312,6 +317,9 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     private void finishExercise() {
         long duration = elapsedMillis();
+        int averageSimilarity = completedSimilarityCount == 0
+                ? SessionEntry.SCORE_UNAVAILABLE
+                : Math.round(completedSimilarityTotal / (float) completedSimilarityCount);
         soundFeedback.playFinish();
 
         // Une session sans aucune répétition validée n'est pas comptée comme réalisée (US-4.2).
@@ -320,7 +328,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         }
 
         startActivity(SummaryActivity.newIntent(
-                this, exercise.getId(), validatedReps, failedReps, duration));
+                this, exercise.getId(), validatedReps, failedReps, duration,
+                averageSimilarity));
         finish();
     }
 }

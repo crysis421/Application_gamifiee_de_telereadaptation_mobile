@@ -127,6 +127,8 @@
     <string name="summary_stat_total_time">Temps total</string>
     <string name="summary_stat_average_time">Temps moyen / rép.</string>
     <string name="summary_stat_failed_reps">Mouvements à corriger</string>
+    <string name="summary_stat_similarity">Similarité moyenne</string>
+    <string name="summary_similarity_unavailable">—</string>
     <string name="summary_percent">%1$d %%</string>
     <string name="summary_add_favorite">Ajouter aux favoris</string>
     <string name="summary_remove_favorite">Retirer des favoris</string>
