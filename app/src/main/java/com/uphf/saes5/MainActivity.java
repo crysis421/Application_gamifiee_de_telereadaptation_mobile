@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
                 Navigation.openTab(this, StatisticsActivity.class));
         binding.openCatalogButton.setOnClickListener(view ->
                 Navigation.openTab(this, ExerciseCatalogActivity.class));
+        binding.openSettingsButton.setOnClickListener(view ->
+                startActivity(new Intent(this, SettingsActivity.class)));
 
         binding.bottomNav.setSelectedItemId(R.id.nav_home);
         binding.bottomNav.setOnItemSelectedListener(item -> {
@@ -60,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
                 Navigation.openTab(this, ExerciseCatalogActivity.class);
             } else if (item.getItemId() == R.id.nav_statistics) {
                 Navigation.openTab(this, StatisticsActivity.class);
+            } else if (item.getItemId() == R.id.nav_profile) {
+                Navigation.openTab(this, ProfileActivity.class);
             }
             return true;
         });
@@ -83,8 +87,26 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // L'accueil reste l'onglet sélectionné au retour d'un autre écran.
         binding.bottomNav.setSelectedItemId(R.id.nav_home);
+        // Les réglages ont pu changer : on réapplique avant de reconstruire la carte.
+        applyGameSettings();
         // Le catalogue a pu changer entre-temps : un exercice créé devient éligible aussitôt.
         bindExerciseOfTheDay();
+    }
+
+    /**
+     * Applique les interrupteurs de gamification à l'accueil (US-4.1).
+     *
+     * <p>Un élément désactivé disparaît entièrement : la carte « Exercice du jour » et les
+     * statistiques ne doivent laisser ni emplacement vide ni onglet mort, sinon la condition
+     * de test n'est pas réellement comparable.</p>
+     */
+    private void applyGameSettings() {
+        boolean statistics = GameSettings.isEnabled(GameSettings.Feature.STATISTICS);
+        binding.openStatisticsButton.setVisibility(statistics ? View.VISIBLE : View.GONE);
+        Navigation.applyGameSettings(binding.bottomNav);
+
+        binding.dailyExerciseCard.favoriteButton.setVisibility(
+                GameSettings.isEnabled(GameSettings.Feature.FAVORITES) ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -94,6 +116,14 @@ public class MainActivity extends AppCompatActivity {
      * catalogue lui-même ont pu changer sur un autre écran.</p>
      */
     private void bindExerciseOfTheDay() {
+        // Élément de jeu désactivé : ni carte, ni message « catalogue vide ».
+        if (!GameSettings.isEnabled(GameSettings.Feature.DAILY_EXERCISE)) {
+            exerciseOfTheDay = null;
+            binding.dailyExerciseCard.getRoot().setVisibility(View.GONE);
+            binding.emptyCatalogMessage.setVisibility(View.GONE);
+            return;
+        }
+
         exerciseOfTheDay = dailyExerciseProvider.ofTheDay();
 
         boolean hasExercise = exerciseOfTheDay != null;

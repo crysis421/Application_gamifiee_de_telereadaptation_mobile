@@ -97,19 +97,19 @@ public class StatisticsActivity extends AppCompatActivity {
 
     private void configureNavigation() {
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        Navigation.applyGameSettings(navigation);
         navigation.setSelectedItemId(R.id.nav_statistics);
+        // Pas de finish() : Navigation.openTab s'en charge via CLEAR_TOP, et fermer l'écran
+        // en plus laisserait une pile incohérente d'un onglet à l'autre.
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 Navigation.openTab(this, MainActivity.class);
-                finish();
-                return true;
-            }
-            if (item.getItemId() == R.id.nav_catalog) {
+            } else if (item.getItemId() == R.id.nav_catalog) {
                 Navigation.openTab(this, ExerciseCatalogActivity.class);
-                finish();
-                return true;
+            } else if (item.getItemId() == R.id.nav_profile) {
+                Navigation.openTab(this, ProfileActivity.class);
             }
-            return item.getItemId() == R.id.nav_statistics;
+            return true;
         });
     }
 }

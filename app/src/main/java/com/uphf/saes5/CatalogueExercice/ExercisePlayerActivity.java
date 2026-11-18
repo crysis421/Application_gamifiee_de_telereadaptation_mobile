@@ -35,6 +35,7 @@ public class ExercisePlayerActivity extends AppCompatActivity {
                     startActivity(ExerciseActivity.newIntent(this, selected.getId())));
         }
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
+        Navigation.applyGameSettings(navigation);
         navigation.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 Navigation.openTab(this, MainActivity.class);
@@ -42,6 +43,14 @@ public class ExercisePlayerActivity extends AppCompatActivity {
             }
             if (item.getItemId() == R.id.nav_catalog) {
                 Navigation.openTab(this, ExerciseCatalogActivity.class);
+                return true;
+            }
+            if (item.getItemId() == R.id.nav_statistics) {
+                Navigation.openTab(this, StatisticsActivity.class);
+                return true;
+            }
+            if (item.getItemId() == R.id.nav_profile) {
+                Navigation.openTab(this, ProfileActivity.class);
                 return true;
             }
             return true;

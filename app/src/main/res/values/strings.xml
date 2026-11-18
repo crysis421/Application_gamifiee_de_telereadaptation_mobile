@@ -10,6 +10,17 @@
     <string name="body_front_label">FACE</string>
     <string name="body_back_label">DOS</string>
     <string name="nav_statistics">Statistiques</string>
+    <string name="nav_profile">Profil</string>
+    <string name="profile_title">Mon profil</string>
+    <string name="profile_subtitle">Suivez vos progrès et vos réussites.</string>
+    <string name="profile_star_icon">★</string>
+    <string name="profile_stars_count">%1$d</string>
+    <string name="profile_stars_label">étoiles gagnées</string>
+    <string name="profile_stars_help">Une étoile par séance parfaite avec un score de 90 ou plus.</string>
+    <string name="profile_muscles_heading">Rangs par muscle</string>
+    <string name="profile_history_heading">Historique des séances</string>
+    <string name="profile_history_empty">Aucune séance pour le moment.</string>
+    <string name="profile_history_details">%1$s • %2$s</string>
     <string name="statistics_title">Statistiques d’exercices</string>
     <string name="statistics_subtitle">Visualisez vos progrès et les zones à renforcer.</string>
     <string name="statistics_global_label">Exercices parfaitement réalisés</string>
@@ -126,4 +137,34 @@
     <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
 
     <string name="exercise_no_longer_available">Cet exercice n\'est plus au catalogue.</string>
+
+    <!-- Réglages des éléments de gamification (US-4.1) -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_subtitle">Activez ou désactivez chaque élément de jeu pour composer une condition de test.</string>
+    <string name="settings_condition_label">Condition de test</string>
+    <string name="settings_back">Retour</string>
+    <string name="settings_open">Ouvrir les paramètres</string>
+
+    <string name="setting_daily_exercise">Exercice du jour</string>
+    <string name="setting_daily_exercise_help">La carte mise en avant sur l\'accueil.</string>
+    <string name="setting_favorites">Favoris</string>
+    <string name="setting_favorites_help">Le cœur pour marquer un exercice préféré.</string>
+    <string name="setting_stars">Rangs et étoiles</string>
+    <string name="setting_stars_help">La note affichée sur chaque exercice du catalogue.</string>
+    <string name="setting_statistics">Statistiques</string>
+    <string name="setting_statistics_help">L\'onglet de progression et la carte musculaire.</string>
+    <string name="setting_sounds">Retours sonores</string>
+    <string name="setting_sounds_help">Les sons de validation, d\'erreur et de fin d\'exercice.</string>
+
+    <!-- Journal des séances et export (US-7.1 / US-7.2 / US-7.3) -->
+    <string name="settings_condition_name_hint">Nom de la condition (facultatif)</string>
+    <string name="settings_log_label">Journal des séances</string>
+    <string name="settings_sessions_recorded">%1$d séance(s) enregistrée(s)</string>
+    <string name="settings_export_button">Exporter le journal</string>
+    <string name="settings_export_period">Exporter quelle période ?</string>
+    <string name="settings_export_all">Tout l\'historique</string>
+    <string name="settings_export_7_days">7 derniers jours</string>
+    <string name="settings_export_30_days">30 derniers jours</string>
+    <string name="settings_export_empty">Aucune séance enregistrée pour le moment.</string>
+    <string name="settings_export_failed">Export impossible.</string>
 </resources>

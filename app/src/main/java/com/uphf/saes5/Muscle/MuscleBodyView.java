@@ -376,9 +376,14 @@ public class MuscleBodyView extends View {
             return ContextCompat.getColor(getContext(), R.color.muscle_no_data);
         }
         int score = statistic.getAverageScore();
-        if (score < 40) return ContextCompat.getColor(getContext(), R.color.muscle_progress_low);
-        if (score < 70) return ContextCompat.getColor(getContext(), R.color.muscle_progress_medium);
-        return ContextCompat.getColor(getContext(), R.color.muscle_progress_high);
+        switch (MuscleProgress.fromScore(score)) {
+            case TO_IMPROVE:
+                return ContextCompat.getColor(getContext(), R.color.muscle_progress_low);
+            case PROGRESSING:
+                return ContextCompat.getColor(getContext(), R.color.muscle_progress_medium);
+            default:
+                return ContextCompat.getColor(getContext(), R.color.muscle_progress_high);
+        }
     }
 
     @Override

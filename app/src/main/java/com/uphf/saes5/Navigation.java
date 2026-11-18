@@ -2,6 +2,9 @@ package com.uphf.saes5;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.MenuItem;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
  * Navigation de la barre d'onglets.
@@ -35,5 +38,18 @@ public final class Navigation {
         Intent intent = new Intent(from, target);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         from.startActivity(intent);
+    }
+
+    /**
+     * Masque les onglets dont l'élément de jeu est désactivé (US-4.1).
+     *
+     * <p>À appeler depuis chaque écran portant la barre : un onglet laissé visible mènerait
+     * à un écran que la condition de test est censée retirer.</p>
+     */
+    public static void applyGameSettings(BottomNavigationView navigation) {
+        MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
+        if (statistics != null) {
+            statistics.setVisible(GameSettings.isEnabled(GameSettings.Feature.STATISTICS));
+        }
     }
 }
