@@ -43,8 +43,8 @@ public class HolisticCameraActivity extends AppCompatActivity
     public static final String MODE_COMPARE = "compare";
 
     private static final String TAG = "HolisticCameraActivity";
-    private static final int COUNTDOWN_SEC = 10;
-    private static final int RECORD_SEC = 20;
+    private static final int COUNTDOWN_SEC = 3;
+    private static final int RECORD_SEC = 6;
     private static final long SAMPLE_INTERVAL_MS = 100;
     private static final int MIN_FRAMES = 20;
 
@@ -239,7 +239,7 @@ public class HolisticCameraActivity extends AppCompatActivity
         }
 
         if (MODE_COMPARE.equals(mode)) {
-            int score = MovementMath.score(reference.frames, frames);
+            int score = MovementMath.angleScore(reference.frames, frames);
             tvStatus.setText("Score : " + score + " / 100");
         } else {
             Movement m = new Movement();
@@ -250,6 +250,7 @@ public class HolisticCameraActivity extends AppCompatActivity
             m.frames = new ArrayList<>(frames);
             try {
                 MovementStorage.save(this, m);
+                setResult(RESULT_OK);
                 tvStatus.setText("« " + movementName + " » enregistré (" + frames.size() + " images)");
             } catch (IOException e) {
                 Log.e(TAG, "Save failed", e);

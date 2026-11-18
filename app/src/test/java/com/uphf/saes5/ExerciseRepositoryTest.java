@@ -68,6 +68,20 @@ public class ExerciseRepositoryTest {
     }
 
     @Test
+    public void update_preservesExplicitReferenceAndSimilarityThreshold() {
+        ExerciseRepository.add(sample("Avant", 2));
+
+        ExerciseRepository.update(new Exercise(
+                ID, "Après", "Dos", "Difficile", 9, "Élastique", 5,
+                "", 20, "modele_squat_lent", 76));
+
+        Exercise updated = ExerciseRepository.findById(ID);
+        assertNotNull(updated);
+        assertEquals("modele_squat_lent", updated.getReferenceMovementId());
+        assertEquals(76, updated.getSimilarityThreshold());
+    }
+
+    @Test
     public void update_isIgnored_whenExerciseIsNotInTheCatalogue() {
         int sizeBefore = ExerciseRepository.getAll().size();
 

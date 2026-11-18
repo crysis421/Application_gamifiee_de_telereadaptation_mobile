@@ -213,20 +213,63 @@
             android:secondaryProgressTint="@color/colorPrimary"
             android:stepSize="1" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/reference_model_title"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/reference_model_help"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:id="@+id/create_reference_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/reference_model_missing"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_record_movement"
-            android:layout_width="185dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Enregistrer un mouvement" />
+            android:text="@string/reference_model_record" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_compare_movement"
-            android:layout_width="188dp"
+            style="@style/Widget.SAES5.Button.Outlined"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Tester un mouvement" />
+            android:enabled="false"
+            android:text="@string/reference_model_test" />
+
+        <TextView
+            android:id="@+id/create_similarity_threshold_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/similarity_threshold_default"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/create_similarity_threshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/similarity_threshold_description"
+            android:stepSize="1"
+            android:value="80"
+            android:valueFrom="1"
+            android:valueTo="100" />
 
         <LinearLayout
             android:layout_width="match_parent"

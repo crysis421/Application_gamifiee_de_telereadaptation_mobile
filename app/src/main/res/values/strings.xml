@@ -137,6 +137,16 @@
     <string name="create_target_reps_hint">Objectif (répétitions)</string>
     <string name="create_description_hint">Consigne d\'exécution (facultatif)</string>
     <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
+    <string name="reference_model_title">Mouvement de référence</string>
+    <string name="reference_model_help">Filmez une répétition complète. Pendant la séance, les angles de vos articulations seront comparés à ce modèle.</string>
+    <string name="reference_model_missing">Aucun modèle enregistré</string>
+    <string name="reference_model_available">Modèle enregistré · prêt pour la comparaison</string>
+    <string name="reference_model_record">Enregistrer ou remplacer le modèle</string>
+    <string name="reference_model_test">Tester le modèle</string>
+    <string name="reference_model_missing_toast">Enregistrez d’abord un mouvement de référence.</string>
+    <string name="similarity_threshold_value">Seuil de validation : %1$d %%</string>
+    <string name="similarity_threshold_default">Seuil de validation : 80 %</string>
+    <string name="similarity_threshold_description">Régler le score minimal de validation</string>
 
     <string name="exercise_no_longer_available">Cet exercice n\'est plus au catalogue.</string>
 

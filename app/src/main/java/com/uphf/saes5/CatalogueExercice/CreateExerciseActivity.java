@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputLayout;
 
 /**
@@ -26,6 +27,13 @@ import com.google.android.material.textfield.TextInputLayout;
 public class CreateExerciseActivity extends AppCompatActivity {
 
     private static final String EXTRA_EXERCISE_ID = "exercise_id";
+    private static final String STATE_DRAFT_ID = "draft_exercise_id";
+
+    private String draftExerciseId;
+    private String referenceMovementId;
+    private int similarityThreshold = Exercise.DEFAULT_SIMILARITY_THRESHOLD;
+    private TextView referenceStatus;
+    private MaterialButton compareMovementButton;
 
     /** Ouvre le formulaire vide, pour créer un exercice. */
     public static Intent newIntent(Context context) {
@@ -56,12 +64,11 @@ public class CreateExerciseActivity extends AppCompatActivity {
         ChipGroup muscleGroup = findViewById(R.id.create_muscle_group);
         ChipGroup difficultyGroup = findViewById(R.id.create_difficulty_group);
         RatingBar stars = findViewById(R.id.create_stars_bar);
-
-        findViewById(R.id.btn_record_movement)
-                .setOnClickListener(v -> HolisticLauncher.startRecordFlow(this));
-
-        findViewById(R.id.btn_compare_movement)
-                .setOnClickListener(v -> HolisticLauncher.startCompareFlow(this));
+        Slider thresholdSlider = findViewById(R.id.create_similarity_threshold);
+        TextView thresholdValue = findViewById(R.id.create_similarity_threshold_value);
+        referenceStatus = findViewById(R.id.create_reference_status);
+        MaterialButton recordMovementButton = findViewById(R.id.btn_record_movement);
+        compareMovementButton = findViewById(R.id.btn_compare_movement);
         TextView saveButton = findViewById(R.id.create_save_button);
 
         // En modification, l'exercice d'origine ; null en création.
@@ -75,6 +82,31 @@ public class CreateExerciseActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        draftExerciseId = savedInstanceState == null
+                ? (edited != null ? edited.getId() : ExerciseRepository.newId())
+                : savedInstanceState.getString(STATE_DRAFT_ID,
+                        edited != null ? edited.getId() : ExerciseRepository.newId());
+        referenceMovementId = edited != null
+                ? edited.getReferenceMovementId()
+                : draftExerciseId;
+        similarityThreshold = edited != null
+                ? edited.getSimilarityThreshold()
+                : Exercise.DEFAULT_SIMILARITY_THRESHOLD;
+
+        thresholdSlider.setValue(similarityThreshold);
+        thresholdValue.setText(getString(R.string.similarity_threshold_value,
+                similarityThreshold));
+        thresholdSlider.addOnChangeListener((slider, value, fromUser) -> {
+            similarityThreshold = Math.round(value);
+            thresholdValue.setText(getString(R.string.similarity_threshold_value,
+                    similarityThreshold));
+        });
+
+        recordMovementButton.setOnClickListener(v ->
+                HolisticLauncher.startRecording(this, referenceMovementId));
+        compareMovementButton.setOnClickListener(v ->
+                HolisticLauncher.startComparison(this, referenceMovementId));
 
         if (edited != null) {
             screenTitle.setText(R.string.edit_title);
@@ -123,7 +155,7 @@ public class CreateExerciseActivity extends AppCompatActivity {
             // En modification on garde l'identifiant : les favoris et l'exercice du jour
             // qui le référencent continuent de pointer sur le bon exercice.
             Exercise result = new Exercise(
-                    edited != null ? edited.getId() : ExerciseRepository.newId(),
+                    draftExerciseId,
                     nameValue,
                     selectedText(muscleGroup),
                     selectedText(difficultyGroup),
@@ -131,7 +163,9 @@ public class CreateExerciseActivity extends AppCompatActivity {
                     equipmentValue,
                     starsValue,
                     description.getText().toString().trim(),
-                    targetRepsValue);
+                    targetRepsValue,
+                    referenceMovementId,
+                    similarityThreshold);
 
             if (edited != null) {
                 ExerciseRepository.update(result);
@@ -144,6 +178,28 @@ public class CreateExerciseActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.create_cancel_button).setOnClickListener(v -> finish());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateReferenceAvailability();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
+        outState.putString(STATE_DRAFT_ID, draftExerciseId);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void updateReferenceAvailability() {
+        if (referenceStatus == null || compareMovementButton == null
+                || referenceMovementId == null) return;
+        boolean available = MovementStorage.exists(this, referenceMovementId);
+        referenceStatus.setText(available
+                ? R.string.reference_model_available
+                : R.string.reference_model_missing);
+        compareMovementButton.setEnabled(available);
     }
 
     /** Valeur entière saisie, ou 0 si le champ est vide ou illisible. */
