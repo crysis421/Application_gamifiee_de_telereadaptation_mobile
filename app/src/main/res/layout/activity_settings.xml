@@ -76,6 +76,63 @@
                     android:textColor="?attr/colorPrimary"
                     android:textIsSelectable="true"
                     android:textSize="14sp" />
+
+                <!-- Nom de la condition, joint à chaque séance journalisée (US-7.3). -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.SAES5.TextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/settings_condition_name_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/settings_condition_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences"
+                        android:maxLength="60" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Journal des séances (US-7.1) et son export (US-7.2). -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/card_stroke"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_log_label"
+                    android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+                <TextView
+                    android:id="@+id/settings_session_count"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settings_export_button"
+                    style="@style/Widget.SAES5.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/settings_export_button" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

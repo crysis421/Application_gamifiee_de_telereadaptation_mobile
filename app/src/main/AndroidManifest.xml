@@ -21,5 +21,16 @@
         <activity android:name=".accueil.ui.ExerciseActivity" android:exported="false" android:keepScreenOn="true" android:parentActivityName=".MainActivity" android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".accueil.ui.SummaryActivity" android:exported="false" android:parentActivityName=".MainActivity"/>
         <activity android:name=".HolisticCameraActivity" android:exported="false" />
+
+        <!-- Partage des fichiers d'export du journal (US-7.2). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

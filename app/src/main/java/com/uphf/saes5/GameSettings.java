@@ -51,11 +51,32 @@ public final class GameSettings {
 
     private static final String PREFS_NAME = "exergame_prefs";
     private static final String KEY_PREFIX = "setting_";
+    private static final String KEY_CONDITION_NAME = "condition_name";
 
     @Nullable
     private static SharedPreferences preferences;
 
     private GameSettings() {}
+
+    /**
+     * Le nom donné à la condition de test courante (US-7.3), ou une chaîne vide.
+     *
+     * <p>Il accompagne chaque séance journalisée : la combinaison de réglages est déjà dans
+     * {@link #snapshot()}, ce nom sert à la désigner dans l'analyse.</p>
+     */
+    public static String getConditionName() {
+        if (preferences == null) {
+            return "";
+        }
+        return preferences.getString(KEY_CONDITION_NAME, "");
+    }
+
+    public static void setConditionName(String name) {
+        if (preferences == null) {
+            return;
+        }
+        preferences.edit().putString(KEY_CONDITION_NAME, name == null ? "" : name.trim()).apply();
+    }
 
     /** Branche les réglages sur leur stockage. Appelé au démarrage, depuis SaeS5Application. */
     public static synchronized void init(Context context) {

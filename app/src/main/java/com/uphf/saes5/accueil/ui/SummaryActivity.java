@@ -13,6 +13,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.uphf.saes5.R;
 import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.GameSettings;
+import com.uphf.saes5.SessionEntry;
+import com.uphf.saes5.SessionLog;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
 import com.uphf.saes5.databinding.ActivitySummaryBinding;
 import com.uphf.saes5.Exercise;
@@ -75,6 +77,12 @@ public class SummaryActivity extends AppCompatActivity {
         bindSession(session);
         bindFavoriteButton();
 
+        // Une séance n'est journalisée qu'une fois : après une rotation, l'écran est recréé
+        // avec les mêmes extras et l'écrirait une seconde fois.
+        if (savedInstanceState == null) {
+            logSession(session);
+        }
+
         binding.restartButton.setOnClickListener(view -> {
             startActivity(ExerciseActivity.newIntent(this, exercise.getId()));
             finish();
@@ -107,8 +115,30 @@ public class SummaryActivity extends AppCompatActivity {
 
         binding.statFailedReps.statValue.setText(String.valueOf(session.getFailedReps()));
         binding.statFailedReps.statLabel.setText(R.string.summary_stat_failed_reps);
+    }
 
-        // TODO (US-7.1) : c'est ici que la session devra être envoyée au journal de recherche.
+    /**
+     * Enregistre la séance dans le journal de recherche (US-7.1).
+     *
+     * <p>Les réglages actifs et le nom de la condition de test accompagnent la séance : sans
+     * eux, une mesure ne peut pas être rattachée à la configuration qui l'a produite.</p>
+     *
+     * <p>Le score de similarité reste indisponible tant que le moteur de comparaison de pose
+     * n'est pas branché sur la séance : il part à {@code null} plutôt qu'à zéro, pour ne pas
+     * se confondre avec un mouvement raté lors de l'analyse.</p>
+     */
+    private void logSession(ExerciseSession session) {
+        SessionLog.record(new SessionEntry(
+                System.currentTimeMillis(),
+                exercise.getId(),
+                exercise.getName(),
+                session.getValidatedReps(),
+                session.getFailedReps(),
+                exercise.getTargetReps(),
+                session.getDurationMillis(),
+                SessionEntry.SCORE_UNAVAILABLE,
+                GameSettings.snapshot(),
+                GameSettings.getConditionName()));
     }
 
     private void bindFavoriteButton() {

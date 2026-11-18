@@ -17,5 +17,6 @@ public class SaeS5Application extends Application {
         super.onCreate();
         ExerciseRepository.init(this);
         GameSettings.init(this);
+        SessionLog.init(this);
     }
 }

@@ -144,4 +144,16 @@
     <string name="setting_statistics_help">L\'onglet de progression et la carte musculaire.</string>
     <string name="setting_sounds">Retours sonores</string>
     <string name="setting_sounds_help">Les sons de validation, d\'erreur et de fin d\'exercice.</string>
+
+    <!-- Journal des séances et export (US-7.1 / US-7.2 / US-7.3) -->
+    <string name="settings_condition_name_hint">Nom de la condition (facultatif)</string>
+    <string name="settings_log_label">Journal des séances</string>
+    <string name="settings_sessions_recorded">%1$d séance(s) enregistrée(s)</string>
+    <string name="settings_export_button">Exporter le journal</string>
+    <string name="settings_export_period">Exporter quelle période ?</string>
+    <string name="settings_export_all">Tout l\'historique</string>
+    <string name="settings_export_7_days">7 derniers jours</string>
+    <string name="settings_export_30_days">30 derniers jours</string>
+    <string name="settings_export_empty">Aucune séance enregistrée pour le moment.</string>
+    <string name="settings_export_failed">Export impossible.</string>
 </resources>
