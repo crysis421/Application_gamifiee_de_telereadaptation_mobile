@@ -66,6 +66,7 @@ public class HolisticCameraActivity extends AppCompatActivity
     private Movement reference;
 
     private State state = State.WAITING;
+    private boolean analysisUnavailable;
     private final List<float[]> frames = new ArrayList<>();
     private long lastSampleTime = 0;
     private CountDownTimer countdownTimer;
@@ -151,7 +152,7 @@ public class HolisticCameraActivity extends AppCompatActivity
 
     @SuppressLint("UnsafeOptInUsageError")
     private void bindCameraUseCases() {
-        if (cameraProvider == null) return;
+        if (cameraProvider == null || analysisUnavailable) return;
 
         CameraSelector selector =
                 new CameraSelector.Builder().requireLensFacing(cameraFacing).build();
@@ -301,7 +302,20 @@ public class HolisticCameraActivity extends AppCompatActivity
     @Override
     public void onError(@NonNull String error, int errorCode) {
         Log.e(TAG, "onError: " + error);
-        runOnUiThread(() -> Toast.makeText(this, error, Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            analysisUnavailable = true;
+            cancelTimers();
+            state = State.WAITING;
+            if (imageAnalyzer != null) {
+                imageAnalyzer.clearAnalyzer();
+                imageAnalyzer = null;
+            }
+            if (cameraProvider != null) cameraProvider.unbindAll();
+            btnAction.setVisibility(View.GONE);
+            tvStatus.setText(error);
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override

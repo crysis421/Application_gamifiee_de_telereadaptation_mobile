@@ -141,6 +141,13 @@ class HolisticLandmarkerHelper(
                 TAG,
                 "Holistic Landmarker failed to load model with error: " + e.message
             )
+        } catch (e: LinkageError) {
+            // MediaPipe does not publish every native library for every Android ABI.
+            // Report the incompatibility to the UI instead of terminating the process.
+            holisticLandmarkerHelperListener?.onError(
+                "L'analyse des mouvements n'est pas disponible sur cet appareil"
+            )
+            Log.e(TAG, "MediaPipe native library failed to load", e)
         }
     }
 
@@ -155,28 +162,30 @@ class HolisticLandmarkerHelper(
             )
         }
         val frameTime = SystemClock.uptimeMillis()
+        val imageWidth = imageProxy.width
+        val imageHeight = imageProxy.height
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
 
         // Copy out RGB bits from the frame to a bitmap buffer
         val bitmapBuffer =
             Bitmap.createBitmap(
-                imageProxy.width,
-                imageProxy.height,
+                imageWidth,
+                imageHeight,
                 Bitmap.Config.ARGB_8888
             )
         imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
-        imageProxy.close()
 
         val matrix = Matrix().apply {
             // Rotate the frame received from the camera to be in the same direction as it'll be shown
-            postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+            postRotate(rotationDegrees.toFloat())
 
             // flip image if user uses front camera
             if (isFrontCamera) {
                 postScale(
                     -1f,
                     1f,
-                    imageProxy.width.toFloat(),
-                    imageProxy.height.toFloat()
+                    imageWidth.toFloat(),
+                    imageHeight.toFloat()
                 )
             }
         }

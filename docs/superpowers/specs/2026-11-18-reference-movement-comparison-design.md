@@ -85,4 +85,3 @@ de l'activité et libère MediaPipe, l'analyseur et l'exécuteur.
 - Tests de sérialisation et de compatibilité des anciens exercices.
 - Tests du score moyen transmis à la séance et au journal.
 - Compilation de l'APK et vérification manuelle sur émulateur avec et sans modèle enregistré.
-

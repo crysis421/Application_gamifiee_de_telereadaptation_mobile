@@ -73,6 +73,24 @@ public class MovementComparisonEngineTest {
     }
 
     @Test
+    public void addFrame_doesNotRevalidateWhileUserStaysInTheEndPose() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(reference(), 80);
+        engine.addFrame(standingPose());
+        assertTrue(engine.addFrame(bentPose()).isRepetitionValidated());
+
+        MovementComparisonResult heldPose = null;
+        for (int i = 0; i < 6; i++) {
+            heldPose = engine.addFrame(bentPose());
+            assertFalse(heldPose.isRepetitionValidated());
+        }
+        assertFalse(heldPose.isReady());
+
+        // Quitter réellement la pose finale réarme le moteur pour la répétition suivante.
+        assertFalse(engine.addFrame(standingPose()).isRepetitionValidated());
+        assertTrue(engine.addFrame(bentPose()).isRepetitionValidated());
+    }
+
+    @Test
     public void addFrame_ignoresMalformedPoseWithoutAdvancingSequence() {
         MovementComparisonEngine engine = new MovementComparisonEngine(reference(), 80);
 

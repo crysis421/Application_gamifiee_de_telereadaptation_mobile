@@ -38,6 +38,10 @@ import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.databinding.ActivityExerciseBinding;
 import com.uphf.saes5.Exercise;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Écran d'exécution d'un exercice.
  *
@@ -59,6 +63,9 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private PoseCameraController cameraController;
     private long lastPoseSampleRealtime;
     private boolean cameraPermissionRefused;
+    private volatile boolean comparisonActive;
+    private final ExecutorService comparisonExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean comparisonInFlight = new AtomicBoolean();
 
     private int validatedReps;
     private int failedReps;
@@ -151,6 +158,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     @Override
     protected void onDestroy() {
         stopCameraComparison();
+        comparisonExecutor.shutdownNow();
         handler.removeCallbacksAndMessages(null);
         if (soundFeedback != null) {
             soundFeedback.release();
@@ -188,12 +196,15 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     private void startCameraComparison() {
         if (comparisonEngine == null || cameraController != null || isFinishing()) return;
+        comparisonActive = true;
+        comparisonExecutor.execute(comparisonEngine::reset);
         cameraController = new PoseCameraController(
                 this, binding.cameraPreview, binding.poseOverlay, this);
         cameraController.start();
     }
 
     private void stopCameraComparison() {
+        comparisonActive = false;
         if (cameraController == null) return;
         cameraController.stop();
         cameraController = null;
@@ -212,21 +223,34 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     @Override
     public void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle resultBundle) {
         long now = SystemClock.elapsedRealtime();
-        if (now - lastPoseSampleRealtime < POSE_SAMPLE_INTERVAL_MILLIS) return;
+        if (!comparisonActive || now - lastPoseSampleRealtime < POSE_SAMPLE_INTERVAL_MILLIS
+                || !comparisonInFlight.compareAndSet(false, true)) return;
 
         float[] frame = MovementMath.normalize(
                 resultBundle.getResult().poseLandmarks(),
                 resultBundle.getInputImageWidth(),
                 resultBundle.getInputImageHeight());
         if (frame == null || comparisonEngine == null) {
+            comparisonInFlight.set(false);
             onEmpty();
             return;
         }
         lastPoseSampleRealtime = now;
 
-        MovementComparisonResult result = comparisonEngine.addFrame(frame);
+        comparisonExecutor.execute(() -> {
+            MovementComparisonResult result = comparisonEngine.addFrame(frame);
+            runOnUiThread(() -> applyComparisonResult(result));
+        });
+    }
+
+    private void applyComparisonResult(MovementComparisonResult result) {
+        comparisonInFlight.set(false);
+        if (!comparisonActive || isFinishing() || isDestroyed()) return;
+        int displayedScore = result.isReady()
+                ? result.getMovementScore()
+                : result.getLiveScore();
         binding.similarityScore.setText(
-                getString(R.string.exercise_similarity_score, result.getLiveScore()));
+                getString(R.string.exercise_similarity_score, displayedScore));
         if (!result.isReady()) {
             showComparisonStatus(R.string.exercise_similarity_analyzing,
                     R.color.colorOnSurfaceVariant);

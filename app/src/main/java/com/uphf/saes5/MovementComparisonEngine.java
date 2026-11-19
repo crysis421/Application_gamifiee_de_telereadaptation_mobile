@@ -1,7 +1,6 @@
 package com.uphf.saes5;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,57 +8,69 @@ import java.util.List;
  * Cette classe ne dépend pas d'Android afin que son comportement temps réel reste testable.
  */
 public final class MovementComparisonEngine {
-    private final List<float[]> referenceFrames = new ArrayList<>();
-    private final List<float[]> attemptFrames = new ArrayList<>();
+    private static final int REARM_DEPARTURE_SCORE = 95;
+
+    private final List<float[]> referenceAngles = new ArrayList<>();
+    private final List<float[]> attemptAngles = new ArrayList<>();
     private final int threshold;
+    private boolean armed = true;
 
     public MovementComparisonEngine(List<float[]> referenceFrames, int threshold) {
         if (referenceFrames != null) {
             for (float[] frame : referenceFrames) {
-                if (MovementMath.angleFeatures(frame) != null) {
-                    this.referenceFrames.add(frame.clone());
-                }
+                float[] angles = MovementMath.angleFeatures(frame);
+                if (angles != null) this.referenceAngles.add(angles);
             }
         }
         this.threshold = Math.max(1, Math.min(100, threshold));
     }
 
     public MovementComparisonResult addFrame(float[] frame) {
-        if (referenceFrames.isEmpty() || MovementMath.angleFeatures(frame) == null) {
+        float[] angles = MovementMath.angleFeatures(frame);
+        if (referenceAngles.isEmpty() || angles == null) {
             return new MovementComparisonResult(0, 0, false, false, false);
         }
 
-        int liveScore = bestReferencePostureScore(frame);
-        attemptFrames.add(frame.clone());
-        while (attemptFrames.size() > referenceFrames.size()) {
-            attemptFrames.remove(0);
+        int liveScore = bestReferencePostureScore(angles);
+        if (!armed) {
+            float[] endPose = referenceAngles.get(referenceAngles.size() - 1);
+            int endPoseScore = MovementMath.angleFeatureScore(endPose, angles);
+            if (endPoseScore >= REARM_DEPARTURE_SCORE) {
+                return new MovementComparisonResult(liveScore, 0, false, false, false);
+            }
+            armed = true;
+            attemptAngles.clear();
         }
 
-        if (attemptFrames.size() < referenceFrames.size()) {
+        attemptAngles.add(angles);
+        while (attemptAngles.size() > referenceAngles.size()) {
+            attemptAngles.remove(0);
+        }
+
+        if (attemptAngles.size() < referenceAngles.size()) {
             return new MovementComparisonResult(liveScore, 0, false, false, false);
         }
 
-        int movementScore = MovementMath.angleScore(referenceFrames, attemptFrames);
+        int movementScore = MovementMath.angleFeatureSequenceScore(
+                referenceAngles, attemptAngles);
         boolean valid = movementScore >= threshold;
         if (valid) {
-            // La prochaine image commence une nouvelle répétition et ne peut donc pas
-            // réémettre immédiatement la validation de celle qui vient de se terminer.
-            attemptFrames.clear();
+            armed = false;
+            attemptAngles.clear();
         }
         return new MovementComparisonResult(liveScore, movementScore, true, valid, valid);
     }
 
     public void reset() {
-        attemptFrames.clear();
+        attemptAngles.clear();
+        armed = true;
     }
 
-    private int bestReferencePostureScore(float[] frame) {
+    private int bestReferencePostureScore(float[] angles) {
         int best = 0;
-        List<float[]> attempt = Collections.singletonList(frame);
-        for (float[] referenceFrame : referenceFrames) {
-            int score = MovementMath.angleScore(
-                    Collections.singletonList(referenceFrame), attempt);
-            best = Math.max(best, score);
+        for (float[] referenceFrameAngles : referenceAngles) {
+            best = Math.max(best,
+                    MovementMath.angleFeatureScore(referenceFrameAngles, angles));
         }
         return best;
     }

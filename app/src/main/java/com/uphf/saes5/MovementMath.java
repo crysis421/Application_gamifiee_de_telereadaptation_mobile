@@ -135,11 +135,7 @@ public final class MovementMath {
     public static int angleScore(List<float[]> reference, List<float[]> attempt) {
         List<float[]> referenceAngles = usableAngleFrames(reference);
         List<float[]> attemptAngles = usableAngleFrames(attempt);
-        if (referenceAngles.isEmpty() || attemptAngles.isEmpty()) return 0;
-
-        float averageDifference = averageAngleDtwDifference(referenceAngles, attemptAngles);
-        float score = 100f * (1f - averageDifference / 180f);
-        return Math.round(Math.max(0f, Math.min(100f, score)));
+        return angleFeatureSequenceScore(referenceAngles, attemptAngles);
     }
 
     private static List<float[]> usableAngleFrames(List<float[]> frames) {
@@ -160,32 +156,62 @@ public final class MovementMath {
         return sum / JOINT_ANGLES;
     }
 
+    static int angleFeatureScore(float[] referenceAngles, float[] attemptAngles) {
+        if (referenceAngles == null || attemptAngles == null
+                || referenceAngles.length < JOINT_ANGLES
+                || attemptAngles.length < JOINT_ANGLES) return 0;
+        return scoreFromAngleDifference(angleFrameDifference(referenceAngles, attemptAngles));
+    }
+
+    static int angleFeatureSequenceScore(List<float[]> referenceAngles,
+                                         List<float[]> attemptAngles) {
+        if (referenceAngles == null || referenceAngles.isEmpty()
+                || attemptAngles == null || attemptAngles.isEmpty()) return 0;
+        return scoreFromAngleDifference(
+                averageAngleDtwDifference(referenceAngles, attemptAngles));
+    }
+
+    private static int scoreFromAngleDifference(float averageDifference) {
+        float score = 100f * (1f - averageDifference / 180f);
+        return Math.round(Math.max(0f, Math.min(100f, score)));
+    }
+
     private static float averageAngleDtwDifference(List<float[]> reference,
                                                    List<float[]> attempt) {
         int n = reference.size();
         int m = attempt.size();
-        float[][] cost = new float[n + 1][m + 1];
-        int[][] pathLength = new int[n + 1][m + 1];
-        for (float[] row : cost) Arrays.fill(row, Float.POSITIVE_INFINITY);
-        cost[0][0] = 0f;
+        float[] previousCost = new float[m + 1];
+        float[] currentCost = new float[m + 1];
+        int[] previousLength = new int[m + 1];
+        int[] currentLength = new int[m + 1];
+        Arrays.fill(previousCost, Float.POSITIVE_INFINITY);
+        previousCost[0] = 0f;
 
         for (int i = 1; i <= n; i++) {
+            Arrays.fill(currentCost, Float.POSITIVE_INFINITY);
+            Arrays.fill(currentLength, 0);
             for (int j = 1; j <= m; j++) {
-                float best = cost[i - 1][j - 1];
-                int bestLength = pathLength[i - 1][j - 1];
-                if (cost[i - 1][j] < best) {
-                    best = cost[i - 1][j];
-                    bestLength = pathLength[i - 1][j];
+                float best = previousCost[j - 1];
+                int bestLength = previousLength[j - 1];
+                if (previousCost[j] < best) {
+                    best = previousCost[j];
+                    bestLength = previousLength[j];
                 }
-                if (cost[i][j - 1] < best) {
-                    best = cost[i][j - 1];
-                    bestLength = pathLength[i][j - 1];
+                if (currentCost[j - 1] < best) {
+                    best = currentCost[j - 1];
+                    bestLength = currentLength[j - 1];
                 }
-                cost[i][j] = best + angleFrameDifference(
+                currentCost[j] = best + angleFrameDifference(
                         reference.get(i - 1), attempt.get(j - 1));
-                pathLength[i][j] = bestLength + 1;
+                currentLength[j] = bestLength + 1;
             }
+            float[] costSwap = previousCost;
+            previousCost = currentCost;
+            currentCost = costSwap;
+            int[] lengthSwap = previousLength;
+            previousLength = currentLength;
+            currentLength = lengthSwap;
         }
-        return cost[n][m] / pathLength[n][m];
+        return previousCost[m] / previousLength[m];
     }
 }

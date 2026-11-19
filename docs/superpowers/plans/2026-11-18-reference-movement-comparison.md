@@ -148,4 +148,3 @@
 - [ ] **Step 2: Run `lintDebug` and distinguish new findings from the known catalogue tint baseline error.**
 - [ ] **Step 3: Install the debug APK on the emulator and verify permission refusal, missing reference fallback, reference recording and live valid/invalid feedback.**
 - [ ] **Step 4: Confirm `git diff --check` and inspect the branch diff for unrelated files.**
-

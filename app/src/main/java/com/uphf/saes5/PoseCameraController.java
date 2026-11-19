@@ -55,16 +55,24 @@ public final class PoseCameraController
         if (started) return;
         started = true;
         backgroundExecutor = Executors.newSingleThreadExecutor();
-        backgroundExecutor.execute(() -> landmarkerHelper = new HolisticLandmarkerHelper(
-                HolisticLandmarkerHelper.DEFAULT_FACE_DETECTION_CONFIDENCE,
-                HolisticLandmarkerHelper.DEFAULT_FACE_PRESENCE_CONFIDENCE,
-                HolisticLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
-                HolisticLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
-                HolisticLandmarkerHelper.DEFAULT_HAND_LANDMARKS_CONFIDENCE,
-                HolisticLandmarkerHelper.DELEGATE_CPU,
-                RunningMode.LIVE_STREAM,
-                activity,
-                this));
+        backgroundExecutor.execute(() -> {
+            try {
+                landmarkerHelper = new HolisticLandmarkerHelper(
+                        HolisticLandmarkerHelper.DEFAULT_FACE_DETECTION_CONFIDENCE,
+                        HolisticLandmarkerHelper.DEFAULT_FACE_PRESENCE_CONFIDENCE,
+                        HolisticLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
+                        HolisticLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
+                        HolisticLandmarkerHelper.DEFAULT_HAND_LANDMARKS_CONFIDENCE,
+                        HolisticLandmarkerHelper.DELEGATE_CPU,
+                        RunningMode.LIVE_STREAM,
+                        activity,
+                        this);
+            } catch (LinkageError error) {
+                // Last-resort guard if MediaPipe fails before its helper can report the error.
+                Log.e(TAG, "MediaPipe native library failed to load", error);
+                onError("Movement analysis unavailable", 0);
+            }
+        });
         previewView.post(this::setUpCamera);
     }
 
