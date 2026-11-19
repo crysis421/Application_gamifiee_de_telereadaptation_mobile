@@ -33,6 +33,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -40,8 +43,22 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
+    implementation(libs.recyclerview)
+    implementation("com.google.code.gson:gson:2.10.1")
+    val cameraxVersion = "1.3.4"
+
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
+    implementation("androidx.fragment:fragment-ktx:1.8.3")
+    implementation("com.google.guava:guava:31.1-android")
     testImplementation(libs.junit)
-    testImplementation(libs.arch.core.testing)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.json:json:20240303")
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
 }

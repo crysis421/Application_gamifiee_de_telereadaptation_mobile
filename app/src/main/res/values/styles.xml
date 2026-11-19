@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Typographies -->
+    <style name="TextAppearance.SAES5.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.SAES5.Display" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="android:fontFamily">sans-serif-black</item>
+    </style>
+
+    <style name="TextAppearance.SAES5.Label" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- Boutons -->
+    <style name="Widget.SAES5.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <style name="Widget.SAES5.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">14dp</item>
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- Boutons du sélecteur segmenté (statistiques) -->
+    <style name="Widget.SAES5.Button.Segment" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="backgroundTint">@color/chip_bg</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- Chips de sélection -->
+    <style name="Widget.SAES5.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/chip_bg</item>
+        <item name="chipStrokeColor">@color/chip_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="checkedIconVisible">false</item>
+    </style>
+
+    <!-- Champs de saisie -->
+    <style name="Widget.SAES5.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+    </style>
+</resources>

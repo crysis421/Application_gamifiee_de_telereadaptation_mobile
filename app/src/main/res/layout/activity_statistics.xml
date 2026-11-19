@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
     <androidx.core.widget.NestedScrollView
@@ -118,7 +118,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/statistics_mode_muscles"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/Widget.SAES5.Button.Segment"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -126,7 +126,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/statistics_mode_exercises"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/Widget.SAES5.Button.Segment"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -168,7 +168,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        app:itemIconTint="?attr/colorPrimary"
-        app:itemTextColor="?attr/colorOnSurface"
+        app:itemIconTint="@color/bottom_nav_item"
+        app:itemTextColor="@color/bottom_nav_item"
         app:menu="@menu/bottom_nav_menu" />
 </LinearLayout>

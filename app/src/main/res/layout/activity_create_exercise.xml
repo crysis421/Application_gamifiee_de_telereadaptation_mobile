@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/screen_margin">
+
+        <TextView
+            android:id="@+id/create_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_title"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textColor="?attr/colorOnSurface" />
+
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:background="?attr/colorPrimary" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/create_name_layout"
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:hint="@string/name_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/muscle_label"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/create_muscle_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:chipSpacingHorizontal="8dp"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_legs"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/muscle_legs" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_chest"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/muscle_chest" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_arms"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/muscle_arms" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_core"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/muscle_core" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_back"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/muscle_back" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/difficulty_label"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/create_difficulty_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:chipSpacingHorizontal="8dp"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_easy"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/difficulty_easy" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_medium"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/difficulty_medium" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_create_hard"
+                style="@style/Widget.SAES5.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/difficulty_hard" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/create_duration_layout"
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:hint="@string/create_duration_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_duration_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="4" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_equipment_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_equipment_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!--
+            Objectif de répétitions : repris par la séance et par la carte « Exercice du jour ».
+        -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/create_target_reps_layout"
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_target_reps_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_target_reps_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!--
+            Consigne d'exécution, facultative : affichée dans le détail de l'exercice du jour,
+            masquée quand elle est vide.
+        -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.SAES5.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_description_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/create_description_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/stars_label"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <RatingBar
+            android:id="@+id/create_stars_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:progressBackgroundTint="@color/colorOutline"
+            android:progressTint="@color/colorPrimary"
+            android:rating="3"
+            android:secondaryProgressTint="@color/colorPrimary"
+            android:stepSize="1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/reference_model_title"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/reference_model_help"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:id="@+id/create_reference_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/reference_model_missing"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_record_movement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/reference_model_record" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_compare_movement"
+            style="@style/Widget.SAES5.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:enabled="false"
+            android:text="@string/reference_model_test" />
+
+        <TextView
+            android:id="@+id/create_similarity_threshold_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/similarity_threshold_default"
+            android:textAppearance="@style/TextAppearance.SAES5.Label" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/create_similarity_threshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/similarity_threshold_description"
+            android:stepSize="1"
+            android:value="80"
+            android:valueFrom="1"
+            android:valueTo="100" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/create_save_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/save_exercise" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/create_cancel_button"
+                style="@style/Widget.SAES5.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/cancel" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

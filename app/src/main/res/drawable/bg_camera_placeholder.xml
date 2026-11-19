@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Emplacement réservé à l'aperçu caméra + squelette (US-1.1 / US-3.2). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorSurfaceVariant" />
+    <stroke
+        android:width="2dp"
+        android:color="?attr/colorOutline"
+        android:dashWidth="8dp"
+        android:dashGap="6dp" />
+    <corners android:radius="20dp" />
+</shape>

@@ -1,0 +1,237 @@
+package com.uphf.saes5;
+
+import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Scanner;
+
+/**
+ * Journal des séances d'exercice (US-7.1) et export (US-7.2).
+ *
+ * <p>Une séance terminée est ajoutée au fichier {@code sessions.json}, dans le stockage privé
+ * de l'application : rien n'est publié, aucune permission n'est nécessaire, et le fichier
+ * disparaît avec l'application.</p>
+ *
+ * <p>Seules les données listées par {@link SessionEntry} sont conservées. Aucune image ni
+ * vidéo n'est écrite, conformément à la contrainte de l'US.</p>
+ */
+public final class SessionLog {
+
+    private static final String TAG = "SessionLog";
+    private static final String FILE_NAME = "sessions.json";
+
+    private static final String F_TIMESTAMP = "timestamp";
+    private static final String F_TIMESTAMP_MILLIS = "timestampMillis";
+    private static final String F_EXERCISE_ID = "exerciseId";
+    private static final String F_EXERCISE_NAME = "exerciseName";
+    private static final String F_VALIDATED = "validatedReps";
+    private static final String F_FAILED = "failedReps";
+    private static final String F_TARGET = "targetReps";
+    private static final String F_SUCCESS_RATE = "successRatePercent";
+    private static final String F_GOAL_REACHED = "goalReached";
+    private static final String F_DURATION = "durationMillis";
+    private static final String F_SCORE = "similarityScore";
+    private static final String F_SETTINGS = "activeSettings";
+    private static final String F_CONDITION = "conditionName";
+
+    /** Horodatage lisible, en plus des millisecondes, pour qui ouvre le fichier à la main. */
+    private static final SimpleDateFormat READABLE =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+
+    @Nullable
+    private static File file;
+
+    private SessionLog() {}
+
+    /** Branche le journal sur son fichier. Appelé au démarrage, depuis SaeS5Application. */
+    public static synchronized void init(Context context) {
+        file = new File(context.getApplicationContext().getFilesDir(), FILE_NAME);
+    }
+
+    /**
+     * Ajoute une séance au journal.
+     *
+     * <p>Sans effet tant que {@link #init(Context)} n'a pas été appelé : journaliser ne doit
+     * jamais faire échouer une fin de séance.</p>
+     */
+    public static synchronized void record(@NonNull SessionEntry entry) {
+        if (file == null) {
+            return;
+        }
+        List<SessionEntry> all = readAll();
+        all.add(entry);
+        write(all);
+    }
+
+    /** Toutes les séances journalisées, de la plus ancienne à la plus récente. */
+    public static synchronized List<SessionEntry> readAll() {
+        List<SessionEntry> result = new ArrayList<>();
+        if (file == null || !file.exists()) {
+            return result;
+        }
+        String content = read();
+        if (content.isEmpty()) {
+            return result;
+        }
+        try {
+            JSONArray array = new JSONArray(content);
+            for (int i = 0; i < array.length(); i++) {
+                result.add(fromJson(array.getJSONObject(i)));
+            }
+        } catch (JSONException e) {
+            // Journal illisible : on ne le vide pas, on refuse juste de l'interpréter.
+            Log.w(TAG, "Journal illisible, il est ignoré", e);
+            return new ArrayList<>();
+        }
+        return result;
+    }
+
+    /**
+     * Le journal au format JSON, limité à une période (US-7.2).
+     *
+     * @param fromMillis début inclus, ou 0 pour ne pas borner
+     * @param toMillis   fin incluse, ou {@link Long#MAX_VALUE} pour ne pas borner
+     */
+    public static synchronized String exportJson(long fromMillis, long toMillis) {
+        return toJsonArray(filterByPeriod(readAll(), fromMillis, toMillis));
+    }
+
+    /**
+     * Ne garde que les séances comprises dans la période.
+     *
+     * <p>Séparé de la lecture du fichier pour être vérifiable en test unitaire.</p>
+     */
+    @VisibleForTesting
+    static List<SessionEntry> filterByPeriod(List<SessionEntry> entries, long fromMillis, long toMillis) {
+        List<SessionEntry> result = new ArrayList<>();
+        for (SessionEntry entry : entries) {
+            long at = entry.getTimestampMillis();
+            if (at >= fromMillis && at <= toMillis) {
+                result.add(entry);
+            }
+        }
+        return result;
+    }
+
+    /** Écrit l'export dans un fichier partageable, et le renvoie. */
+    @Nullable
+    public static synchronized File writeExport(Context context, long fromMillis, long toMillis) {
+        File exports = new File(context.getCacheDir(), "exports");
+        if (!exports.exists() && !exports.mkdirs()) {
+            Log.w(TAG, "Dossier d'export impossible à créer");
+            return null;
+        }
+        File target = new File(exports, "sessions-" + READABLE.format(new Date())
+                .replace(':', '-') + ".json");
+        try (FileOutputStream out = new FileOutputStream(target)) {
+            out.write(exportJson(fromMillis, toMillis).getBytes(StandardCharsets.UTF_8));
+            return target;
+        } catch (IOException e) {
+            Log.w(TAG, "Export impossible", e);
+            return null;
+        }
+    }
+
+    /** Nombre de séances journalisées. */
+    public static synchronized int count() {
+        return readAll().size();
+    }
+
+    // --- sérialisation ----------------------------------------------------
+
+    private static String toJsonArray(List<SessionEntry> entries) {
+        JSONArray array = new JSONArray();
+        for (SessionEntry entry : entries) {
+            JSONObject object = toJson(entry);
+            if (object != null) {
+                array.put(object);
+            }
+        }
+        try {
+            // Indenté : le fichier doit rester lisible tel quel par le chercheur.
+            return array.toString(2);
+        } catch (JSONException e) {
+            Log.w(TAG, "Indentation impossible, écriture sur une ligne", e);
+            return array.toString();
+        }
+    }
+
+    @Nullable
+    private static JSONObject toJson(SessionEntry entry) {
+        JSONObject object = new JSONObject();
+        try {
+            object.put(F_TIMESTAMP, READABLE.format(new Date(entry.getTimestampMillis())));
+            object.put(F_TIMESTAMP_MILLIS, entry.getTimestampMillis());
+            object.put(F_EXERCISE_ID, entry.getExerciseId());
+            object.put(F_EXERCISE_NAME, entry.getExerciseName());
+            object.put(F_VALIDATED, entry.getValidatedReps());
+            object.put(F_FAILED, entry.getFailedReps());
+            object.put(F_TARGET, entry.getTargetReps());
+            object.put(F_SUCCESS_RATE, entry.getSuccessRate());
+            object.put(F_GOAL_REACHED, entry.isGoalReached());
+            object.put(F_DURATION, entry.getDurationMillis());
+            // Null explicite plutôt que 0 : un score absent ne doit pas se confondre avec un
+            // score nul lors de l'analyse.
+            object.put(F_SCORE, entry.hasSimilarityScore() ? entry.getSimilarityScore() : JSONObject.NULL);
+            object.put(F_SETTINGS, entry.getSettings());
+            object.put(F_CONDITION, entry.getConditionName());
+            return object;
+        } catch (JSONException e) {
+            Log.w(TAG, "Séance non journalisée", e);
+            return null;
+        }
+    }
+
+    private static SessionEntry fromJson(JSONObject object) throws JSONException {
+        return new SessionEntry(
+                object.optLong(F_TIMESTAMP_MILLIS, 0L),
+                object.optString(F_EXERCISE_ID, ""),
+                object.optString(F_EXERCISE_NAME, ""),
+                object.optInt(F_VALIDATED, 0),
+                object.optInt(F_FAILED, 0),
+                object.optInt(F_TARGET, 0),
+                object.optLong(F_DURATION, 0L),
+                object.isNull(F_SCORE)
+                        ? SessionEntry.SCORE_UNAVAILABLE
+                        : object.optInt(F_SCORE, SessionEntry.SCORE_UNAVAILABLE),
+                object.optString(F_SETTINGS, ""),
+                object.optString(F_CONDITION, ""));
+    }
+
+    // --- fichier ----------------------------------------------------------
+
+    private static String read() {
+        try (Scanner scanner = new Scanner(file, StandardCharsets.UTF_8.name())) {
+            scanner.useDelimiter("\\A");
+            return scanner.hasNext() ? scanner.next() : "";
+        } catch (IOException e) {
+            Log.w(TAG, "Lecture du journal impossible", e);
+            return "";
+        }
+    }
+
+    private static void write(List<SessionEntry> entries) {
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(toJsonArray(entries).getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            Log.w(TAG, "Écriture du journal impossible", e);
+        }
+    }
+}

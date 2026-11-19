@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">SAE S5</string>
-    <string name="open_statistics">Ouvrir les statistiques</string>
-    <string name="nav_home">Accueil</string>
     <string name="muscle_body_description">Carte interactive de la progression musculaire</string>
     <string name="muscle_accessibility_score">%1$s : %2$d %%</string>
     <string name="muscle_accessibility_no_data">%1$s : aucune donnée</string>
@@ -12,6 +10,17 @@
     <string name="body_front_label">FACE</string>
     <string name="body_back_label">DOS</string>
     <string name="nav_statistics">Statistiques</string>
+    <string name="nav_profile">Profil</string>
+    <string name="profile_title">Mon profil</string>
+    <string name="profile_subtitle">Suivez vos progrès et vos réussites.</string>
+    <string name="profile_star_icon">★</string>
+    <string name="profile_stars_count">%1$d</string>
+    <string name="profile_stars_label">étoiles gagnées</string>
+    <string name="profile_stars_help">Une étoile par séance parfaite avec un score de 90 ou plus.</string>
+    <string name="profile_muscles_heading">Rangs par muscle</string>
+    <string name="profile_history_heading">Historique des séances</string>
+    <string name="profile_history_empty">Aucune séance pour le moment.</string>
+    <string name="profile_history_details">%1$s • %2$s</string>
     <string name="statistics_title">Statistiques d’exercices</string>
     <string name="statistics_subtitle">Visualisez vos progrès et les zones à renforcer.</string>
     <string name="statistics_global_label">Exercices parfaitement réalisés</string>
@@ -33,4 +42,154 @@
         <item quantity="other">%1$d séances</item>
     </plurals>
     <string name="statistics_exercise_details">%1$s • %2$d %% parfaites</string>
+    <string name="nav_home">Accueil</string>
+    <string name="nav_catalog">Catalogue</string>
+    <string name="catalog_title">Catalogue d’exercices</string>
+    <string name="apply_filters">Appliquer</string>
+    <string name="open_filters">Ouvrir les filtres</string>
+    <string name="close_filters">Fermer les filtres</string>
+    <string name="reset_filters">Réinitialiser</string>
+    <string name="duration_hint">Durée max. (min)</string>
+    <string name="equipment_hint">Matériel</string>
+    <string name="start_exercise">Démarrer</string>
+    <string name="create_exercise">Créer un exercice</string>
+    <string name="create_title">Nouvel exercice</string>
+    <string name="name_hint">Nom de l\'exercice</string>
+    <string name="muscle_label">Groupe musculaire</string>
+    <string name="difficulty_label">Difficulté</string>
+    <string name="create_duration_hint">Durée (minutes)</string>
+    <string name="create_equipment_hint">Matériel (vide = Aucun)</string>
+    <string name="stars_label">Note</string>
+    <string name="save_exercise">Enregistrer</string>
+    <string name="cancel">Annuler</string>
+    <string name="exercise_created">Exercice créé</string>
+    <string name="error_name_required">Le nom est obligatoire</string>
+    <string name="error_duration_invalid">Entre une durée supérieure à 0</string>
+    <string name="home_subtitle">Télé-réadaptation gamifiée</string>
+    <string name="home_statistics_subtitle">Progression et carte musculaire</string>
+    <string name="home_catalog_subtitle">Parcourir et créer des exercices</string>
+    <string name="filter_all_muscles">Tous</string>
+    <string name="filter_all_difficulties">Toutes</string>
+    <string name="muscle_legs">Jambes</string>
+    <string name="muscle_chest">Pectoraux</string>
+    <string name="muscle_arms">Bras</string>
+    <string name="muscle_core">Tronc</string>
+    <string name="muscle_back">Dos</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="difficulty_medium">Moyen</string>
+    <string name="difficulty_hard">Difficile</string>
+
+    <!-- Accueil : carte « Exercice du jour » (US-4.2) -->
+    <string name="daily_exercise_label">Exercice du jour</string>
+    <string name="daily_exercise_done_today">Déjà réalisé aujourd\'hui</string>
+    <string name="daily_exercise_goal">Objectif : %1$d répétitions</string>
+    <string name="daily_exercise_start">Commencer l\'exercice</string>
+    <string name="daily_exercise_restart">Refaire l\'exercice</string>
+    <string name="daily_exercise_empty">Aucun exercice disponible pour le moment.</string>
+    <string name="daily_exercise_expand">Voir le détail</string>
+    <string name="daily_exercise_collapse">Réduire</string>
+
+    <!-- Métadonnées d\'exercice : les libellés de difficulté sont définis plus haut -->
+    <string name="exercise_meta">%1$s · %2$s · %3$s</string>
+    <string name="duration_minutes">%1$d min</string>
+
+    <!-- Écran d\'exécution d\'un exercice -->
+    <string name="exercise_camera_preview_description">Aperçu caméra avec squelette de posture</string>
+    <string name="exercise_similarity_unavailable">— %</string>
+    <string name="exercise_similarity_score">%1$d %%</string>
+    <string name="exercise_similarity_waiting">Placez votre corps entier dans le cadre</string>
+    <string name="exercise_similarity_analyzing">Mouvement en cours…</string>
+    <string name="exercise_similarity_valid">Mouvement validé</string>
+    <string name="exercise_similarity_correct">Mouvement à corriger</string>
+    <string name="exercise_pose_not_detected">Corps non détecté</string>
+    <string name="exercise_reference_ready">Comparaison active · seuil %1$d %%</string>
+    <string name="exercise_reference_missing_fallback">Aucun modèle enregistré · validation manuelle</string>
+    <string name="exercise_camera_permission_required">Caméra refusée · validation manuelle</string>
+    <string name="exercise_camera_error_fallback">Caméra indisponible · validation manuelle</string>
+    <string name="exercise_rep_counter">%1$d / %2$d</string>
+    <string name="exercise_reps_label">Répétitions</string>
+    <string name="exercise_validate_rep">Valider la répétition</string>
+    <string name="exercise_fail_rep">Répétition ratée</string>
+    <string name="exercise_finish">Terminer l\'exercice</string>
+    <string name="exercise_feedback_valid">Répétition validée</string>
+    <string name="exercise_feedback_failed">Mouvement à corriger</string>
+    <string name="exercise_quit_title">Abandonner l\'exercice ?</string>
+    <string name="exercise_quit_message">Ta progression sur cet exercice ne sera pas enregistrée.</string>
+    <string name="exercise_quit_confirm">Abandonner</string>
+    <string name="exercise_quit_cancel">Continuer</string>
+
+    <!-- Récapitulatif de fin d\'exercice -->
+    <string name="summary_title">Exercice terminé !</string>
+    <string name="summary_goal_reached">Objectif atteint</string>
+    <string name="summary_goal_missed">Objectif : %1$d répétitions</string>
+    <string name="summary_stat_reps">Répétitions validées</string>
+    <string name="summary_stat_success_rate">Réussite</string>
+    <string name="summary_stat_total_time">Temps total</string>
+    <string name="summary_stat_average_time">Temps moyen / rép.</string>
+    <string name="summary_stat_failed_reps">Mouvements à corriger</string>
+    <string name="summary_stat_similarity">Similarité moyenne</string>
+    <string name="summary_similarity_unavailable">—</string>
+    <string name="summary_percent">%1$d %%</string>
+    <string name="summary_add_favorite">Ajouter aux favoris</string>
+    <string name="summary_remove_favorite">Retirer des favoris</string>
+    <string name="summary_favorite_added">Ajouté à tes favoris</string>
+    <string name="summary_favorite_removed">Retiré de tes favoris</string>
+    <string name="summary_restart">Recommencer</string>
+    <string name="summary_back_home">Retour à l\'accueil</string>
+
+    <!-- Catalogue : modification et suppression d'un exercice -->
+    <string name="edit_title">Modifier l\'exercice</string>
+    <string name="edit_exercise">Modifier</string>
+    <string name="delete_exercise">Supprimer</string>
+    <string name="save_changes">Enregistrer les modifications</string>
+    <string name="exercise_options">Options de %1$s</string>
+    <string name="exercise_updated">Exercice modifié</string>
+    <string name="exercise_deleted">Exercice supprimé</string>
+    <string name="delete_exercise_title">Supprimer cet exercice ?</string>
+    <string name="delete_exercise_message">« %1$s » sera retiré du catalogue.</string>
+    <string name="create_target_reps_hint">Objectif (répétitions)</string>
+    <string name="create_description_hint">Consigne d\'exécution (facultatif)</string>
+    <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
+    <string name="reference_model_title">Mouvement de référence</string>
+    <string name="reference_model_help">Filmez une répétition complète. Pendant la séance, les angles de vos articulations seront comparés à ce modèle.</string>
+    <string name="reference_model_missing">Aucun modèle enregistré</string>
+    <string name="reference_model_available">Modèle enregistré · prêt pour la comparaison</string>
+    <string name="reference_model_record">Enregistrer ou remplacer le modèle</string>
+    <string name="reference_model_test">Tester le modèle</string>
+    <string name="reference_model_missing_toast">Enregistrez d’abord un mouvement de référence.</string>
+    <string name="similarity_threshold_value">Seuil de validation : %1$d %%</string>
+    <string name="similarity_threshold_default">Seuil de validation : 80 %</string>
+    <string name="similarity_threshold_description">Régler le score minimal de validation</string>
+
+    <string name="exercise_no_longer_available">Cet exercice n\'est plus au catalogue.</string>
+
+    <!-- Réglages des éléments de gamification (US-4.1) -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_subtitle">Activez ou désactivez chaque élément de jeu pour composer une condition de test.</string>
+    <string name="settings_condition_label">Condition de test</string>
+    <string name="settings_back">Retour</string>
+    <string name="settings_open">Ouvrir les paramètres</string>
+
+    <string name="setting_daily_exercise">Exercice du jour</string>
+    <string name="setting_daily_exercise_help">La carte mise en avant sur l\'accueil.</string>
+    <string name="setting_favorites">Favoris</string>
+    <string name="setting_favorites_help">Le cœur pour marquer un exercice préféré.</string>
+    <string name="setting_stars">Rangs et étoiles</string>
+    <string name="setting_stars_help">La note affichée sur chaque exercice du catalogue.</string>
+    <string name="setting_statistics">Statistiques</string>
+    <string name="setting_statistics_help">L\'onglet de progression et la carte musculaire.</string>
+    <string name="setting_sounds">Retours sonores</string>
+    <string name="setting_sounds_help">Les sons de validation, d\'erreur et de fin d\'exercice.</string>
+
+    <!-- Journal des séances et export (US-7.1 / US-7.2 / US-7.3) -->
+    <string name="settings_condition_name_hint">Nom de la condition (facultatif)</string>
+    <string name="settings_log_label">Journal des séances</string>
+    <string name="settings_sessions_recorded">%1$d séance(s) enregistrée(s)</string>
+    <string name="settings_export_button">Exporter le journal</string>
+    <string name="settings_export_period">Exporter quelle période ?</string>
+    <string name="settings_export_all">Tout l\'historique</string>
+    <string name="settings_export_7_days">7 derniers jours</string>
+    <string name="settings_export_30_days">30 derniers jours</string>
+    <string name="settings_export_empty">Aucune séance enregistrée pour le moment.</string>
+    <string name="settings_export_failed">Export impossible.</string>
 </resources>
