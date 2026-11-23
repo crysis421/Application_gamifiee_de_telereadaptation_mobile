@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 /**
  * Journal des séances d'exercice (US-7.1) et export (US-7.2).
@@ -135,18 +136,39 @@ public final class SessionLog {
         return result;
     }
 
+    /** Formats d'export (US-7.2) : tableur pour lire et calculer, JSON pour un script. */
+    public enum ExportFormat {
+        CSV("csv", "text/csv"),
+        JSON("json", "application/json");
+
+        private final String extension;
+        private final String mimeType;
+
+        ExportFormat(String extension, String mimeType) {
+            this.extension = extension;
+            this.mimeType = mimeType;
+        }
+
+        public String getMimeType() { return mimeType; }
+    }
+
     /** Écrit l'export dans un fichier partageable, et le renvoie. */
     @Nullable
-    public static synchronized File writeExport(Context context, long fromMillis, long toMillis) {
+    public static synchronized File writeExport(Context context, long fromMillis, long toMillis,
+                                                ExportFormat format) {
         File exports = new File(context.getCacheDir(), "exports");
         if (!exports.exists() && !exports.mkdirs()) {
             Log.w(TAG, "Dossier d'export impossible à créer");
             return null;
         }
         File target = new File(exports, "sessions-" + READABLE.format(new Date())
-                .replace(':', '-') + ".json");
+                .replace(':', '-') + "." + format.extension);
+        String content = format == ExportFormat.CSV
+                ? SessionCsv.toCsv(filterByPeriod(readAll(), fromMillis, toMillis),
+                        TimeZone.getDefault())
+                : exportJson(fromMillis, toMillis);
         try (FileOutputStream out = new FileOutputStream(target)) {
-            out.write(exportJson(fromMillis, toMillis).getBytes(StandardCharsets.UTF_8));
+            out.write(content.getBytes(StandardCharsets.UTF_8));
             return target;
         } catch (IOException e) {
             Log.w(TAG, "Export impossible", e);

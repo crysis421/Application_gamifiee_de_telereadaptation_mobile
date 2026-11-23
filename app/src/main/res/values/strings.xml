@@ -235,6 +235,9 @@
     <string name="settings_export_all">Tout l\'historique</string>
     <string name="settings_export_7_days">7 derniers jours</string>
     <string name="settings_export_30_days">30 derniers jours</string>
+    <string name="settings_export_format">Quel format ?</string>
+    <string name="settings_export_format_csv">Tableur (CSV, Excel, LibreOffice)</string>
+    <string name="settings_export_format_json">JSON (scripts d\'analyse)</string>
     <string name="settings_export_empty">Aucune séance enregistrée pour le moment.</string>
     <string name="settings_export_failed">Export impossible.</string>
 </resources>

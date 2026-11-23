@@ -178,14 +178,31 @@ public class SettingsActivity extends AppCompatActivity {
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_export_period)
-                .setItems(labels, (dialog, which) -> export(EXPORT_PERIODS_DAYS[which]))
+                .setItems(labels, (dialog, which) -> askFormatThenExport(EXPORT_PERIODS_DAYS[which]))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
-    private void export(int days) {
+    /** Tableur par défaut : c'est ce que le chercheur ouvre le plus souvent (US-7.2). */
+    private void askFormatThenExport(int days) {
+        String[] labels = {
+                getString(R.string.settings_export_format_csv),
+                getString(R.string.settings_export_format_json),
+        };
+        SessionLog.ExportFormat[] formats = {
+                SessionLog.ExportFormat.CSV,
+                SessionLog.ExportFormat.JSON,
+        };
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_export_format)
+                .setItems(labels, (dialog, which) -> export(days, formats[which]))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void export(int days, SessionLog.ExportFormat format) {
         long from = days == 0 ? 0L : System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days);
-        File exported = SessionLog.writeExport(this, from, Long.MAX_VALUE);
+        File exported = SessionLog.writeExport(this, from, Long.MAX_VALUE, format);
         if (exported == null) {
             Toast.makeText(this, R.string.settings_export_failed, Toast.LENGTH_SHORT).show();
             return;
@@ -193,7 +210,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", exported);
         Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType("application/json");
+        share.setType(format.getMimeType());
         share.putExtra(Intent.EXTRA_STREAM, uri);
         share.putExtra(Intent.EXTRA_SUBJECT, exported.getName());
         // Sans ce drapeau, l'application qui reçoit le fichier ne peut pas le lire.
