@@ -1,68 +1,113 @@
 package com.uphf.saes5;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/**
+ * Profil : rangs par muscle et étoiles par exercice (US-4.5), puis historique des séances.
+ *
+ * <p>Tout est calculé à partir du journal des séances. L'écran est relu à chaque retour, car
+ * l'onglet est réutilisé (singleTop) et une séance a pu se terminer entre-temps.</p>
+ */
 public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
-        ProfileSummary summary = ProfileCalculator.calculate(
-                StatisticsRepository.getExercises(), StatisticsRepository.getAll());
-        ((TextView) findViewById(R.id.profile_star_count)).setText(
-                getString(R.string.profile_stars_count, summary.getStarCount()));
-        renderMuscleRanks(summary);
-        renderHistory(summary);
+        render();
         configureNavigation();
     }
 
-    private void renderMuscleRanks(ProfileSummary summary) {
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        render();
+    }
+
+    private void render() {
+        boolean progressionEnabled = GameSettings.isEnabled(GameSettings.Feature.STARS);
+        findViewById(R.id.profile_progression)
+                .setVisibility(progressionEnabled ? View.VISIBLE : View.GONE);
+        if (progressionEnabled) {
+            Progression.Summary progression = Progression.calculate(
+                    ExerciseRepository.getAll(), SessionLog.readAll());
+            ((TextView) findViewById(R.id.profile_star_count)).setText(
+                    getString(R.string.profile_stars_count, progression.getTotalStars()));
+            renderMuscleRanks(progression);
+            renderExerciseStars(progression);
+        }
+
+        renderHistory(ProfileCalculator.calculate(
+                StatisticsRepository.getExercises(), StatisticsRepository.getAll()));
+    }
+
+    private void renderMuscleRanks(Progression.Summary progression) {
         LinearLayout container = findViewById(R.id.profile_muscle_ranks);
+        container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
-        for (MuscleStatistic statistic : summary.getMuscleStatistics()) {
+        for (Progression.MuscleRank muscle : progression.getMuscles()) {
             View row = inflater.inflate(R.layout.item_profile_muscle, container, false);
             ((TextView) row.findViewById(R.id.profile_muscle_name))
-                    .setText(statistic.getMuscleGroup());
+                    .setText(muscle.getMuscleGroup());
+            ((TextView) row.findViewById(R.id.profile_muscle_rank))
+                    .setText(rankLabel(muscle.getRank()));
+            ((TextView) row.findViewById(R.id.profile_muscle_score))
+                    .setText(getString(R.string.profile_points, muscle.getPoints()));
 
-            TextView rank = row.findViewById(R.id.profile_muscle_rank);
-            TextView score = row.findViewById(R.id.profile_muscle_score);
-            TextView sessions = row.findViewById(R.id.profile_muscle_sessions);
-            if (!statistic.hasData()) {
-                rank.setText(R.string.legend_no_data);
-                score.setVisibility(View.GONE);
-                sessions.setVisibility(View.GONE);
-            } else {
-                rank.setText(rankLabel(MuscleProgress.fromScore(statistic.getAverageScore())));
-                score.setText(getString(R.string.statistics_score, statistic.getAverageScore()));
-                sessions.setText(getResources().getQuantityString(
-                        R.plurals.statistics_sessions,
-                        statistic.getSessionCount(),
-                        statistic.getSessionCount()));
-            }
+            Progression.Rank next = muscle.getRank().next();
+            ((TextView) row.findViewById(R.id.profile_muscle_sessions)).setText(next == null
+                    ? getString(R.string.profile_max_rank)
+                    : getString(R.string.profile_next_rank,
+                            muscle.getPointsToNextRank(), getString(rankLabel(next))));
             container.addView(row);
         }
     }
 
-    private int rankLabel(MuscleProgress progress) {
-        switch (progress) {
-            case TO_IMPROVE:
-                return R.string.legend_to_improve;
-            case PROGRESSING:
-                return R.string.legend_progressing;
-            default:
-                return R.string.legend_mastered;
+    private void renderExerciseStars(Progression.Summary progression) {
+        LinearLayout container = findViewById(R.id.profile_exercise_stars);
+        container.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (Progression.ExerciseStars exercise : progression.getExercises()) {
+            // Même carte que les muscles : nom, étoiles, points et prochain palier.
+            View row = inflater.inflate(R.layout.item_profile_muscle, container, false);
+            ((TextView) row.findViewById(R.id.profile_muscle_name)).setText(exercise.getName());
+            ((TextView) row.findViewById(R.id.profile_muscle_rank))
+                    .setText(starLine(exercise.getStars()));
+            ((TextView) row.findViewById(R.id.profile_muscle_score))
+                    .setText(getString(R.string.profile_points, exercise.getPoints()));
+            ((TextView) row.findViewById(R.id.profile_muscle_sessions)).setText(
+                    exercise.getPointsToNextStar() == 0
+                            ? getString(R.string.profile_all_stars)
+                            : getString(R.string.profile_next_star,
+                                    exercise.getPointsToNextStar()));
+            container.addView(row);
+        }
+    }
+
+    private static String starLine(int stars) {
+        StringBuilder line = new StringBuilder();
+        for (int i = 0; i < Progression.MAX_STARS; i++) line.append(i < stars ? '★' : '☆');
+        return line.toString();
+    }
+
+    @StringRes
+    private static int rankLabel(Progression.Rank rank) {
+        switch (rank) {
+            case BRONZE: return R.string.rank_bronze;
+            case SILVER: return R.string.rank_silver;
+            case GOLD: return R.string.rank_gold;
+            case PLATINUM: return R.string.rank_platinum;
+            default: return R.string.rank_novice;
         }
     }
 
@@ -75,6 +120,8 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
+        emptyState.setVisibility(View.GONE);
+        history.setVisibility(View.VISIBLE);
         history.setLayoutManager(new LinearLayoutManager(this));
         ProfileHistoryAdapter adapter = new ProfileHistoryAdapter();
         adapter.submitList(summary.getHistory());
