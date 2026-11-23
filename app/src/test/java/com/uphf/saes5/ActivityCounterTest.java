@@ -43,6 +43,14 @@ public class ActivityCounterTest {
     }
 
     @Test
+    public void anAbandonedSession_isNotARealisedExercise() {
+        SessionEntry abandoned = new SessionEntry(NOW, "squat", "Squat", 4, 0, 10, 1_000,
+                SessionEntry.SCORE_UNAVAILABLE, "", "", "", -1, -1, true);
+
+        assertEquals(0, ActivityCounter.count(Collections.singletonList(abandoned), NOW).getTotal());
+    }
+
+    @Test
     public void theWeek_keepsOnlyTheLastSevenDays() {
         ActivityCounter.Counts counts = ActivityCounter.count(Arrays.asList(
                 at(NOW - 8 * DAY, 3),

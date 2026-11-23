@@ -54,6 +54,7 @@ public final class SessionLog {
     private static final String F_ANALYSIS = "analysisSettings";
     private static final String F_LATENCY = "averageLatencyMillis";
     private static final String F_POINTS = "arcadePoints";
+    private static final String F_ABANDONED = "abandoned";
 
     /** Horodatage lisible, en plus des millisecondes, pour qui ouvre le fichier à la main. */
     private static final SimpleDateFormat READABLE =
@@ -199,6 +200,7 @@ public final class SessionLog {
             object.put(F_ANALYSIS, entry.getAnalysisSettings());
             object.put(F_LATENCY, entry.hasLatency() ? entry.getAverageLatencyMillis() : JSONObject.NULL);
             object.put(F_POINTS, entry.hasArcadePoints() ? entry.getArcadePoints() : JSONObject.NULL);
+            object.put(F_ABANDONED, entry.isAbandoned());
             return object;
         } catch (JSONException e) {
             Log.w(TAG, "Séance non journalisée", e);
@@ -226,7 +228,9 @@ public final class SessionLog {
                         : object.optInt(F_LATENCY, SessionEntry.LATENCY_UNAVAILABLE),
                 object.isNull(F_POINTS)
                         ? SessionEntry.POINTS_UNAVAILABLE
-                        : object.optInt(F_POINTS, SessionEntry.POINTS_UNAVAILABLE));
+                        : object.optInt(F_POINTS, SessionEntry.POINTS_UNAVAILABLE),
+                // Absent des entrées antérieures : elles sont toutes passées par le récap.
+                object.optBoolean(F_ABANDONED, false));
     }
 
     // --- fichier ----------------------------------------------------------

@@ -34,6 +34,8 @@ public final class SessionEntry {
 
     /** Score arcade de la séance (US-4.4), ou {@link #POINTS_UNAVAILABLE}. */
     private final int arcadePoints;
+    /** Séance quittée avant la fin, sans passer par le récapitulatif (US-7.1). */
+    private final boolean abandoned;
 
     public SessionEntry(long timestampMillis,
                         String exerciseId,
@@ -79,6 +81,26 @@ public final class SessionEntry {
                         @Nullable String analysisSettings,
                         int averageLatencyMillis,
                         int arcadePoints) {
+        this(timestampMillis, exerciseId, exerciseName, validatedReps, failedReps, targetReps,
+                durationMillis, similarityScore, settings, conditionName, analysisSettings,
+                averageLatencyMillis, arcadePoints, false);
+    }
+
+    public SessionEntry(long timestampMillis,
+                        String exerciseId,
+                        String exerciseName,
+                        int validatedReps,
+                        int failedReps,
+                        int targetReps,
+                        long durationMillis,
+                        int similarityScore,
+                        String settings,
+                        @Nullable String conditionName,
+                        @Nullable String analysisSettings,
+                        int averageLatencyMillis,
+                        int arcadePoints,
+                        boolean abandoned) {
+        this.abandoned = abandoned;
         this.arcadePoints = arcadePoints < 0 ? POINTS_UNAVAILABLE : arcadePoints;
         this.analysisSettings = analysisSettings == null ? "" : analysisSettings;
         this.averageLatencyMillis = averageLatencyMillis < 0
@@ -113,6 +135,7 @@ public final class SessionEntry {
     public boolean hasLatency() { return averageLatencyMillis != LATENCY_UNAVAILABLE; }
     public int getArcadePoints() { return arcadePoints; }
     public boolean hasArcadePoints() { return arcadePoints != POINTS_UNAVAILABLE; }
+    public boolean isAbandoned() { return abandoned; }
 
     /** Le score de similarité, ou {@link #SCORE_UNAVAILABLE} s'il n'a pas été mesuré. */
     public int getSimilarityScore() { return similarityScore; }

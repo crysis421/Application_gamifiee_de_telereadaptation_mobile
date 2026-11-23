@@ -11,11 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.AnalysisSettings;
 import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.GameSettings;
 import com.uphf.saes5.SessionEntry;
-import com.uphf.saes5.SessionLog;
+import com.uphf.saes5.SessionRecorder;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
 import com.uphf.saes5.databinding.ActivitySummaryBinding;
 import com.uphf.saes5.Exercise;
@@ -155,23 +154,15 @@ public class SummaryActivity extends AppCompatActivity {
      * de ne pas se confondre avec une comparaison réellement mesurée.</p>
      */
     private void logSession(ExerciseSession session, int similarityScore) {
-        int averageLatency = getIntent().getIntExtra(
-                EXTRA_AVERAGE_LATENCY, SessionEntry.LATENCY_UNAVAILABLE);
-        SessionLog.record(new SessionEntry(
-                System.currentTimeMillis(),
-                exercise.getId(),
-                exercise.getName(),
+        SessionRecorder.record(
+                exercise,
                 session.getValidatedReps(),
                 session.getFailedReps(),
-                exercise.getTargetReps(),
                 session.getDurationMillis(),
                 similarityScore,
-                GameSettings.snapshot(),
-                GameSettings.getConditionName(),
-                // US-1.4 : le modèle et la latence n'ont de sens que si la caméra a tourné.
-                averageLatency == SessionEntry.LATENCY_UNAVAILABLE ? "" : AnalysisSettings.snapshot(),
-                averageLatency,
-                arcadePoints()));
+                getIntent().getIntExtra(EXTRA_AVERAGE_LATENCY, SessionEntry.LATENCY_UNAVAILABLE),
+                arcadePoints(),
+                false);
     }
 
     private void bindFavoriteButton() {

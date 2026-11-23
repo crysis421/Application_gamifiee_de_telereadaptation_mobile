@@ -19,7 +19,8 @@ public final class ActivityCounter {
         int total = 0;
         int week = 0;
         for (SessionEntry entry : log) {
-            if (entry.getValidatedReps() <= 0) continue;
+            // Abandonnée (US-7.1) : journalisée pour l'étude, mais pas « réalisée ».
+            if (entry.getValidatedReps() <= 0 || entry.isAbandoned()) continue;
             total++;
             if (entry.getTimestampMillis() >= nowMillis - SEVEN_DAYS) week++;
         }

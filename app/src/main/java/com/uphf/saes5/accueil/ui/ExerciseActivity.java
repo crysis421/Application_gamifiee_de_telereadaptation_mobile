@@ -36,6 +36,7 @@ import com.uphf.saes5.PoseCameraController;
 import com.uphf.saes5.PoseFrame;
 import com.uphf.saes5.PostureFeedback;
 import com.uphf.saes5.SessionEntry;
+import com.uphf.saes5.SessionRecorder;
 import com.uphf.saes5.SoundFeedback;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
 import com.uphf.saes5.ExerciseRepository;
@@ -430,15 +431,35 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                 .setTitle(R.string.exercise_quit_title)
                 .setMessage(R.string.exercise_quit_message)
                 .setNegativeButton(R.string.exercise_quit_cancel, null)
-                .setPositiveButton(R.string.exercise_quit_confirm, (dialog, which) -> finish())
+                .setPositiveButton(R.string.exercise_quit_confirm, (dialog, which) -> abandon())
                 .show();
+    }
+
+    /**
+     * Séance quittée avant la fin : elle est journalisée quand même, marquée abandonnée
+     * (US-7.1). Pour l'étude, un abandon est une donnée, pas un trou dans le journal.
+     */
+    private void abandon() {
+        handler.removeCallbacks(autoFinish);
+        SessionRecorder.record(exercise, validatedReps, failedReps, elapsedMillis(),
+                averageSimilarity(), latencyTracker.getAverageMillis(), arcadePointsOrNone(),
+                true);
+        finish();
+    }
+
+    private int averageSimilarity() {
+        return completedSimilarityCount == 0
+                ? SessionEntry.SCORE_UNAVAILABLE
+                : Math.round(completedSimilarityTotal / (float) completedSimilarityCount);
+    }
+
+    private int arcadePointsOrNone() {
+        return isArcadeEnabled() ? arcadeScore.getTotal() : SessionEntry.POINTS_UNAVAILABLE;
     }
 
     private void finishExercise() {
         long duration = elapsedMillis();
-        int averageSimilarity = completedSimilarityCount == 0
-                ? SessionEntry.SCORE_UNAVAILABLE
-                : Math.round(completedSimilarityTotal / (float) completedSimilarityCount);
+        int averageSimilarity = averageSimilarity();
         soundFeedback.playFinish();
 
         // Une session sans aucune répétition validée n'est pas comptée comme réalisée (US-4.2).
@@ -448,8 +469,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         startActivity(SummaryActivity.newIntent(
                 this, exercise.getId(), validatedReps, failedReps, duration,
-                averageSimilarity, latencyTracker.getAverageMillis(),
-                isArcadeEnabled() ? arcadeScore.getTotal() : SessionEntry.POINTS_UNAVAILABLE));
+                averageSimilarity, latencyTracker.getAverageMillis(), arcadePointsOrNone()));
         finish();
     }
 
