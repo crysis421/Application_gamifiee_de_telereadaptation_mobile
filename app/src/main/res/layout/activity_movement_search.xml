@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Retrouver un exercice à partir d'un mouvement (US-6.3).
+    Même principe que la séance : caméra et squelette en grand, consignes lisibles de loin.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/search_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    android:orientation="vertical"
+    android:padding="@dimen/screen_margin">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/search_title"
+        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+        android:textColor="?attr/colorOnSurface" />
+
+    <View
+        android:layout_width="48dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/colorPrimary" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/search_help"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="@dimen/text_body_large" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/block_spacing"
+        android:layout_weight="1"
+        android:background="@drawable/bg_camera_placeholder">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/search_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/exercise_camera_preview_description"
+            app:implementationMode="compatible"
+            app:scaleType="fillCenter" />
+
+        <com.uphf.saes5.OverlayView
+            android:id="@+id/search_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/search_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_feedback_banner"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textColor="@color/colorOnSurface"
+            android:textSize="@dimen/text_session_status"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- Exercices proposés, du plus proche au moins proche. -->
+    <LinearLayout
+        android:id="@+id/search_results"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/search_retry"
+        style="@style/Widget.SAES5.Button.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height_large"
+        android:layout_marginTop="8dp"
+        android:text="@string/search_retry"
+        android:textSize="@dimen/button_text_large"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/search_cancel"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="@string/cancel"
+        android:textSize="18sp" />
+</LinearLayout>

@@ -235,6 +235,17 @@
     <string name="settings_export_all">Tout l\'historique</string>
     <string name="settings_export_7_days">7 derniers jours</string>
     <string name="settings_export_30_days">30 derniers jours</string>
+    <!-- Recherche d'un exercice par le mouvement (US-6.3). -->
+    <string name="search_open">Par le mouvement</string>
+    <string name="search_title">Retrouver un exercice</string>
+    <string name="search_help">Placez-vous en entier dans le cadre, puis faites le mouvement une fois.</string>
+    <string name="search_countdown">Placez-vous… %1$d</string>
+    <string name="search_recording">● Faites le mouvement… %1$d s</string>
+    <string name="search_results">Exercices les plus proches :</string>
+    <string name="search_result">%1$s · %2$d %%</string>
+    <string name="search_retry">Recommencer</string>
+    <string name="search_no_movement">Aucun mouvement détecté. Recommencez en bougeant davantage.</string>
+    <string name="search_no_reference">Aucun exercice n\'a encore de mouvement de référence enregistré.</string>
     <!-- Notice et consentement (US-9.1). Texte à valider par l'équipe et l'encadrement. -->
     <string name="consent_title">Avant de commencer</string>
     <string name="consent_intro">Cette application est développée dans le cadre d\'une étude du laboratoire LAMIH (UMR CNRS 8201, Université Polytechnique Hauts-de-France) sur les exercices de rééducation à domicile. Merci de lire ces informations avant de l\'utiliser.</string>

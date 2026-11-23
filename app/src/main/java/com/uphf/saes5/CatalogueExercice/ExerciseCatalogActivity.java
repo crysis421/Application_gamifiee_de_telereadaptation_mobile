@@ -83,6 +83,8 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
 
         findViewById(R.id.create_exercise_button).setOnClickListener(v ->
                 startActivity(CreateExerciseActivity.newIntent(this)));
+        findViewById(R.id.search_by_movement_button).setOnClickListener(v ->
+                startActivity(MovementSearchActivity.newIntent(this)));
 
         BottomNavigationView navigation = findViewById(R.id.bottom_nav);
         Navigation.applyGameSettings(navigation);

@@ -178,17 +178,11 @@ public final class MovementComparisonEngine {
     }
 
     private boolean detectMovingJoints() {
-        if (referenceAngles.isEmpty()) return false;
+        boolean[] detected = MovementMath.movingJoints(referenceAngles, MOVING_JOINT_MIN_RANGE);
         boolean any = false;
         for (int joint = 0; joint < MovementMath.JOINT_ANGLES; joint++) {
-            float min = Float.MAX_VALUE;
-            float max = -Float.MAX_VALUE;
-            for (float[] angles : referenceAngles) {
-                min = Math.min(min, angles[joint]);
-                max = Math.max(max, angles[joint]);
-            }
-            movingJoints[joint] = max - min >= MOVING_JOINT_MIN_RANGE;
-            any |= movingJoints[joint];
+            movingJoints[joint] = detected[joint];
+            any |= detected[joint];
         }
         return any;
     }

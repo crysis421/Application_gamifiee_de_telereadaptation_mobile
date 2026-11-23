@@ -149,11 +149,57 @@ public final class MovementMath {
     }
 
     private static float angleFrameDifference(float[] first, float[] second) {
+        return angleFrameDifference(first, second, null);
+    }
+
+    /** Écart moyen sur les articulations marquées, ou sur toutes si {@code joints} est null. */
+    private static float angleFrameDifference(float[] first, float[] second, boolean[] joints) {
         float sum = 0f;
+        int count = 0;
         for (int i = 0; i < JOINT_ANGLES; i++) {
+            if (joints != null && !joints[i]) continue;
             sum += Math.abs(first[i] - second[i]);
+            count++;
         }
-        return sum / JOINT_ANGLES;
+        return count == 0 ? 0f : sum / count;
+    }
+
+    /**
+     * Articulations dont l'angle varie d'au moins {@code minRange} degrés sur la séquence :
+     * celles que le mouvement fait réellement travailler.
+     */
+    static boolean[] movingJoints(List<float[]> angleFrames, float minRange) {
+        boolean[] moving = new boolean[JOINT_ANGLES];
+        if (angleFrames == null || angleFrames.isEmpty()) return moving;
+        for (int joint = 0; joint < JOINT_ANGLES; joint++) {
+            float min = Float.MAX_VALUE;
+            float max = -Float.MAX_VALUE;
+            for (float[] angles : angleFrames) {
+                min = Math.min(min, angles[joint]);
+                max = Math.max(max, angles[joint]);
+            }
+            moving[joint] = max - min >= minRange;
+        }
+        return moving;
+    }
+
+    /** Les angles des images exploitables, les autres étant ignorées. */
+    static List<float[]> angleFrames(List<float[]> normalizedFrames) {
+        return usableAngleFrames(normalizedFrames);
+    }
+
+    /**
+     * Comme {@link #angleFeatureSequenceScore(List, List)}, limité aux articulations marquées.
+     * Sans articulation marquée, retombe sur les huit.
+     */
+    static int angleFeatureSequenceScore(List<float[]> referenceAngles,
+                                         List<float[]> attemptAngles, boolean[] joints) {
+        if (referenceAngles == null || referenceAngles.isEmpty()
+                || attemptAngles == null || attemptAngles.isEmpty()) return 0;
+        boolean any = false;
+        if (joints != null) for (boolean joint : joints) any |= joint;
+        return scoreFromAngleDifference(averageAngleDtwDifference(
+                referenceAngles, attemptAngles, any ? joints : null));
     }
 
     static int angleFeatureScore(float[] referenceAngles, float[] attemptAngles) {
@@ -199,6 +245,11 @@ public final class MovementMath {
 
     private static float averageAngleDtwDifference(List<float[]> reference,
                                                    List<float[]> attempt) {
+        return averageAngleDtwDifference(reference, attempt, null);
+    }
+
+    private static float averageAngleDtwDifference(List<float[]> reference,
+                                                   List<float[]> attempt, boolean[] joints) {
         int n = reference.size();
         int m = attempt.size();
         float[] previousCost = new float[m + 1];
@@ -223,7 +274,7 @@ public final class MovementMath {
                     bestLength = currentLength[j - 1];
                 }
                 currentCost[j] = best + angleFrameDifference(
-                        reference.get(i - 1), attempt.get(j - 1));
+                        reference.get(i - 1), attempt.get(j - 1), joints);
                 currentLength[j] = bestLength + 1;
             }
             float[] costSwap = previousCost;
