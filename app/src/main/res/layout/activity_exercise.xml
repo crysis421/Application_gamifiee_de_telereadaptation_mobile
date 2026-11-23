@@ -34,8 +34,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="@dimen/text_title"
+            android:fontFeatureSettings="tnum"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="@dimen/text_session_chrono"
+            android:textStyle="bold"
             tools:text="01:24" />
     </LinearLayout>
 
@@ -85,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/exercise_similarity_unavailable"
                 android:textColor="@color/colorOnSurface"
-                android:textSize="24sp"
+                android:textSize="@dimen/text_session_score"
                 android:textStyle="bold" />
 
             <TextView
@@ -93,10 +95,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:maxWidth="220dp"
+                android:maxWidth="@dimen/session_status_max_width"
                 android:text="@string/exercise_similarity_waiting"
                 android:textColor="@color/colorOnSurfaceVariant"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_session_status"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!--
@@ -114,7 +117,7 @@
             android:gravity="center"
             android:padding="16dp"
             android:textColor="@color/colorOnPrimary"
-            android:textSize="@dimen/text_body_large"
+            android:textSize="@dimen/text_session_feedback"
             android:textStyle="bold"
             android:visibility="invisible"
             tools:text="Répétition validée"
@@ -160,12 +163,13 @@
         android:textSize="18sp"
         android:visibility="gone" />
 
+    <!-- Grand bouton contrasté : on doit pouvoir l'atteindre sans viser en revenant vers l'écran. -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/finishButton"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Widget.SAES5.Button.Outlined"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="4dp"
+        android:layout_height="@dimen/button_height_large"
+        android:layout_marginTop="8dp"
         android:text="@string/exercise_finish"
-        android:textSize="18sp" />
+        android:textSize="@dimen/button_text_large" />
 </LinearLayout>

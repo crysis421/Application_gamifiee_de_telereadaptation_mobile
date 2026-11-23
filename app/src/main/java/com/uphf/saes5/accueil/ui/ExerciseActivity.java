@@ -56,6 +56,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private static final long FEEDBACK_DURATION_MILLIS = 1_200L;
     private static final long POSE_SAMPLE_INTERVAL_MILLIS = 100L;
     private static final long REP_PULSE_DURATION_MILLIS = 450L;
+    private static final long GOAL_AUTO_FINISH_DELAY_MILLIS = 3_000L;
 
     private ActivityExerciseBinding binding;
     private Exercise exercise;
@@ -85,6 +86,9 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         }
     };
     private final Runnable hideFeedback = () -> binding.feedbackBanner.setVisibility(View.INVISIBLE);
+    private final Runnable autoFinish = () -> {
+        if (!isFinishing()) finishExercise();
+    };
     private final ActivityResultLauncher<String> requestCameraPermission =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) {
@@ -295,6 +299,10 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         validatedReps++;
         updateRepCounter();
         pulseRepCounter();
+        if (comparisonActive && validatedReps == exercise.getTargetReps()) {
+            onGoalReachedHandsFree();
+            return;
+        }
         showFeedback(R.string.exercise_feedback_valid, R.color.app_success);
         soundFeedback.playValid();
     }
@@ -304,6 +312,24 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         failedReps++;
         showFeedback(R.string.exercise_feedback_failed, R.color.app_error);
         soundFeedback.playFailed();
+    }
+
+    /**
+     * Objectif atteint pendant une séance suivie par la caméra : la séance se termine seule
+     * après un court délai (US-3.1). L'utilisateur, à plusieurs mètres, n'a pas à revenir
+     * viser le bouton « Terminer ».
+     */
+    private void onGoalReachedHandsFree() {
+        // Plus rien à compter : la caméra reste affichée, mais les résultats sont ignorés.
+        comparisonActive = false;
+        soundFeedback.playValid();
+        handler.removeCallbacks(hideFeedback);
+        binding.feedbackBanner.setText(getString(R.string.exercise_goal_reached_auto_finish,
+                GOAL_AUTO_FINISH_DELAY_MILLIS / 1_000L));
+        binding.feedbackBanner.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.app_success)));
+        binding.feedbackBanner.setVisibility(View.VISIBLE);
+        handler.postDelayed(autoFinish, GOAL_AUTO_FINISH_DELAY_MILLIS);
     }
 
     /**
