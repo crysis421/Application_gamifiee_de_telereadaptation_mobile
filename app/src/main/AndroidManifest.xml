@@ -5,6 +5,8 @@
 
     <!-- Declare permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Nombre de pas sur l'accueil (US-5.1), lu via la Recording API. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <application android:name=".SaeS5Application" android:allowBackup="true" android:dataExtractionRules="@xml/data_extraction_rules" android:fullBackupContent="@xml/backup_rules" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/Theme.SAES5">
         <!-- Les trois onglets sont en singleTop : ils se réutilisent au lieu de s'empiler. -->
         <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop">

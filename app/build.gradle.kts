@@ -56,6 +56,8 @@ dependencies {
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
     implementation("androidx.fragment:fragment-ktx:1.8.3")
     implementation("com.google.guava:guava:31.1-android")
+    // Recording API (US-5.1) : comptage des pas sur l'appareil, sans compte Google.
+    implementation("com.google.android.gms:play-services-fitness:21.2.0")
     testImplementation(libs.junit)
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("org.json:json:20240303")

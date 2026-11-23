@@ -1,10 +1,15 @@
 package com.uphf.saes5;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.Locale;
+
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,14 +24,19 @@ import com.uphf.saes5.databinding.ActivityMainBinding;
 
 /**
  * Accueil. Il porte la carte « Exercice du jour » (US-4.2) ainsi que les raccourcis vers les
- * statistiques et le catalogue ; les blocs « nombre de pas » (US-5.1) et « exercices réalisés »
- * (US-5.2) viendront s'y ajouter.
+ * statistiques et le catalogue, ainsi que le nombre de pas du jour (US-5.1) et le nombre
+ * d'exercices réalisés (US-5.2).
  */
 public class MainActivity extends AppCompatActivity {
 
     private static final String STATE_DETAILS_EXPANDED = "daily_details_expanded";
 
     private ActivityMainBinding binding;
+    private StepCounter stepCounter;
+    /** Demandée seulement au toucher de la tuile des pas, jamais d'office au lancement. */
+    private final ActivityResultLauncher<String> requestActivityRecognition =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                    granted -> bindSteps());
     private FavoritesRepository favoritesRepository;
     private DailyExerciseTracker dailyExerciseTracker;
     private DailyExerciseProvider dailyExerciseProvider;
@@ -69,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         favoritesRepository = new FavoritesRepository(this);
+        stepCounter = new StepCounter(this);
         dailyExerciseTracker = new DailyExerciseTracker(this);
         dailyExerciseProvider = new DailyExerciseProvider(this);
 
@@ -93,6 +104,39 @@ public class MainActivity extends AppCompatActivity {
         bindExerciseOfTheDay();
         // Une séance a pu se terminer depuis le dernier passage sur l'accueil (US-5.2).
         bindExercisesDone();
+        bindSteps();
+    }
+
+    /**
+     * Pas du jour (US-5.1). Sans permission, la tuile invite à l'accorder d'un toucher ; sans
+     * Play services compatible, elle le dit plutôt que d'afficher un zéro trompeur.
+     */
+    private void bindSteps() {
+        binding.stepsTile.getRoot().setOnClickListener(null);
+        binding.stepsTile.getRoot().setClickable(false);
+        stepCounter.readToday(new StepCounter.Callback() {
+            @Override
+            public void onSteps(int steps) {
+                if (isFinishing()) return;
+                binding.stepsTile.statValue.setText(
+                        String.format(Locale.FRANCE, "%,d", steps));
+                binding.stepsTile.statLabel.setText(R.string.home_steps_today);
+            }
+
+            @Override
+            public void onUnavailable(@NonNull StepCounter.Availability reason) {
+                if (isFinishing()) return;
+                binding.stepsTile.statValue.setText(R.string.home_steps_none);
+                if (reason == StepCounter.Availability.PERMISSION_MISSING) {
+                    binding.stepsTile.statLabel.setText(R.string.home_steps_permission);
+                    binding.stepsTile.getRoot().setOnClickListener(view ->
+                            requestActivityRecognition.launch(
+                                    Manifest.permission.ACTIVITY_RECOGNITION));
+                } else {
+                    binding.stepsTile.statLabel.setText(R.string.home_steps_unsupported);
+                }
+            }
+        });
     }
 
     /** Exercices réalisés au total et sur les sept derniers jours (US-5.2). */

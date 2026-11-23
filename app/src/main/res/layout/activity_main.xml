@@ -89,13 +89,25 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <!-- Activité : exercices réalisés (US-5.2). -->
+            <!-- Activité : nombre de pas (US-5.1) et exercices réalisés (US-5.2). -->
             <LinearLayout
                 android:id="@+id/home_activity_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/block_spacing"
                 android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/stepsTile"
+                    layout="@layout/view_stat_tile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Space
+                    android:id="@+id/home_activity_spacer"
+                    android:layout_width="12dp"
+                    android:layout_height="wrap_content" />
 
                 <include
                     android:id="@+id/exercisesDoneTile"
