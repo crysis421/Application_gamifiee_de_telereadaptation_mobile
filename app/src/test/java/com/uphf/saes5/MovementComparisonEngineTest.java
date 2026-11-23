@@ -172,8 +172,65 @@ public class MovementComparisonEngineTest {
         assertEquals(3, count);
     }
 
+    @Test
+    public void addFrame_countsARepetitionSlowerThanTheModel() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+        boolean validated = false;
+
+        for (float[] pose : Arrays.asList(standingPose(), standingPose(), squatPose(),
+                squatPose(), squatPose(), squatPose(), standingPose())) {
+            validated |= engine.addFrame(pose).isRepetitionValidated();
+        }
+
+        assertTrue(validated);
+    }
+
+    @Test
+    public void addFrame_reportsAnAttemptThatMissesTheTarget_asOneFailure() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+        int failures = 0;
+
+        for (float[] pose : Arrays.asList(standingPose(), partialSquatPose(),
+                partialSquatPose(), standingPose(), standingPose(), standingPose())) {
+            MovementComparisonResult result = engine.addFrame(pose);
+            assertFalse(result.isRepetitionValidated());
+            if (result.isRepetitionFailed()) failures++;
+        }
+
+        assertEquals(1, failures);
+    }
+
+    @Test
+    public void addFrame_neverReportsAFailure_forAUserWhoStaysStill() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+
+        for (int i = 0; i < 10; i++) {
+            assertFalse(engine.addFrame(standingPose()).isRepetitionFailed());
+        }
+    }
+
+    @Test
+    public void addFrame_aValidRepetition_isNotAFailure() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+
+        engine.addFrame(standingPose());
+        engine.addFrame(squatPose());
+        MovementComparisonResult result = engine.addFrame(standingPose());
+
+        assertTrue(result.isRepetitionValidated());
+        assertFalse(result.isRepetitionFailed());
+    }
+
     private static List<float[]> reference() {
         return Arrays.asList(standingPose(), bentPose());
+    }
+
+    /** Flexion nette, mais loin de la profondeur du squat de référence. */
+    private static float[] partialSquatPose() {
+        float[] pose = standingPose();
+        point(pose, 25, -1.4f, 1.4f);
+        point(pose, 26, 1.4f, 1.4f);
+        return pose;
     }
 
     private static List<float[]> squatReference() {

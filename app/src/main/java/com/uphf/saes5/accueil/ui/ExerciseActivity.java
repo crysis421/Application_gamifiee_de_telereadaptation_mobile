@@ -275,6 +275,9 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
             showComparisonStatus(R.string.exercise_posture_to_correct, R.color.app_error);
         }
 
+        if (result.isRepetitionFailed()) {
+            onRepetitionFailed();
+        }
         if (result.isRepetitionValidated()) {
             completedSimilarityTotal += result.getMovementScore();
             completedSimilarityCount++;
