@@ -35,6 +35,7 @@ public class SummaryActivity extends AppCompatActivity {
     private static final String EXTRA_DURATION_MILLIS = "extra_duration_millis";
     private static final String EXTRA_SIMILARITY_SCORE = "extra_similarity_score";
     private static final String EXTRA_AVERAGE_LATENCY = "extra_average_latency";
+    private static final String EXTRA_ARCADE_POINTS = "extra_arcade_points";
 
     private ActivitySummaryBinding binding;
     private FavoritesRepository favoritesRepository;
@@ -46,8 +47,10 @@ public class SummaryActivity extends AppCompatActivity {
                                    int failedReps,
                                    long durationMillis,
                                    int similarityScore,
-                                   int averageLatencyMillis) {
+                                   int averageLatencyMillis,
+                                   int arcadePoints) {
         Intent intent = new Intent(context, SummaryActivity.class);
+        intent.putExtra(EXTRA_ARCADE_POINTS, arcadePoints);
         intent.putExtra(EXTRA_AVERAGE_LATENCY, averageLatencyMillis);
         intent.putExtra(EXTRA_EXERCISE_ID, exerciseId);
         intent.putExtra(EXTRA_VALIDATED_REPS, validatedReps);
@@ -129,6 +132,17 @@ public class SummaryActivity extends AppCompatActivity {
                 ? getString(R.string.summary_similarity_unavailable)
                 : getString(R.string.summary_percent, similarityScore));
         binding.statSimilarity.statLabel.setText(R.string.summary_stat_similarity);
+
+        // US-4.4 : absent si l'élément de jeu était désactivé pendant la séance.
+        int points = arcadePoints();
+        binding.statPoints.getRoot().setVisibility(
+                points == SessionEntry.POINTS_UNAVAILABLE ? View.GONE : View.VISIBLE);
+        binding.statPoints.statValue.setText(String.valueOf(points));
+        binding.statPoints.statLabel.setText(R.string.summary_stat_points);
+    }
+
+    private int arcadePoints() {
+        return getIntent().getIntExtra(EXTRA_ARCADE_POINTS, SessionEntry.POINTS_UNAVAILABLE);
     }
 
     /**
@@ -156,7 +170,8 @@ public class SummaryActivity extends AppCompatActivity {
                 GameSettings.getConditionName(),
                 // US-1.4 : le modèle et la latence n'ont de sens que si la caméra a tourné.
                 averageLatency == SessionEntry.LATENCY_UNAVAILABLE ? "" : AnalysisSettings.snapshot(),
-                averageLatency));
+                averageLatency,
+                arcadePoints()));
     }
 
     private void bindFavoriteButton() {

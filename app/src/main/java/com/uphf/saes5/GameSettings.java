@@ -32,7 +32,10 @@ public final class GameSettings {
         FAVORITES("favorites", R.string.setting_favorites, R.string.setting_favorites_help),
         STARS("stars", R.string.setting_stars, R.string.setting_stars_help),
         STATISTICS("statistics", R.string.setting_statistics, R.string.setting_statistics_help),
-        SOUNDS("sounds", R.string.setting_sounds, R.string.setting_sounds_help);
+        SOUNDS("sounds", R.string.setting_sounds, R.string.setting_sounds_help),
+        // Ajouté après la collecte des premières données : toujours en fin de liste, pour que
+        // le début de l'instantané journalisé ne change pas.
+        ARCADE("arcade", R.string.setting_arcade, R.string.setting_arcade_help);
 
         private final String key;
         @StringRes private final int labelRes;

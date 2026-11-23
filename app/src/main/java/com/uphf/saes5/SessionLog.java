@@ -53,6 +53,7 @@ public final class SessionLog {
     // US-1.4. Clés ajoutées, jamais renommées : les anciennes entrées restent lisibles.
     private static final String F_ANALYSIS = "analysisSettings";
     private static final String F_LATENCY = "averageLatencyMillis";
+    private static final String F_POINTS = "arcadePoints";
 
     /** Horodatage lisible, en plus des millisecondes, pour qui ouvre le fichier à la main. */
     private static final SimpleDateFormat READABLE =
@@ -197,6 +198,7 @@ public final class SessionLog {
             object.put(F_CONDITION, entry.getConditionName());
             object.put(F_ANALYSIS, entry.getAnalysisSettings());
             object.put(F_LATENCY, entry.hasLatency() ? entry.getAverageLatencyMillis() : JSONObject.NULL);
+            object.put(F_POINTS, entry.hasArcadePoints() ? entry.getArcadePoints() : JSONObject.NULL);
             return object;
         } catch (JSONException e) {
             Log.w(TAG, "Séance non journalisée", e);
@@ -221,7 +223,10 @@ public final class SessionLog {
                 object.optString(F_ANALYSIS, ""),
                 object.isNull(F_LATENCY)
                         ? SessionEntry.LATENCY_UNAVAILABLE
-                        : object.optInt(F_LATENCY, SessionEntry.LATENCY_UNAVAILABLE));
+                        : object.optInt(F_LATENCY, SessionEntry.LATENCY_UNAVAILABLE),
+                object.isNull(F_POINTS)
+                        ? SessionEntry.POINTS_UNAVAILABLE
+                        : object.optInt(F_POINTS, SessionEntry.POINTS_UNAVAILABLE));
     }
 
     // --- fichier ----------------------------------------------------------

@@ -181,6 +181,11 @@
     <string name="setting_statistics_help">L\'onglet de progression et la carte musculaire.</string>
     <string name="setting_sounds">Retours sonores</string>
     <string name="setting_sounds_help">Les sons de validation, d\'erreur et de fin d\'exercice.</string>
+    <string name="setting_arcade">Points et multiplicateurs</string>
+    <string name="setting_arcade_help">Le score de la séance, et le multiplicateur que les réussites consécutives font monter.</string>
+    <string name="exercise_arcade_score">%1$d pts · ×%2$d</string>
+    <string name="exercise_feedback_valid_points">Répétition validée · +%1$d</string>
+    <string name="summary_stat_points">Points gagnés</string>
 
     <!-- Journal des séances et export (US-7.1 / US-7.2 / US-7.3) -->
     <string name="settings_condition_name_hint">Nom de la condition (facultatif)</string>

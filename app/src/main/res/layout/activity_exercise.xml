@@ -155,6 +155,21 @@
         android:textAppearance="@style/TextAppearance.SAES5.Label"
         android:textSize="16sp" />
 
+    <!-- Score arcade et multiplicateur (US-4.4), masqué si l'élément de jeu est désactivé. -->
+    <TextView
+        android:id="@+id/arcadeScore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="@dimen/text_session_score"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="1 240 pts · ×3"
+        tools:visibility="visible" />
+
     <!-- Secours pour les anciens exercices sans modèle ou si la caméra est refusée. -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/validateRepButton"

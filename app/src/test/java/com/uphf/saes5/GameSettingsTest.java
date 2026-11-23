@@ -27,7 +27,7 @@ public class GameSettingsTest {
     @Test
     public void snapshot_listsEveryFeature_inDeclarationOrder() {
         assertEquals(
-                "daily_exercise=1;favorites=1;stars=1;statistics=1;sounds=1",
+                "daily_exercise=1;favorites=1;stars=1;statistics=1;sounds=1;arcade=1",
                 GameSettings.snapshot());
     }
 

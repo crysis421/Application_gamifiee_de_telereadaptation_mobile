@@ -24,6 +24,8 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.ArcadeScore;
+import com.uphf.saes5.GameSettings;
 import com.uphf.saes5.LatencyTracker;
 import com.uphf.saes5.Movement;
 import com.uphf.saes5.MovementComparisonEngine;
@@ -66,6 +68,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private MovementComparisonEngine comparisonEngine;
     private PostureFeedback postureFeedback;
     private final LatencyTracker latencyTracker = new LatencyTracker();
+    private final ArcadeScore arcadeScore = new ArcadeScore();
     private PoseCameraController cameraController;
     private long lastPoseSampleRealtime;
     private boolean cameraPermissionRefused;
@@ -133,7 +136,9 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         updateRepCounter();
         updateChronometer();
 
-        binding.validateRepButton.setOnClickListener(view -> onRepetitionValidated());
+        binding.validateRepButton.setOnClickListener(
+                view -> onRepetitionValidated(SessionEntry.SCORE_UNAVAILABLE));
+        updateArcadeScore();
         binding.failRepButton.setOnClickListener(view -> onRepetitionFailed());
         binding.finishButton.setOnClickListener(view -> finishExercise());
         prepareReferenceComparison();
@@ -281,7 +286,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         if (result.isRepetitionValidated()) {
             completedSimilarityTotal += result.getMovementScore();
             completedSimilarityCount++;
-            onRepetitionValidated();
+            onRepetitionValidated(result.getMovementScore());
         }
     }
 
@@ -304,21 +309,48 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     }
 
     /** Une répétition complète et correcte vient d'être détectée. */
-    private void onRepetitionValidated() {
+    private void onRepetitionValidated(int precision) {
         validatedReps++;
+        int gained = arcadeScore.onSuccess(precision);
         updateRepCounter();
+        updateArcadeScore();
         pulseRepCounter();
         if (comparisonActive && validatedReps == exercise.getTargetReps()) {
             onGoalReachedHandsFree();
             return;
         }
-        showFeedback(R.string.exercise_feedback_valid, R.color.app_success);
+        if (isArcadeEnabled()) {
+            showFeedback(getString(R.string.exercise_feedback_valid_points, gained),
+                    R.color.app_success);
+        } else {
+            showFeedback(R.string.exercise_feedback_valid, R.color.app_success);
+        }
         soundFeedback.playValid();
+    }
+
+    private boolean isArcadeEnabled() {
+        return GameSettings.isEnabled(GameSettings.Feature.ARCADE);
+    }
+
+    /** Score et multiplicateur en temps réel (US-4.4). */
+    private void updateArcadeScore() {
+        if (!isArcadeEnabled()) {
+            binding.arcadeScore.setVisibility(View.GONE);
+            return;
+        }
+        binding.arcadeScore.setVisibility(View.VISIBLE);
+        binding.arcadeScore.setText(getString(R.string.exercise_arcade_score,
+                arcadeScore.getTotal(), arcadeScore.getMultiplier()));
+        // Multiplicateur actif : le score passe à la couleur principale pour se remarquer.
+        binding.arcadeScore.setTextColor(ContextCompat.getColor(this,
+                arcadeScore.getMultiplier() > 1 ? R.color.colorPrimary : R.color.colorOnSurface));
     }
 
     /** Un mouvement a été tenté mais n'est pas conforme à la référence : il n'est pas compté. */
     private void onRepetitionFailed() {
         failedReps++;
+        arcadeScore.onFailure();
+        updateArcadeScore();
         showFeedback(R.string.exercise_feedback_failed, R.color.app_error);
         soundFeedback.playFailed();
     }
@@ -380,7 +412,11 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
      * bien sur le vert que sur le rouge.</p>
      */
     private void showFeedback(@StringRes int messageRes, @ColorRes int backgroundRes) {
-        binding.feedbackBanner.setText(messageRes);
+        showFeedback(getString(messageRes), backgroundRes);
+    }
+
+    private void showFeedback(String message, @ColorRes int backgroundRes) {
+        binding.feedbackBanner.setText(message);
         binding.feedbackBanner.setBackgroundTintList(
                 ColorStateList.valueOf(ContextCompat.getColor(this, backgroundRes)));
         binding.feedbackBanner.setVisibility(View.VISIBLE);
@@ -412,7 +448,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         startActivity(SummaryActivity.newIntent(
                 this, exercise.getId(), validatedReps, failedReps, duration,
-                averageSimilarity, latencyTracker.getAverageMillis()));
+                averageSimilarity, latencyTracker.getAverageMillis(),
+                isArcadeEnabled() ? arcadeScore.getTotal() : SessionEntry.POINTS_UNAVAILABLE));
         finish();
     }
 

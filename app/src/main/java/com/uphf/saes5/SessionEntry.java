@@ -29,6 +29,11 @@ public final class SessionEntry {
 
     /** Latence inconnue : séance manuelle, ou entrée journalisée avant l'US-1.4. */
     public static final int LATENCY_UNAVAILABLE = -1;
+    /** Pas de points : élément de jeu désactivé, ou entrée journalisée avant l'US-4.4. */
+    public static final int POINTS_UNAVAILABLE = -1;
+
+    /** Score arcade de la séance (US-4.4), ou {@link #POINTS_UNAVAILABLE}. */
+    private final int arcadePoints;
 
     public SessionEntry(long timestampMillis,
                         String exerciseId,
@@ -56,6 +61,25 @@ public final class SessionEntry {
                         @Nullable String conditionName,
                         @Nullable String analysisSettings,
                         int averageLatencyMillis) {
+        this(timestampMillis, exerciseId, exerciseName, validatedReps, failedReps, targetReps,
+                durationMillis, similarityScore, settings, conditionName, analysisSettings,
+                averageLatencyMillis, POINTS_UNAVAILABLE);
+    }
+
+    public SessionEntry(long timestampMillis,
+                        String exerciseId,
+                        String exerciseName,
+                        int validatedReps,
+                        int failedReps,
+                        int targetReps,
+                        long durationMillis,
+                        int similarityScore,
+                        String settings,
+                        @Nullable String conditionName,
+                        @Nullable String analysisSettings,
+                        int averageLatencyMillis,
+                        int arcadePoints) {
+        this.arcadePoints = arcadePoints < 0 ? POINTS_UNAVAILABLE : arcadePoints;
         this.analysisSettings = analysisSettings == null ? "" : analysisSettings;
         this.averageLatencyMillis = averageLatencyMillis < 0
                 ? LATENCY_UNAVAILABLE
@@ -87,6 +111,8 @@ public final class SessionEntry {
     /** Latence moyenne de l'analyse, ou {@link #LATENCY_UNAVAILABLE}. */
     public int getAverageLatencyMillis() { return averageLatencyMillis; }
     public boolean hasLatency() { return averageLatencyMillis != LATENCY_UNAVAILABLE; }
+    public int getArcadePoints() { return arcadePoints; }
+    public boolean hasArcadePoints() { return arcadePoints != POINTS_UNAVAILABLE; }
 
     /** Le score de similarité, ou {@link #SCORE_UNAVAILABLE} s'il n'a pas été mesuré. */
     public int getSimilarityScore() { return similarityScore; }

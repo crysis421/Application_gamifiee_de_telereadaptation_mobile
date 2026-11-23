@@ -154,6 +154,14 @@
                 android:layout_weight="1" />
         </LinearLayout>
 
+        <!-- Score arcade de la séance (US-4.4). -->
+        <include
+            android:id="@+id/statPoints"
+            layout="@layout/view_stat_tile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/favoriteButton"
             style="@style/Widget.SAES5.Button.Outlined"
