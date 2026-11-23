@@ -9,13 +9,27 @@ import java.util.List;
 
 public class StatisticsViewModel extends ViewModel {
     private final MutableLiveData<StatisticsScreenState> state = new MutableLiveData<>();
-    private final StatisticsSummary summary;
+    private StatisticsSummary summary;
     private StatisticsScreenState.DisplayMode displayMode = StatisticsScreenState.DisplayMode.MUSCLES;
     private String selectedMuscle;
 
     public StatisticsViewModel() {
-        summary = StatisticsCalculator.calculate(
-                StatisticsRepository.getExercises(), StatisticsRepository.getAll());
+        this(StatisticsRepository.getExercises(), StatisticsRepository.getAll());
+    }
+
+    /** Données fournies directement : sert aux tests, qui n'ont pas de journal sur disque. */
+    StatisticsViewModel(List<StatisticsExercise> exercises, List<ExerciseSession> sessions) {
+        summary = StatisticsCalculator.calculate(exercises, sessions);
+        publishState();
+    }
+
+    /** Relit le journal : une séance a pu se terminer depuis l'ouverture de l'écran. */
+    public void refresh() {
+        refresh(StatisticsRepository.getExercises(), StatisticsRepository.getAll());
+    }
+
+    void refresh(List<StatisticsExercise> exercises, List<ExerciseSession> sessions) {
+        summary = StatisticsCalculator.calculate(exercises, sessions);
         publishState();
     }
 

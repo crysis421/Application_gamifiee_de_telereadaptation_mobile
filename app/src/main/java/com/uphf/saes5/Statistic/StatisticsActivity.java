@@ -55,6 +55,14 @@ public class StatisticsActivity extends AppCompatActivity {
         configureNavigation();
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        // L'onglet est réutilisé (singleTop) : sans relecture, il afficherait les chiffres
+        // d'avant la dernière séance.
+        viewModel.refresh();
+    }
+
     private void render(StatisticsScreenState state) {
         globalValue.setText(getString(
                 R.string.statistics_percentage, state.getSummary().getGlobalPerfectPercentage()));
