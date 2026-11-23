@@ -235,6 +235,17 @@
     <string name="settings_export_all">Tout l\'historique</string>
     <string name="settings_export_7_days">7 derniers jours</string>
     <string name="settings_export_30_days">30 derniers jours</string>
+    <string name="settings_condition_save">Enregistrer cette condition</string>
+    <string name="settings_condition_apply">Appliquer une condition enregistrée…</string>
+    <string name="settings_condition_name_required">Donnez d\'abord un nom à la condition.</string>
+    <string name="settings_condition_saved">Condition « %1$s » enregistrée.</string>
+    <string name="settings_condition_applied">Condition « %1$s » appliquée.</string>
+    <string name="settings_condition_none">Aucune condition enregistrée pour le moment.</string>
+    <string name="settings_condition_choose">Appliquer quelle condition ?</string>
+    <string name="settings_condition_delete">Supprimer…</string>
+    <string name="settings_condition_delete_choose">Supprimer quelle condition ?</string>
+    <string name="settings_condition_delete_confirm">Supprimer « %1$s » ? Les séances déjà journalisées gardent ce nom.</string>
+    <string name="settings_condition_delete_ok">Supprimer</string>
     <string name="settings_export_format">Quel format ?</string>
     <string name="settings_export_format_csv">Tableur (CSV, Excel, LibreOffice)</string>
     <string name="settings_export_format_json">JSON (scripts d\'analyse)</string>

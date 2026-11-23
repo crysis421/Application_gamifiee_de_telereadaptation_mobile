@@ -8,6 +8,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Interrupteurs des éléments de gamification (US-4.1).
  *
@@ -78,6 +81,7 @@ public final class GameSettings {
     private static final String PREFS_NAME = "exergame_prefs";
     private static final String KEY_PREFIX = "setting_";
     private static final String KEY_CONDITION_NAME = "condition_name";
+    private static final String KEY_SAVED_CONDITIONS = "saved_conditions";
 
     @Nullable
     private static SharedPreferences preferences;
@@ -102,6 +106,36 @@ public final class GameSettings {
             return;
         }
         preferences.edit().putString(KEY_CONDITION_NAME, name == null ? "" : name.trim()).apply();
+    }
+
+    /** Conditions de test enregistrées (US-7.3), par ordre alphabétique. */
+    public static List<TestCondition> getSavedConditions() {
+        if (preferences == null) return new ArrayList<>();
+        return TestCondition.fromJson(preferences.getString(KEY_SAVED_CONDITIONS, null));
+    }
+
+    /** Enregistre la configuration courante sous ce nom, en remplaçant un homonyme. */
+    public static void saveCurrentCondition(@NonNull String name) {
+        if (preferences == null) return;
+        TestCondition condition = TestCondition.capture(name, GameSettings::isEnabled);
+        storeConditions(TestCondition.save(getSavedConditions(), condition));
+        setConditionName(condition.getName());
+    }
+
+    /** Applique tous les interrupteurs de la condition, et reprend son nom pour les journaux. */
+    public static void applyCondition(@NonNull TestCondition condition) {
+        condition.applyTo(GameSettings::setEnabled);
+        setConditionName(condition.getName());
+    }
+
+    public static void deleteCondition(@NonNull String name) {
+        if (preferences == null) return;
+        storeConditions(TestCondition.remove(getSavedConditions(), name));
+    }
+
+    private static void storeConditions(List<TestCondition> conditions) {
+        if (preferences == null) return;
+        preferences.edit().putString(KEY_SAVED_CONDITIONS, TestCondition.toJson(conditions)).apply();
     }
 
     /** Branche les réglages sur leur stockage. Appelé au démarrage, depuis SaeS5Application. */

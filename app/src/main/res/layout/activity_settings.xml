@@ -163,6 +163,23 @@
                         android:inputType="textCapSentences"
                         android:maxLength="60" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Conditions enregistrées, réappliquées d'un toucher (US-7.3). -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settings_condition_save"
+                    style="@style/Widget.SAES5.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/settings_condition_save" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settings_condition_apply"
+                    style="@style/Widget.SAES5.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/settings_condition_apply" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -22,6 +22,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import com.uphf.saes5.accueil.ui.EdgeToEdgeSupport;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
         buildFeatureSwitches();
         bindAnalysisSettings();
         bindConditionName();
+        bindSavedConditions();
         bindExport();
 
         refreshSnapshot();
@@ -55,6 +57,9 @@ public class SettingsActivity extends AppCompatActivity {
     private void buildFeatureSwitches() {
         LinearLayout gameContainer = findViewById(R.id.settings_container);
         LinearLayout homeContainer = findViewById(R.id.settings_home_container);
+        // Reconstruit aussi après l'application d'une condition (US-7.3).
+        gameContainer.removeAllViews();
+        homeContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
 
         for (GameSettings.Feature feature : GameSettings.Feature.values()) {
@@ -131,6 +136,71 @@ public class SettingsActivity extends AppCompatActivity {
         return stride == 1
                 ? getString(R.string.settings_analysis_stride_all)
                 : getString(R.string.settings_analysis_stride_one_in, stride);
+    }
+
+    /**
+     * Conditions enregistrées (US-7.3) : la configuration courante se sauvegarde sous le nom
+     * saisi, et une condition enregistrée se réapplique d'un toucher avant chaque participant.
+     */
+    private void bindSavedConditions() {
+        findViewById(R.id.settings_condition_save).setOnClickListener(v -> {
+            String name = GameSettings.getConditionName();
+            if (name.isEmpty()) {
+                Toast.makeText(this, R.string.settings_condition_name_required,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            GameSettings.saveCurrentCondition(name);
+            Toast.makeText(this, getString(R.string.settings_condition_saved, name),
+                    Toast.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.settings_condition_apply).setOnClickListener(v -> chooseCondition());
+    }
+
+    private void chooseCondition() {
+        List<TestCondition> conditions = GameSettings.getSavedConditions();
+        if (conditions.isEmpty()) {
+            Toast.makeText(this, R.string.settings_condition_none, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_condition_choose)
+                .setItems(names(conditions), (dialog, which) -> {
+                    TestCondition condition = conditions.get(which);
+                    GameSettings.applyCondition(condition);
+                    buildFeatureSwitches();
+                    ((EditText) findViewById(R.id.settings_condition_name))
+                            .setText(condition.getName());
+                    refreshSnapshot();
+                    Toast.makeText(this, getString(R.string.settings_condition_applied,
+                            condition.getName()), Toast.LENGTH_SHORT).show();
+                })
+                .setNeutralButton(R.string.settings_condition_delete,
+                        (dialog, which) -> chooseConditionToDelete(conditions))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void chooseConditionToDelete(List<TestCondition> conditions) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_condition_delete_choose)
+                .setItems(names(conditions), (dialog, which) -> {
+                    String name = conditions.get(which).getName();
+                    new MaterialAlertDialogBuilder(this)
+                            .setMessage(getString(R.string.settings_condition_delete_confirm, name))
+                            .setPositiveButton(R.string.settings_condition_delete_ok,
+                                    (confirm, ignored) -> GameSettings.deleteCondition(name))
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private static String[] names(List<TestCondition> conditions) {
+        String[] names = new String[conditions.size()];
+        for (int i = 0; i < names.length; i++) names[i] = conditions.get(i).getName();
+        return names;
     }
 
     /** Nom donné à la condition de test, enregistré à chaque frappe (US-7.3). */
