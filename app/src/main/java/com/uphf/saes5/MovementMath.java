@@ -163,6 +163,27 @@ public final class MovementMath {
         return scoreFromAngleDifference(angleFrameDifference(referenceAngles, attemptAngles));
     }
 
+    /**
+     * Comme {@link #angleFeatureScore(float[], float[])}, mais limité aux articulations
+     * marquées dans {@code joints}. Sert à juger une pose sur les seules articulations que
+     * l'exercice fait travailler : les autres, immobiles, gonfleraient le score.
+     */
+    static int angleFeatureScore(float[] referenceAngles, float[] attemptAngles,
+                                 boolean[] joints) {
+        if (referenceAngles == null || attemptAngles == null || joints == null
+                || referenceAngles.length < JOINT_ANGLES
+                || attemptAngles.length < JOINT_ANGLES) return 0;
+        float sum = 0f;
+        int count = 0;
+        for (int i = 0; i < JOINT_ANGLES && i < joints.length; i++) {
+            if (!joints[i]) continue;
+            sum += Math.abs(referenceAngles[i] - attemptAngles[i]);
+            count++;
+        }
+        if (count == 0) return angleFeatureScore(referenceAngles, attemptAngles);
+        return scoreFromAngleDifference(sum / count);
+    }
+
     static int angleFeatureSequenceScore(List<float[]> referenceAngles,
                                          List<float[]> attemptAngles) {
         if (referenceAngles == null || referenceAngles.isEmpty()

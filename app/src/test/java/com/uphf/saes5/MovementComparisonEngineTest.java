@@ -114,8 +114,86 @@ public class MovementComparisonEngineTest {
         assertFalse(result.isRepetitionValidated());
     }
 
+    @Test
+    public void addFrame_doesNotCountAUserWhoStaysStill() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+
+        for (int i = 0; i < 10; i++) {
+            MovementComparisonResult result = engine.addFrame(standingPose());
+            assertFalse(result.isRepetitionValidated());
+            assertFalse(result.isMovementValid());
+        }
+    }
+
+    @Test
+    public void addFrame_doesNotCountAMovementThatSkipsTheTargetPose() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+
+        engine.addFrame(standingPose());
+        engine.addFrame(halfSquatPose());
+        MovementComparisonResult result = engine.addFrame(standingPose());
+
+        assertFalse(result.isRepetitionValidated());
+    }
+
+    @Test
+    public void addFrame_doesNotCountAMovementWithoutTheReturn() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+
+        engine.addFrame(standingPose());
+        engine.addFrame(squatPose());
+        MovementComparisonResult result = engine.addFrame(squatPose());
+
+        assertFalse(result.isRepetitionValidated());
+    }
+
+    @Test
+    public void addFrame_countsStartTargetReturn() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+
+        engine.addFrame(standingPose());
+        engine.addFrame(squatPose());
+        MovementComparisonResult result = engine.addFrame(standingPose());
+
+        assertTrue(result.isRepetitionValidated());
+    }
+
+    @Test
+    public void addFrame_countsConsecutiveRepetitions() {
+        MovementComparisonEngine engine = new MovementComparisonEngine(squatReference(), 80);
+        int count = 0;
+
+        for (int rep = 0; rep < 3; rep++) {
+            if (engine.addFrame(standingPose()).isRepetitionValidated()) count++;
+            if (engine.addFrame(squatPose()).isRepetitionValidated()) count++;
+            if (engine.addFrame(standingPose()).isRepetitionValidated()) count++;
+        }
+
+        assertEquals(3, count);
+    }
+
     private static List<float[]> reference() {
         return Arrays.asList(standingPose(), bentPose());
+    }
+
+    private static List<float[]> squatReference() {
+        return Arrays.asList(standingPose(), squatPose(), standingPose());
+    }
+
+    /** Hanches et genoux fléchis, bras inchangés. */
+    private static float[] squatPose() {
+        float[] pose = standingPose();
+        point(pose, 25, -2.5f, .5f);
+        point(pose, 26, 2.5f, .5f);
+        return pose;
+    }
+
+    /** À mi-chemin entre debout et le squat : la cible n'est pas atteinte. */
+    private static float[] halfSquatPose() {
+        float[] pose = standingPose();
+        point(pose, 25, -1.2f, 1.6f);
+        point(pose, 26, 1.2f, 1.6f);
+        return pose;
     }
 
     private static float[] standingPose() {
