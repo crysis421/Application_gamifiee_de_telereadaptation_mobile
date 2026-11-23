@@ -77,6 +77,12 @@
     <string name="error_name_required">Le nom est obligatoire</string>
     <string name="error_duration_invalid">Entre une durée supérieure à 0</string>
     <string name="home_subtitle">Télé-réadaptation gamifiée</string>
+    <!-- Le nombre affiché en grand est le total ; ce libellé donne les 7 derniers jours. -->
+    <plurals name="home_exercises_done">
+        <item quantity="one">exercice réalisé\n%1$d sur 7 jours</item>
+        <item quantity="many">exercices réalisés\n%1$d sur 7 jours</item>
+        <item quantity="other">exercices réalisés\n%1$d sur 7 jours</item>
+    </plurals>
     <string name="home_statistics_subtitle">Progression et carte musculaire</string>
     <string name="home_catalog_subtitle">Parcourir et créer des exercices</string>
     <string name="filter_all_muscles">Tous</string>

@@ -91,6 +91,17 @@ public class MainActivity extends AppCompatActivity {
         applyGameSettings();
         // Le catalogue a pu changer entre-temps : un exercice créé devient éligible aussitôt.
         bindExerciseOfTheDay();
+        // Une séance a pu se terminer depuis le dernier passage sur l'accueil (US-5.2).
+        bindExercisesDone();
+    }
+
+    /** Exercices réalisés au total et sur les sept derniers jours (US-5.2). */
+    private void bindExercisesDone() {
+        ActivityCounter.Counts counts =
+                ActivityCounter.count(SessionLog.readAll(), System.currentTimeMillis());
+        binding.exercisesDoneTile.statValue.setText(String.valueOf(counts.getTotal()));
+        binding.exercisesDoneTile.statLabel.setText(getResources().getQuantityString(
+                R.plurals.home_exercises_done, counts.getTotal(), counts.getLastSevenDays()));
     }
 
     /**

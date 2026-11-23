@@ -89,6 +89,22 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <!-- Activité : exercices réalisés (US-5.2). -->
+            <LinearLayout
+                android:id="@+id/home_activity_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/block_spacing"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/exercisesDoneTile"
+                    layout="@layout/view_stat_tile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/open_statistics_button"
                 android:layout_width="match_parent"
