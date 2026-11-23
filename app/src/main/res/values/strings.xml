@@ -99,6 +99,7 @@
     <string name="exercise_similarity_score">%1$d %%</string>
     <string name="exercise_similarity_waiting">Placez votre corps entier dans le cadre</string>
     <string name="exercise_pose_not_detected">Corps non détecté</string>
+    <string name="exercise_latency">Latence %1$d ms</string>
     <string name="exercise_goal_reached_auto_finish">Objectif atteint ! Fin dans %1$d s</string>
     <string name="exercise_posture_correct">Posture correcte</string>
     <string name="exercise_posture_to_correct">Corrigez votre posture</string>
@@ -184,6 +185,16 @@
     <!-- Journal des séances et export (US-7.1 / US-7.2 / US-7.3) -->
     <string name="settings_condition_name_hint">Nom de la condition (facultatif)</string>
     <string name="settings_log_label">Journal des séances</string>
+    <string name="settings_analysis_label">Analyse des mouvements</string>
+    <string name="settings_analysis_help">Un modèle plus léger et moins d\'images analysées réduisent le calcul et la latence, au prix d\'un peu de précision.</string>
+    <string name="settings_analysis_model_title">Modèle d\'analyse</string>
+    <string name="settings_analysis_model_value">Modèle : %1$s</string>
+    <string name="settings_analysis_stride_title">Images analysées</string>
+    <string name="settings_analysis_stride_value">Images analysées : %1$s</string>
+    <string name="settings_analysis_stride_all">toutes</string>
+    <string name="settings_analysis_stride_one_in">une sur %1$d</string>
+    <string name="analysis_model_lite">léger (corps seul)</string>
+    <string name="analysis_model_full">complet (corps, mains, visage)</string>
     <string name="settings_sessions_recorded">%1$d séance(s) enregistrée(s)</string>
     <string name="settings_export_button">Exporter le journal</string>
     <string name="settings_export_period">Exporter quelle période ?</string>

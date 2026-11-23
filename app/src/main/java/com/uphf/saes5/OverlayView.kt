@@ -72,8 +72,21 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         pointPaint.color = if (postureState == PostureFeedback.State.NEUTRAL) Color.YELLOW else color
     }
 
+    /** Pose seule, venant du modèle léger (US-1.4) : pas de mains ni de visage. */
+    private var poseOnly: List<NormalizedLandmark>? = null
+
+    fun setPose(landmarks: List<NormalizedLandmark>, imageHeight: Int, imageWidth: Int) {
+        results = null
+        poseOnly = landmarks
+        this.imageHeight = imageHeight
+        this.imageWidth = imageWidth
+        scaleFactor = max(width * 1f / imageWidth, height * 1f / imageHeight)
+        invalidate()
+    }
+
     fun clear() {
         results = null
+        poseOnly = null
         pointPaint.reset()
         poseLinePaint.reset()
         faceLinePaint.reset()
@@ -109,6 +122,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
+        poseOnly?.let { drawPose(canvas, it) }
         results?.let { holisticResult ->
 
             // Calculate scaled image dimensions & offsets to center the image on the canvas
@@ -118,30 +132,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             val offsetY = (height - scaledImageHeight) / 2f
 
             // 1. Draw Pose Landmarks & Connections
-            val poseLandmarks = holisticResult.poseLandmarks()
-            if (poseLandmarks.isNotEmpty()) {
-                for (landmark in poseLandmarks) {
-                    canvas.drawPoint(
-                        landmark.x() * imageWidth * scaleFactor + offsetX,
-                        landmark.y() * imageHeight * scaleFactor + offsetY,
-                        pointPaint
-                    )
-                }
-
-                PoseLandmarker.POSE_LANDMARKS.forEach { connection ->
-                    val start = poseLandmarks.getOrNull(connection.start())
-                    val end = poseLandmarks.getOrNull(connection.end())
-                    if (start != null && end != null) {
-                        canvas.drawLine(
-                            start.x() * imageWidth * scaleFactor + offsetX,
-                            start.y() * imageHeight * scaleFactor + offsetY,
-                            end.x() * imageWidth * scaleFactor + offsetX,
-                            end.y() * imageHeight * scaleFactor + offsetY,
-                            poseLinePaint
-                        )
-                    }
-                }
-            }
+            drawPose(canvas, holisticResult.poseLandmarks())
 
             // 2. Draw Face Landmarks & Connectors
 //            val faceLandmarks = holisticResult.faceLandmarks()
@@ -223,6 +214,32 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
+    private fun drawPose(canvas: Canvas, poseLandmarks: List<NormalizedLandmark>) {
+        if (poseLandmarks.isEmpty()) return
+        val offsetX = (width - imageWidth * scaleFactor) / 2f
+        val offsetY = (height - imageHeight * scaleFactor) / 2f
+        for (landmark in poseLandmarks) {
+            canvas.drawPoint(
+                landmark.x() * imageWidth * scaleFactor + offsetX,
+                landmark.y() * imageHeight * scaleFactor + offsetY,
+                pointPaint
+            )
+        }
+        PoseLandmarker.POSE_LANDMARKS.forEach { connection ->
+            val start = poseLandmarks.getOrNull(connection.start())
+            val end = poseLandmarks.getOrNull(connection.end())
+            if (start != null && end != null) {
+                canvas.drawLine(
+                    start.x() * imageWidth * scaleFactor + offsetX,
+                    start.y() * imageHeight * scaleFactor + offsetY,
+                    end.x() * imageWidth * scaleFactor + offsetX,
+                    end.y() * imageHeight * scaleFactor + offsetY,
+                    poseLinePaint
+                )
+            }
+        }
+    }
+
     fun setResults(
         holisticLandmarkerResults: HolisticLandmarkerResult,
         imageHeight: Int,
@@ -230,6 +247,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         runningMode: RunningMode = RunningMode.IMAGE
     ) {
         results = holisticLandmarkerResults
+        poseOnly = null
 
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth

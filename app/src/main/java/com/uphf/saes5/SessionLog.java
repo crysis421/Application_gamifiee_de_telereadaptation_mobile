@@ -50,6 +50,9 @@ public final class SessionLog {
     private static final String F_SCORE = "similarityScore";
     private static final String F_SETTINGS = "activeSettings";
     private static final String F_CONDITION = "conditionName";
+    // US-1.4. Clés ajoutées, jamais renommées : les anciennes entrées restent lisibles.
+    private static final String F_ANALYSIS = "analysisSettings";
+    private static final String F_LATENCY = "averageLatencyMillis";
 
     /** Horodatage lisible, en plus des millisecondes, pour qui ouvre le fichier à la main. */
     private static final SimpleDateFormat READABLE =
@@ -192,6 +195,8 @@ public final class SessionLog {
             object.put(F_SCORE, entry.hasSimilarityScore() ? entry.getSimilarityScore() : JSONObject.NULL);
             object.put(F_SETTINGS, entry.getSettings());
             object.put(F_CONDITION, entry.getConditionName());
+            object.put(F_ANALYSIS, entry.getAnalysisSettings());
+            object.put(F_LATENCY, entry.hasLatency() ? entry.getAverageLatencyMillis() : JSONObject.NULL);
             return object;
         } catch (JSONException e) {
             Log.w(TAG, "Séance non journalisée", e);
@@ -212,7 +217,11 @@ public final class SessionLog {
                         ? SessionEntry.SCORE_UNAVAILABLE
                         : object.optInt(F_SCORE, SessionEntry.SCORE_UNAVAILABLE),
                 object.optString(F_SETTINGS, ""),
-                object.optString(F_CONDITION, ""));
+                object.optString(F_CONDITION, ""),
+                object.optString(F_ANALYSIS, ""),
+                object.isNull(F_LATENCY)
+                        ? SessionEntry.LATENCY_UNAVAILABLE
+                        : object.optInt(F_LATENCY, SessionEntry.LATENCY_UNAVAILABLE));
     }
 
     // --- fichier ----------------------------------------------------------

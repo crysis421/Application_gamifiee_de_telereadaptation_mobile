@@ -23,6 +23,12 @@ public final class SessionEntry {
     private final int similarityScore;
     private final String settings;
     private final String conditionName;
+    /** Modèle et part d'images analysées (US-1.4), vide pour une séance sans caméra. */
+    private final String analysisSettings;
+    private final int averageLatencyMillis;
+
+    /** Latence inconnue : séance manuelle, ou entrée journalisée avant l'US-1.4. */
+    public static final int LATENCY_UNAVAILABLE = -1;
 
     public SessionEntry(long timestampMillis,
                         String exerciseId,
@@ -34,6 +40,26 @@ public final class SessionEntry {
                         int similarityScore,
                         String settings,
                         @Nullable String conditionName) {
+        this(timestampMillis, exerciseId, exerciseName, validatedReps, failedReps, targetReps,
+                durationMillis, similarityScore, settings, conditionName, "", LATENCY_UNAVAILABLE);
+    }
+
+    public SessionEntry(long timestampMillis,
+                        String exerciseId,
+                        String exerciseName,
+                        int validatedReps,
+                        int failedReps,
+                        int targetReps,
+                        long durationMillis,
+                        int similarityScore,
+                        String settings,
+                        @Nullable String conditionName,
+                        @Nullable String analysisSettings,
+                        int averageLatencyMillis) {
+        this.analysisSettings = analysisSettings == null ? "" : analysisSettings;
+        this.averageLatencyMillis = averageLatencyMillis < 0
+                ? LATENCY_UNAVAILABLE
+                : averageLatencyMillis;
         this.timestampMillis = timestampMillis;
         this.exerciseId = exerciseId;
         this.exerciseName = exerciseName;
@@ -57,6 +83,10 @@ public final class SessionEntry {
     public long getDurationMillis() { return durationMillis; }
     public String getSettings() { return settings; }
     public String getConditionName() { return conditionName; }
+    public String getAnalysisSettings() { return analysisSettings; }
+    /** Latence moyenne de l'analyse, ou {@link #LATENCY_UNAVAILABLE}. */
+    public int getAverageLatencyMillis() { return averageLatencyMillis; }
+    public boolean hasLatency() { return averageLatencyMillis != LATENCY_UNAVAILABLE; }
 
     /** Le score de similarité, ou {@link #SCORE_UNAVAILABLE} s'il n'a pas été mesuré. */
     public int getSimilarityScore() { return similarityScore; }

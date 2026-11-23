@@ -24,13 +24,14 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.HolisticLandmarkerHelper;
+import com.uphf.saes5.LatencyTracker;
 import com.uphf.saes5.Movement;
 import com.uphf.saes5.MovementComparisonEngine;
 import com.uphf.saes5.MovementComparisonResult;
 import com.uphf.saes5.MovementMath;
 import com.uphf.saes5.MovementStorage;
 import com.uphf.saes5.PoseCameraController;
+import com.uphf.saes5.PoseFrame;
 import com.uphf.saes5.PostureFeedback;
 import com.uphf.saes5.SessionEntry;
 import com.uphf.saes5.SoundFeedback;
@@ -64,6 +65,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private SoundFeedback soundFeedback;
     private MovementComparisonEngine comparisonEngine;
     private PostureFeedback postureFeedback;
+    private final LatencyTracker latencyTracker = new LatencyTracker();
     private PoseCameraController cameraController;
     private long lastPoseSampleRealtime;
     private boolean cameraPermissionRefused;
@@ -229,15 +231,19 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     }
 
     @Override
-    public void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle resultBundle) {
+    public void onResults(@NonNull PoseFrame poseFrame) {
+        // US-1.4 : chaque image analysée compte dans la latence, même si elle n'est pas comparée.
+        latencyTracker.record(poseFrame.getLatencyMillis());
+
         long now = SystemClock.elapsedRealtime();
         if (!comparisonActive || now - lastPoseSampleRealtime < POSE_SAMPLE_INTERVAL_MILLIS
                 || !comparisonInFlight.compareAndSet(false, true)) return;
 
+        showLatency();
         float[] frame = MovementMath.normalize(
-                resultBundle.getResult().poseLandmarks(),
-                resultBundle.getInputImageWidth(),
-                resultBundle.getInputImageHeight());
+                poseFrame.getPoseLandmarks(),
+                poseFrame.getInputImageWidth(),
+                poseFrame.getInputImageHeight());
         if (frame == null || comparisonEngine == null) {
             comparisonInFlight.set(false);
             onEmpty();
@@ -403,7 +409,17 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         startActivity(SummaryActivity.newIntent(
                 this, exercise.getId(), validatedReps, failedReps, duration,
-                averageSimilarity));
+                averageSimilarity, latencyTracker.getAverageMillis()));
         finish();
+    }
+
+    /** Latence moyenne de l'analyse, en rouge si elle dépasse la cible de l'US-1.4. */
+    private void showLatency() {
+        int average = latencyTracker.getAverageMillis();
+        if (average == LatencyTracker.UNAVAILABLE) return;
+        binding.latencyLabel.setVisibility(View.VISIBLE);
+        binding.latencyLabel.setText(getString(R.string.exercise_latency, average));
+        binding.latencyLabel.setTextColor(ContextCompat.getColor(this,
+                latencyTracker.isAboveTarget() ? R.color.app_error : R.color.colorOnSurfaceVariant));
     }
 }

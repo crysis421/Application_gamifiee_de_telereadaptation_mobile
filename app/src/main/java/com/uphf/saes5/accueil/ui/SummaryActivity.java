@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.AnalysisSettings;
 import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.GameSettings;
 import com.uphf.saes5.SessionEntry;
@@ -33,6 +34,7 @@ public class SummaryActivity extends AppCompatActivity {
     private static final String EXTRA_FAILED_REPS = "extra_failed_reps";
     private static final String EXTRA_DURATION_MILLIS = "extra_duration_millis";
     private static final String EXTRA_SIMILARITY_SCORE = "extra_similarity_score";
+    private static final String EXTRA_AVERAGE_LATENCY = "extra_average_latency";
 
     private ActivitySummaryBinding binding;
     private FavoritesRepository favoritesRepository;
@@ -43,8 +45,10 @@ public class SummaryActivity extends AppCompatActivity {
                                    int validatedReps,
                                    int failedReps,
                                    long durationMillis,
-                                   int similarityScore) {
+                                   int similarityScore,
+                                   int averageLatencyMillis) {
         Intent intent = new Intent(context, SummaryActivity.class);
+        intent.putExtra(EXTRA_AVERAGE_LATENCY, averageLatencyMillis);
         intent.putExtra(EXTRA_EXERCISE_ID, exerciseId);
         intent.putExtra(EXTRA_VALIDATED_REPS, validatedReps);
         intent.putExtra(EXTRA_FAILED_REPS, failedReps);
@@ -137,6 +141,8 @@ public class SummaryActivity extends AppCompatActivity {
      * de ne pas se confondre avec une comparaison réellement mesurée.</p>
      */
     private void logSession(ExerciseSession session, int similarityScore) {
+        int averageLatency = getIntent().getIntExtra(
+                EXTRA_AVERAGE_LATENCY, SessionEntry.LATENCY_UNAVAILABLE);
         SessionLog.record(new SessionEntry(
                 System.currentTimeMillis(),
                 exercise.getId(),
@@ -147,7 +153,10 @@ public class SummaryActivity extends AppCompatActivity {
                 session.getDurationMillis(),
                 similarityScore,
                 GameSettings.snapshot(),
-                GameSettings.getConditionName()));
+                GameSettings.getConditionName(),
+                // US-1.4 : le modèle et la latence n'ont de sens que si la caméra a tourné.
+                averageLatency == SessionEntry.LATENCY_UNAVAILABLE ? "" : AnalysisSettings.snapshot(),
+                averageLatency));
     }
 
     private void bindFavoriteButton() {

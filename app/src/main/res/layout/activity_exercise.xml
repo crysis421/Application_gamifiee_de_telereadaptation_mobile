@@ -100,6 +100,18 @@
                 android:textColor="@color/colorOnSurfaceVariant"
                 android:textSize="@dimen/text_session_status"
                 android:textStyle="bold" />
+
+            <!-- Latence moyenne de l'analyse (US-1.4) : indication technique, volontairement discrète. -->
+            <TextView
+                android:id="@+id/latencyLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/colorOnSurfaceVariant"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="Latence 48 ms"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <!--

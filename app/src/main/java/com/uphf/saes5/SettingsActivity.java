@@ -44,6 +44,7 @@ public class SettingsActivity extends AppCompatActivity {
         EdgeToEdgeSupport.applySystemBarInsets(findViewById(R.id.settings_root));
 
         buildFeatureSwitches();
+        bindAnalysisSettings();
         bindConditionName();
         bindExport();
 
@@ -73,6 +74,59 @@ public class SettingsActivity extends AppCompatActivity {
 
             container.addView(row);
         }
+    }
+
+    /** Modèle d'analyse et part d'images analysées (US-1.4). */
+    private void bindAnalysisSettings() {
+        refreshAnalysisButtons();
+
+        findViewById(R.id.settings_analysis_model).setOnClickListener(v -> {
+            AnalysisSettings.Model[] models = AnalysisSettings.Model.values();
+            String[] labels = new String[models.length];
+            for (int i = 0; i < models.length; i++) labels[i] = getString(models[i].getLabelRes());
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.settings_analysis_model_title)
+                    .setSingleChoiceItems(labels, AnalysisSettings.getModel().ordinal(),
+                            (dialog, which) -> {
+                                AnalysisSettings.setModel(models[which]);
+                                refreshAnalysisButtons();
+                                dialog.dismiss();
+                            })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+        });
+
+        findViewById(R.id.settings_analysis_stride).setOnClickListener(v -> {
+            String[] labels = new String[AnalysisSettings.MAX_FRAME_STRIDE];
+            for (int stride = 1; stride <= AnalysisSettings.MAX_FRAME_STRIDE; stride++) {
+                labels[stride - 1] = strideLabel(stride);
+            }
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.settings_analysis_stride_title)
+                    .setSingleChoiceItems(labels, AnalysisSettings.getFrameStride() - 1,
+                            (dialog, which) -> {
+                                AnalysisSettings.setFrameStride(which + 1);
+                                refreshAnalysisButtons();
+                                dialog.dismiss();
+                            })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+        });
+    }
+
+    private void refreshAnalysisButtons() {
+        ((TextView) findViewById(R.id.settings_analysis_model)).setText(getString(
+                R.string.settings_analysis_model_value,
+                getString(AnalysisSettings.getModel().getLabelRes())));
+        ((TextView) findViewById(R.id.settings_analysis_stride)).setText(getString(
+                R.string.settings_analysis_stride_value,
+                strideLabel(AnalysisSettings.getFrameStride())));
+    }
+
+    private String strideLabel(int stride) {
+        return stride == 1
+                ? getString(R.string.settings_analysis_stride_all)
+                : getString(R.string.settings_analysis_stride_one_in, stride);
     }
 
     /** Nom donné à la condition de test, enregistré à chaque frappe (US-7.3). */

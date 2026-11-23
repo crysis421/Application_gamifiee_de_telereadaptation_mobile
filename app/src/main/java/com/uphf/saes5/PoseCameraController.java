@@ -20,15 +20,27 @@ import com.google.mediapipe.tasks.vision.core.RunningMode;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/** Gère CameraX et MediaPipe pendant une séance, sans logique de score ni de compteur. */
-public final class PoseCameraController
-        implements HolisticLandmarkerHelper.LandmarkerListener {
+/**
+ * Gère CameraX et MediaPipe pendant une séance, sans logique de score ni de compteur.
+ *
+ * <p>US-1.4 : le modèle (léger par défaut, ou holistic) et la part d'images analysées viennent
+ * de {@link AnalysisSettings}. Une image sautée est rendue à CameraX sans passer par
+ * MediaPipe, ce qui réduit réellement le calcul, et pas seulement l'affichage.</p>
+ */
+public final class PoseCameraController {
     private static final String TAG = "PoseCameraController";
 
     public interface Listener {
-        void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle resultBundle);
+        void onResults(@NonNull PoseFrame frame);
         void onEmpty();
         void onError(@NonNull String message);
+    }
+
+    /** Ce qu'il faut d'un détecteur, quel que soit le modèle. */
+    private interface Detector {
+        void detect(ImageProxy imageProxy, boolean frontCamera);
+        boolean isClosed();
+        void close();
     }
 
     private final AppCompatActivity activity;
@@ -36,12 +48,15 @@ public final class PoseCameraController
     private final OverlayView overlayView;
     private final Listener listener;
     private final int cameraFacing = CameraSelector.LENS_FACING_FRONT;
+    private final AnalysisSettings.Model model;
+    private final int frameStride;
 
     private ExecutorService backgroundExecutor;
-    private volatile HolisticLandmarkerHelper landmarkerHelper;
+    private volatile Detector detector;
     private ProcessCameraProvider cameraProvider;
     private ImageAnalysis imageAnalysis;
     private boolean started;
+    private long frameIndex;
 
     public PoseCameraController(AppCompatActivity activity, PreviewView previewView,
                                 OverlayView overlayView, Listener listener) {
@@ -49,31 +64,75 @@ public final class PoseCameraController
         this.previewView = previewView;
         this.overlayView = overlayView;
         this.listener = listener;
+        this.model = AnalysisSettings.getModel();
+        this.frameStride = AnalysisSettings.getFrameStride();
     }
 
     public void start() {
         if (started) return;
         started = true;
+        frameIndex = 0;
         backgroundExecutor = Executors.newSingleThreadExecutor();
         backgroundExecutor.execute(() -> {
             try {
-                landmarkerHelper = new HolisticLandmarkerHelper(
-                        HolisticLandmarkerHelper.DEFAULT_FACE_DETECTION_CONFIDENCE,
-                        HolisticLandmarkerHelper.DEFAULT_FACE_PRESENCE_CONFIDENCE,
-                        HolisticLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
-                        HolisticLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
-                        HolisticLandmarkerHelper.DEFAULT_HAND_LANDMARKS_CONFIDENCE,
-                        HolisticLandmarkerHelper.DELEGATE_CPU,
-                        RunningMode.LIVE_STREAM,
-                        activity,
-                        this);
+                detector = model == AnalysisSettings.Model.FULL
+                        ? holisticDetector()
+                        : liteDetector();
             } catch (LinkageError error) {
                 // Last-resort guard if MediaPipe fails before its helper can report the error.
                 Log.e(TAG, "MediaPipe native library failed to load", error);
-                onError("Movement analysis unavailable", 0);
+                reportError("Movement analysis unavailable");
             }
         });
         previewView.post(this::setUpCamera);
+    }
+
+    private Detector liteDetector() {
+        PoseLandmarkerHelper helper = new PoseLandmarkerHelper(activity,
+                new PoseLandmarkerHelper.Listener() {
+                    @Override public void onResults(@NonNull PoseFrame frame) { deliver(frame); }
+                    @Override public void onEmpty() { deliverEmpty(); }
+                    @Override public void onError(@NonNull String error) { reportError(error); }
+                });
+        return new Detector() {
+            @Override public void detect(ImageProxy image, boolean front) {
+                helper.detectLiveStream(image, front);
+            }
+            @Override public boolean isClosed() { return helper.isClose(); }
+            @Override public void close() { helper.close(); }
+        };
+    }
+
+    private Detector holisticDetector() {
+        HolisticLandmarkerHelper helper = new HolisticLandmarkerHelper(
+                HolisticLandmarkerHelper.DEFAULT_FACE_DETECTION_CONFIDENCE,
+                HolisticLandmarkerHelper.DEFAULT_FACE_PRESENCE_CONFIDENCE,
+                HolisticLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE,
+                HolisticLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE,
+                HolisticLandmarkerHelper.DEFAULT_HAND_LANDMARKS_CONFIDENCE,
+                HolisticLandmarkerHelper.DELEGATE_CPU,
+                RunningMode.LIVE_STREAM,
+                activity,
+                new HolisticLandmarkerHelper.LandmarkerListener() {
+                    @Override
+                    public void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle bundle) {
+                        deliver(new PoseFrame(bundle.getResult().poseLandmarks(),
+                                bundle.getInferenceTime(),
+                                bundle.getInputImageWidth(),
+                                bundle.getInputImageHeight()));
+                    }
+                    @Override public void onEmpty() { deliverEmpty(); }
+                    @Override public void onError(@NonNull String error, int errorCode) {
+                        reportError(error);
+                    }
+                });
+        return new Detector() {
+            @Override public void detect(ImageProxy image, boolean front) {
+                helper.detectLiveStream(image, front);
+            }
+            @Override public boolean isClosed() { return helper.isClose(); }
+            @Override public void close() { helper.clearHolisticLandmarker(); }
+        };
     }
 
     private void setUpCamera() {
@@ -87,7 +146,7 @@ public final class PoseCameraController
                 bindCameraUseCases();
             } catch (Exception error) {
                 Log.e(TAG, "Camera provider failed", error);
-                onError(error.getMessage() == null ? "Camera unavailable" : error.getMessage(), 0);
+                reportError(error.getMessage() == null ? "Camera unavailable" : error.getMessage());
             }
         }, ContextCompat.getMainExecutor(activity));
     }
@@ -118,17 +177,18 @@ public final class PoseCameraController
             preview.setSurfaceProvider(previewView.getSurfaceProvider());
         } catch (Exception error) {
             Log.e(TAG, "Camera binding failed", error);
-            onError(error.getMessage() == null ? "Camera unavailable" : error.getMessage(), 0);
+            reportError(error.getMessage() == null ? "Camera unavailable" : error.getMessage());
         }
     }
 
     private void detectPose(ImageProxy imageProxy) {
-        HolisticLandmarkerHelper helper = landmarkerHelper;
-        if (!started || helper == null || helper.isClose()) {
+        Detector current = detector;
+        boolean analyze = AnalysisSettings.shouldAnalyze(frameIndex++, frameStride);
+        if (!started || current == null || current.isClosed() || !analyze) {
             imageProxy.close();
             return;
         }
-        helper.detectLiveStream(imageProxy, cameraFacing == CameraSelector.LENS_FACING_FRONT);
+        current.detect(imageProxy, cameraFacing == CameraSelector.LENS_FACING_FRONT);
     }
 
     public void stop() {
@@ -148,26 +208,28 @@ public final class PoseCameraController
         backgroundExecutor = null;
         if (executor != null && !executor.isShutdown()) {
             executor.execute(() -> {
-                HolisticLandmarkerHelper helper = landmarkerHelper;
-                landmarkerHelper = null;
-                if (helper != null) helper.clearHolisticLandmarker();
+                Detector current = detector;
+                detector = null;
+                if (current != null) current.close();
             });
             executor.shutdown();
         }
     }
 
-    @Override
-    public void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle resultBundle) {
+    public AnalysisSettings.Model getModel() {
+        return model;
+    }
+
+    private void deliver(@NonNull PoseFrame frame) {
         activity.runOnUiThread(() -> {
             if (!started || activity.isFinishing()) return;
-            overlayView.setResults(resultBundle.getResult(), resultBundle.getInputImageHeight(),
-                    resultBundle.getInputImageWidth(), RunningMode.LIVE_STREAM);
-            listener.onResults(resultBundle);
+            overlayView.setPose(frame.getPoseLandmarks(), frame.getInputImageHeight(),
+                    frame.getInputImageWidth());
+            listener.onResults(frame);
         });
     }
 
-    @Override
-    public void onEmpty() {
+    private void deliverEmpty() {
         activity.runOnUiThread(() -> {
             if (!started || activity.isFinishing()) return;
             overlayView.clear();
@@ -175,8 +237,7 @@ public final class PoseCameraController
         });
     }
 
-    @Override
-    public void onError(@NonNull String error, int errorCode) {
+    private void reportError(@NonNull String error) {
         Log.e(TAG, error);
         activity.runOnUiThread(() -> {
             if (started && !activity.isFinishing()) listener.onError(error);
