@@ -45,8 +45,31 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
 
+    /** Couleur du squelette selon la posture (US-3.2). Neutre hors séance. */
+    private var postureState: PostureFeedback.State = PostureFeedback.State.NEUTRAL
+
     init {
         initPaints()
+    }
+
+    fun setPostureState(state: PostureFeedback.State) {
+        if (state == postureState) return
+        postureState = state
+        applyPostureColor()
+        invalidate()
+    }
+
+    private fun applyPostureColor() {
+        val colorRes = when (postureState) {
+            PostureFeedback.State.CORRECT -> R.color.app_success
+            PostureFeedback.State.TO_CORRECT -> R.color.app_error
+            PostureFeedback.State.NEUTRAL -> R.color.colorPrimary
+        }
+        val color = ContextCompat.getColor(context!!, colorRes)
+        poseLinePaint.color = color
+        // Les articulations prennent la même couleur : de loin, c'est la silhouette entière
+        // qui doit changer, pas un trait fin.
+        pointPaint.color = if (postureState == PostureFeedback.State.NEUTRAL) Color.YELLOW else color
     }
 
     fun clear() {
@@ -80,6 +103,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         rightHandLinePaint.color = Color.MAGENTA
         rightHandLinePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         rightHandLinePaint.style = Paint.Style.STROKE
+
+        applyPostureColor()
     }
 
     override fun draw(canvas: Canvas) {

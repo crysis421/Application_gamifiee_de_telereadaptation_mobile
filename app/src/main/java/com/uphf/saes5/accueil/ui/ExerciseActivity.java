@@ -31,6 +31,7 @@ import com.uphf.saes5.MovementComparisonResult;
 import com.uphf.saes5.MovementMath;
 import com.uphf.saes5.MovementStorage;
 import com.uphf.saes5.PoseCameraController;
+import com.uphf.saes5.PostureFeedback;
 import com.uphf.saes5.SessionEntry;
 import com.uphf.saes5.SoundFeedback;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
@@ -54,12 +55,14 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private static final String EXTRA_EXERCISE_ID = "extra_exercise_id";
     private static final long FEEDBACK_DURATION_MILLIS = 1_200L;
     private static final long POSE_SAMPLE_INTERVAL_MILLIS = 100L;
+    private static final long REP_PULSE_DURATION_MILLIS = 450L;
 
     private ActivityExerciseBinding binding;
     private Exercise exercise;
     private DailyExerciseTracker dailyExerciseTracker;
     private SoundFeedback soundFeedback;
     private MovementComparisonEngine comparisonEngine;
+    private PostureFeedback postureFeedback;
     private PoseCameraController cameraController;
     private long lastPoseSampleRealtime;
     private boolean cameraPermissionRefused;
@@ -175,6 +178,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         comparisonEngine = new MovementComparisonEngine(
                 reference.frames, exercise.getSimilarityThreshold());
+        postureFeedback = new PostureFeedback(exercise.getSimilarityThreshold());
         binding.validateRepButton.setVisibility(View.GONE);
         binding.failRepButton.setVisibility(View.GONE);
         binding.comparisonStatus.setText(getString(R.string.exercise_reference_ready,
@@ -251,17 +255,16 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                 : result.getLiveScore();
         binding.similarityScore.setText(
                 getString(R.string.exercise_similarity_score, displayedScore));
-        if (!result.isReady()) {
-            showComparisonStatus(R.string.exercise_similarity_analyzing,
-                    R.color.colorOnSurfaceVariant);
-            return;
+        // US-3.2 : la couleur suit la posture instantanée, pas la validation de la répétition,
+        // qui n'est connue qu'en fin de mouvement.
+        PostureFeedback.State posture = postureFeedback.update(result.getLiveScore());
+        binding.poseOverlay.setPostureState(posture);
+        if (posture == PostureFeedback.State.CORRECT) {
+            showComparisonStatus(R.string.exercise_posture_correct, R.color.app_success);
+        } else {
+            showComparisonStatus(R.string.exercise_posture_to_correct, R.color.app_error);
         }
 
-        if (result.isMovementValid()) {
-            showComparisonStatus(R.string.exercise_similarity_valid, R.color.app_success);
-        } else {
-            showComparisonStatus(R.string.exercise_similarity_correct, R.color.app_error);
-        }
         if (result.isRepetitionValidated()) {
             completedSimilarityTotal += result.getMovementScore();
             completedSimilarityCount++;
@@ -271,6 +274,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     @Override
     public void onEmpty() {
+        if (postureFeedback != null) postureFeedback.reset();
+        binding.poseOverlay.setPostureState(PostureFeedback.State.NEUTRAL);
         showComparisonStatus(R.string.exercise_pose_not_detected,
                 R.color.colorOnSurfaceVariant);
     }
@@ -289,6 +294,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private void onRepetitionValidated() {
         validatedReps++;
         updateRepCounter();
+        pulseRepCounter();
         showFeedback(R.string.exercise_feedback_valid, R.color.app_success);
         soundFeedback.playValid();
     }
@@ -298,6 +304,24 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         failedReps++;
         showFeedback(R.string.exercise_feedback_failed, R.color.app_error);
         soundFeedback.playFailed();
+    }
+
+    /**
+     * Le compteur grossit puis revient, en vert : de loin, c'est le signal le plus visible
+     * qu'une répétition vient d'être comptée (US-3.2).
+     */
+    private void pulseRepCounter() {
+        int primary = ContextCompat.getColor(this, R.color.colorPrimary);
+        binding.repCounter.animate().cancel();
+        binding.repCounter.setTextColor(ContextCompat.getColor(this, R.color.app_success));
+        binding.repCounter.setScaleX(1.25f);
+        binding.repCounter.setScaleY(1.25f);
+        binding.repCounter.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(REP_PULSE_DURATION_MILLIS)
+                .withEndAction(() -> binding.repCounter.setTextColor(primary))
+                .start();
     }
 
     private void updateRepCounter() {
