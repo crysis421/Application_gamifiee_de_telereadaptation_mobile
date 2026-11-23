@@ -27,7 +27,8 @@ public class GameSettingsTest {
     @Test
     public void snapshot_listsEveryFeature_inDeclarationOrder() {
         assertEquals(
-                "daily_exercise=1;favorites=1;stars=1;statistics=1;sounds=1;arcade=1",
+                "daily_exercise=1;favorites=1;stars=1;statistics=1;sounds=1;arcade=1;"
+                        + "home_steps=1;home_exercises_done=1;home_catalog=1",
                 GameSettings.snapshot());
     }
 
@@ -45,6 +46,14 @@ public class GameSettingsTest {
             assertTrue("clé vide : " + feature.name(), !feature.getKey().isEmpty());
         }
         assertEquals(GameSettings.Feature.values().length, keys.size());
+    }
+
+    @Test
+    public void homeBlocks_areInTheHomeSection_andGameElementsInTheGameSection() {
+        assertEquals(GameSettings.Group.HOME, GameSettings.Feature.HOME_STEPS.getGroup());
+        assertEquals(GameSettings.Group.HOME, GameSettings.Feature.HOME_EXERCISES_DONE.getGroup());
+        assertEquals(GameSettings.Group.HOME, GameSettings.Feature.HOME_CATALOG.getGroup());
+        assertEquals(GameSettings.Group.GAME, GameSettings.Feature.ARCADE.getGroup());
     }
 
     @Test

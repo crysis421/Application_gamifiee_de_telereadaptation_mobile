@@ -202,6 +202,14 @@
     <string name="setting_statistics_help">L\'onglet de progression et la carte musculaire.</string>
     <string name="setting_sounds">Retours sonores</string>
     <string name="setting_sounds_help">Les sons de validation, d\'erreur et de fin d\'exercice.</string>
+    <string name="settings_home_heading">Blocs de l\'accueil</string>
+    <string name="settings_home_help">L\'exercice du jour et le raccourci des statistiques suivent leurs éléments de jeu ci-dessus.</string>
+    <string name="setting_home_steps">Nombre de pas</string>
+    <string name="setting_home_steps_help">La tuile des pas du jour.</string>
+    <string name="setting_home_exercises_done">Exercices réalisés</string>
+    <string name="setting_home_exercises_done_help">Le total des exercices réalisés et ceux des 7 derniers jours.</string>
+    <string name="setting_home_catalog">Raccourci du catalogue</string>
+    <string name="setting_home_catalog_help">La carte qui ouvre le catalogue. L\'onglet du bas reste disponible.</string>
     <string name="setting_arcade">Points et multiplicateurs</string>
     <string name="setting_arcade_help">Le score de la séance, et le multiplicateur que les réussites consécutives font monter.</string>
     <string name="exercise_arcade_score">%1$d pts · ×%2$d</string>

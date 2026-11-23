@@ -35,21 +35,44 @@ public final class GameSettings {
         SOUNDS("sounds", R.string.setting_sounds, R.string.setting_sounds_help),
         // Ajouté après la collecte des premières données : toujours en fin de liste, pour que
         // le début de l'instantané journalisé ne change pas.
-        ARCADE("arcade", R.string.setting_arcade, R.string.setting_arcade_help);
+        ARCADE("arcade", R.string.setting_arcade, R.string.setting_arcade_help),
+        // Blocs de l'accueil (US-5.4). Journalisés comme les éléments de jeu : ils font partie
+        // de la condition de test.
+        HOME_STEPS("home_steps", R.string.setting_home_steps,
+                R.string.setting_home_steps_help, Group.HOME),
+        HOME_EXERCISES_DONE("home_exercises_done", R.string.setting_home_exercises_done,
+                R.string.setting_home_exercises_done_help, Group.HOME),
+        HOME_CATALOG("home_catalog", R.string.setting_home_catalog,
+                R.string.setting_home_catalog_help, Group.HOME);
 
         private final String key;
         @StringRes private final int labelRes;
         @StringRes private final int helpRes;
+        private final Group group;
 
         Feature(String key, @StringRes int labelRes, @StringRes int helpRes) {
+            this(key, labelRes, helpRes, Group.GAME);
+        }
+
+        Feature(String key, @StringRes int labelRes, @StringRes int helpRes, Group group) {
             this.key = key;
             this.labelRes = labelRes;
             this.helpRes = helpRes;
+            this.group = group;
         }
 
         public String getKey() { return key; }
         @StringRes public int getLabelRes() { return labelRes; }
         @StringRes public int getHelpRes() { return helpRes; }
+        public Group getGroup() { return group; }
+    }
+
+    /** Section de l'écran de réglages où l'interrupteur apparaît. */
+    public enum Group {
+        /** Éléments de jeu (US-4.1). */
+        GAME,
+        /** Blocs de l'accueil (US-5.4). */
+        HOME
     }
 
     private static final String PREFS_NAME = "exergame_prefs";

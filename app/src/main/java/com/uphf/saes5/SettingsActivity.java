@@ -53,10 +53,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void buildFeatureSwitches() {
-        LinearLayout container = findViewById(R.id.settings_container);
+        LinearLayout gameContainer = findViewById(R.id.settings_container);
+        LinearLayout homeContainer = findViewById(R.id.settings_home_container);
         LayoutInflater inflater = LayoutInflater.from(this);
 
         for (GameSettings.Feature feature : GameSettings.Feature.values()) {
+            LinearLayout container = feature.getGroup() == GameSettings.Group.HOME
+                    ? homeContainer
+                    : gameContainer;
             View row = inflater.inflate(R.layout.item_setting, container, false);
 
             ((TextView) row.findViewById(R.id.setting_label)).setText(feature.getLabelRes());

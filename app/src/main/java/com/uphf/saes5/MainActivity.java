@@ -114,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
     private void bindSteps() {
         binding.stepsTile.getRoot().setOnClickListener(null);
         binding.stepsTile.getRoot().setClickable(false);
+        // Bloc masqué (US-5.4) : inutile de lire les pas, ni d'inviter à la permission.
+        if (!GameSettings.isEnabled(GameSettings.Feature.HOME_STEPS)) return;
         stepCounter.readToday(new StepCounter.Callback() {
             @Override
             public void onSteps(int steps) {
@@ -162,6 +164,16 @@ public class MainActivity extends AppCompatActivity {
 
         binding.dailyExerciseCard.favoriteButton.setVisibility(
                 GameSettings.isEnabled(GameSettings.Feature.FAVORITES) ? View.VISIBLE : View.GONE);
+
+        // Blocs de l'accueil (US-5.4) : même règle, un bloc masqué ne laisse pas de trou.
+        boolean steps = GameSettings.isEnabled(GameSettings.Feature.HOME_STEPS);
+        boolean exercisesDone = GameSettings.isEnabled(GameSettings.Feature.HOME_EXERCISES_DONE);
+        binding.stepsTile.getRoot().setVisibility(steps ? View.VISIBLE : View.GONE);
+        binding.exercisesDoneTile.getRoot().setVisibility(exercisesDone ? View.VISIBLE : View.GONE);
+        binding.homeActivitySpacer.setVisibility(steps && exercisesDone ? View.VISIBLE : View.GONE);
+        binding.homeActivityRow.setVisibility(steps || exercisesDone ? View.VISIBLE : View.GONE);
+        binding.openCatalogButton.setVisibility(
+                GameSettings.isEnabled(GameSettings.Feature.HOME_CATALOG) ? View.VISIBLE : View.GONE);
     }
 
     /**

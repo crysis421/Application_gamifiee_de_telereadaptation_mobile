@@ -41,6 +41,30 @@
             android:layout_marginTop="@dimen/block_spacing"
             android:orientation="vertical" />
 
+        <!-- Blocs de l'accueil (US-5.4), eux aussi construits depuis GameSettings.Feature. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/settings_home_heading"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="?attr/colorOnSurface" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/settings_home_help"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <LinearLayout
+            android:id="@+id/settings_home_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+
         <!-- Analyse des mouvements (US-1.4) : modèle et part d'images analysées. -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
