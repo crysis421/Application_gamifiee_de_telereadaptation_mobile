@@ -43,8 +43,8 @@ public class HolisticCameraActivity extends AppCompatActivity
     public static final String MODE_COMPARE = "compare";
 
     private static final String TAG = "HolisticCameraActivity";
-    private static final int COUNTDOWN_SEC = 10;
-    private static final int RECORD_SEC = 20;
+    private static final int COUNTDOWN_SEC = 3;
+    private static final int RECORD_SEC = 6;
     private static final long SAMPLE_INTERVAL_MS = 100;
     private static final int MIN_FRAMES = 20;
 
@@ -66,6 +66,7 @@ public class HolisticCameraActivity extends AppCompatActivity
     private Movement reference;
 
     private State state = State.WAITING;
+    private boolean analysisUnavailable;
     private final List<float[]> frames = new ArrayList<>();
     private long lastSampleTime = 0;
     private CountDownTimer countdownTimer;
@@ -151,7 +152,7 @@ public class HolisticCameraActivity extends AppCompatActivity
 
     @SuppressLint("UnsafeOptInUsageError")
     private void bindCameraUseCases() {
-        if (cameraProvider == null) return;
+        if (cameraProvider == null || analysisUnavailable) return;
 
         CameraSelector selector =
                 new CameraSelector.Builder().requireLensFacing(cameraFacing).build();
@@ -239,7 +240,7 @@ public class HolisticCameraActivity extends AppCompatActivity
         }
 
         if (MODE_COMPARE.equals(mode)) {
-            int score = MovementMath.score(reference.frames, frames);
+            int score = MovementMath.angleScore(reference.frames, frames);
             tvStatus.setText("Score : " + score + " / 100");
         } else {
             Movement m = new Movement();
@@ -250,6 +251,7 @@ public class HolisticCameraActivity extends AppCompatActivity
             m.frames = new ArrayList<>(frames);
             try {
                 MovementStorage.save(this, m);
+                setResult(RESULT_OK);
                 tvStatus.setText("« " + movementName + " » enregistré (" + frames.size() + " images)");
             } catch (IOException e) {
                 Log.e(TAG, "Save failed", e);
@@ -300,7 +302,20 @@ public class HolisticCameraActivity extends AppCompatActivity
     @Override
     public void onError(@NonNull String error, int errorCode) {
         Log.e(TAG, "onError: " + error);
-        runOnUiThread(() -> Toast.makeText(this, error, Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            analysisUnavailable = true;
+            cancelTimers();
+            state = State.WAITING;
+            if (imageAnalyzer != null) {
+                imageAnalyzer.clearAnalyzer();
+                imageAnalyzer = null;
+            }
+            if (cameraProvider != null) cameraProvider.unbindAll();
+            btnAction.setVisibility(View.GONE);
+            tvStatus.setText(error);
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override

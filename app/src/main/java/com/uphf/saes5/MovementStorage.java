@@ -52,6 +52,11 @@ public final class MovementStorage {
         }
     }
 
+    public static boolean exists(Context c, String name) {
+        return name != null && !name.trim().isEmpty()
+                && new File(dir(c), safe(name) + ".json").isFile();
+    }
+
     public static List<String> list(Context c) {
         List<String> names = new ArrayList<>();
         File[] files = dir(c).listFiles((d, n) -> n.endsWith(".json"));

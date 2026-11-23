@@ -1,7 +1,9 @@
 package com.uphf.saes5.accueil.ui;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,7 +13,10 @@ import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -19,33 +24,53 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.HolisticLandmarkerHelper;
+import com.uphf.saes5.Movement;
+import com.uphf.saes5.MovementComparisonEngine;
+import com.uphf.saes5.MovementComparisonResult;
+import com.uphf.saes5.MovementMath;
+import com.uphf.saes5.MovementStorage;
+import com.uphf.saes5.PoseCameraController;
+import com.uphf.saes5.SessionEntry;
 import com.uphf.saes5.SoundFeedback;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
 import com.uphf.saes5.ExerciseRepository;
 import com.uphf.saes5.databinding.ActivityExerciseBinding;
 import com.uphf.saes5.Exercise;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Écran d'exécution d'un exercice.
  *
- * <p>La validation des mouvements est pour l'instant <em>manuelle</em> : deux boutons remplacent
- * le moteur de reconnaissance (US-1.2 / US-1.3), qui n'est pas encore disponible. Toute la
- * mécanique autour (compteur, chronomètre, feedback, calcul des statistiques) est en revanche
- * définitive : brancher MediaPipe consistera à appeler {@link #onRepetitionValidated()} et
- * {@link #onRepetitionFailed()} depuis l'analyseur de pose au lieu des clics.</p>
+ * <p>CameraX et MediaPipe alimentent un moteur de comparaison par angles. Les boutons manuels
+ * restent disponibles uniquement si l'exercice n'a pas encore de modèle ou si la caméra est
+ * refusée.</p>
  */
-public class ExerciseActivity extends AppCompatActivity {
+public class ExerciseActivity extends AppCompatActivity implements PoseCameraController.Listener {
 
     private static final String EXTRA_EXERCISE_ID = "extra_exercise_id";
     private static final long FEEDBACK_DURATION_MILLIS = 1_200L;
+    private static final long POSE_SAMPLE_INTERVAL_MILLIS = 100L;
 
     private ActivityExerciseBinding binding;
     private Exercise exercise;
     private DailyExerciseTracker dailyExerciseTracker;
     private SoundFeedback soundFeedback;
+    private MovementComparisonEngine comparisonEngine;
+    private PoseCameraController cameraController;
+    private long lastPoseSampleRealtime;
+    private boolean cameraPermissionRefused;
+    private volatile boolean comparisonActive;
+    private final ExecutorService comparisonExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean comparisonInFlight = new AtomicBoolean();
 
     private int validatedReps;
     private int failedReps;
+    private int completedSimilarityTotal;
+    private int completedSimilarityCount;
     private long startElapsedRealtime;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -57,6 +82,16 @@ public class ExerciseActivity extends AppCompatActivity {
         }
     };
     private final Runnable hideFeedback = () -> binding.feedbackBanner.setVisibility(View.INVISIBLE);
+    private final ActivityResultLauncher<String> requestCameraPermission =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) {
+                    cameraPermissionRefused = false;
+                    startCameraComparison();
+                } else {
+                    cameraPermissionRefused = true;
+                    enableManualFallback(R.string.exercise_camera_permission_required);
+                }
+            });
 
     public static Intent newIntent(Context context, String exerciseId) {
         Intent intent = new Intent(context, ExerciseActivity.class);
@@ -92,6 +127,7 @@ public class ExerciseActivity extends AppCompatActivity {
         binding.validateRepButton.setOnClickListener(view -> onRepetitionValidated());
         binding.failRepButton.setOnClickListener(view -> onRepetitionFailed());
         binding.finishButton.setOnClickListener(view -> finishExercise());
+        prepareReferenceComparison();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -105,21 +141,148 @@ public class ExerciseActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         handler.post(chronometerTick);
+        if (comparisonEngine != null && !cameraPermissionRefused
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            startCameraComparison();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         handler.removeCallbacks(chronometerTick);
+        stopCameraComparison();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        stopCameraComparison();
+        comparisonExecutor.shutdownNow();
         handler.removeCallbacksAndMessages(null);
         if (soundFeedback != null) {
             soundFeedback.release();
         }
+        super.onDestroy();
+    }
+
+    private void prepareReferenceComparison() {
+        Movement reference = MovementStorage.load(this, exercise.getReferenceMovementId());
+        if (!hasUsableReference(reference)) {
+            enableManualFallback(R.string.exercise_reference_missing_fallback);
+            return;
+        }
+
+        comparisonEngine = new MovementComparisonEngine(
+                reference.frames, exercise.getSimilarityThreshold());
+        binding.validateRepButton.setVisibility(View.GONE);
+        binding.failRepButton.setVisibility(View.GONE);
+        binding.comparisonStatus.setText(getString(R.string.exercise_reference_ready,
+                exercise.getSimilarityThreshold()));
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestCameraPermission.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private boolean hasUsableReference(Movement movement) {
+        if (movement == null || movement.frames == null || movement.frames.isEmpty()) return false;
+        for (float[] frame : movement.frames) {
+            if (MovementMath.angleFeatures(frame) != null) return true;
+        }
+        return false;
+    }
+
+    private void startCameraComparison() {
+        if (comparisonEngine == null || cameraController != null || isFinishing()) return;
+        comparisonActive = true;
+        comparisonExecutor.execute(comparisonEngine::reset);
+        cameraController = new PoseCameraController(
+                this, binding.cameraPreview, binding.poseOverlay, this);
+        cameraController.start();
+    }
+
+    private void stopCameraComparison() {
+        comparisonActive = false;
+        if (cameraController == null) return;
+        cameraController.stop();
+        cameraController = null;
+    }
+
+    private void enableManualFallback(@StringRes int reason) {
+        stopCameraComparison();
+        binding.similarityScore.setText(R.string.exercise_similarity_unavailable);
+        binding.comparisonStatus.setText(reason);
+        binding.comparisonStatus.setTextColor(
+                ContextCompat.getColor(this, R.color.colorOnSurfaceVariant));
+        binding.validateRepButton.setVisibility(View.VISIBLE);
+        binding.failRepButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle resultBundle) {
+        long now = SystemClock.elapsedRealtime();
+        if (!comparisonActive || now - lastPoseSampleRealtime < POSE_SAMPLE_INTERVAL_MILLIS
+                || !comparisonInFlight.compareAndSet(false, true)) return;
+
+        float[] frame = MovementMath.normalize(
+                resultBundle.getResult().poseLandmarks(),
+                resultBundle.getInputImageWidth(),
+                resultBundle.getInputImageHeight());
+        if (frame == null || comparisonEngine == null) {
+            comparisonInFlight.set(false);
+            onEmpty();
+            return;
+        }
+        lastPoseSampleRealtime = now;
+
+        comparisonExecutor.execute(() -> {
+            MovementComparisonResult result = comparisonEngine.addFrame(frame);
+            runOnUiThread(() -> applyComparisonResult(result));
+        });
+    }
+
+    private void applyComparisonResult(MovementComparisonResult result) {
+        comparisonInFlight.set(false);
+        if (!comparisonActive || isFinishing() || isDestroyed()) return;
+        int displayedScore = result.isReady()
+                ? result.getMovementScore()
+                : result.getLiveScore();
+        binding.similarityScore.setText(
+                getString(R.string.exercise_similarity_score, displayedScore));
+        if (!result.isReady()) {
+            showComparisonStatus(R.string.exercise_similarity_analyzing,
+                    R.color.colorOnSurfaceVariant);
+            return;
+        }
+
+        if (result.isMovementValid()) {
+            showComparisonStatus(R.string.exercise_similarity_valid, R.color.app_success);
+        } else {
+            showComparisonStatus(R.string.exercise_similarity_correct, R.color.app_error);
+        }
+        if (result.isRepetitionValidated()) {
+            completedSimilarityTotal += result.getMovementScore();
+            completedSimilarityCount++;
+            onRepetitionValidated();
+        }
+    }
+
+    @Override
+    public void onEmpty() {
+        showComparisonStatus(R.string.exercise_pose_not_detected,
+                R.color.colorOnSurfaceVariant);
+    }
+
+    @Override
+    public void onError(@NonNull String message) {
+        enableManualFallback(R.string.exercise_camera_error_fallback);
+    }
+
+    private void showComparisonStatus(@StringRes int messageRes, @ColorRes int colorRes) {
+        binding.comparisonStatus.setText(messageRes);
+        binding.comparisonStatus.setTextColor(ContextCompat.getColor(this, colorRes));
     }
 
     /** Une répétition complète et correcte vient d'être détectée. */
@@ -178,6 +341,9 @@ public class ExerciseActivity extends AppCompatActivity {
 
     private void finishExercise() {
         long duration = elapsedMillis();
+        int averageSimilarity = completedSimilarityCount == 0
+                ? SessionEntry.SCORE_UNAVAILABLE
+                : Math.round(completedSimilarityTotal / (float) completedSimilarityCount);
         soundFeedback.playFinish();
 
         // Une session sans aucune répétition validée n'est pas comptée comme réalisée (US-4.2).
@@ -186,7 +352,8 @@ public class ExerciseActivity extends AppCompatActivity {
         }
 
         startActivity(SummaryActivity.newIntent(
-                this, exercise.getId(), validatedReps, failedReps, duration));
+                this, exercise.getId(), validatedReps, failedReps, duration,
+                averageSimilarity));
         finish();
     }
 }

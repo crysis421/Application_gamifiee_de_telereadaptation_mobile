@@ -41,7 +41,9 @@ public final class SessionEntry {
         this.failedReps = failedReps;
         this.targetReps = targetReps;
         this.durationMillis = durationMillis;
-        this.similarityScore = similarityScore;
+        this.similarityScore = similarityScore == SCORE_UNAVAILABLE
+                ? SCORE_UNAVAILABLE
+                : Math.max(0, Math.min(100, similarityScore));
         this.settings = settings == null ? "" : settings;
         this.conditionName = conditionName == null ? "" : conditionName;
     }

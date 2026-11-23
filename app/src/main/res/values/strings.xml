@@ -94,7 +94,18 @@
     <string name="duration_minutes">%1$d min</string>
 
     <!-- Écran d\'exécution d\'un exercice -->
-    <string name="exercise_camera_placeholder">Aperçu caméra\n(détection de pose à venir)</string>
+    <string name="exercise_camera_preview_description">Aperçu caméra avec squelette de posture</string>
+    <string name="exercise_similarity_unavailable">— %</string>
+    <string name="exercise_similarity_score">%1$d %%</string>
+    <string name="exercise_similarity_waiting">Placez votre corps entier dans le cadre</string>
+    <string name="exercise_similarity_analyzing">Mouvement en cours…</string>
+    <string name="exercise_similarity_valid">Mouvement validé</string>
+    <string name="exercise_similarity_correct">Mouvement à corriger</string>
+    <string name="exercise_pose_not_detected">Corps non détecté</string>
+    <string name="exercise_reference_ready">Comparaison active · seuil %1$d %%</string>
+    <string name="exercise_reference_missing_fallback">Aucun modèle enregistré · validation manuelle</string>
+    <string name="exercise_camera_permission_required">Caméra refusée · validation manuelle</string>
+    <string name="exercise_camera_error_fallback">Caméra indisponible · validation manuelle</string>
     <string name="exercise_rep_counter">%1$d / %2$d</string>
     <string name="exercise_reps_label">Répétitions</string>
     <string name="exercise_validate_rep">Valider la répétition</string>
@@ -116,6 +127,8 @@
     <string name="summary_stat_total_time">Temps total</string>
     <string name="summary_stat_average_time">Temps moyen / rép.</string>
     <string name="summary_stat_failed_reps">Mouvements à corriger</string>
+    <string name="summary_stat_similarity">Similarité moyenne</string>
+    <string name="summary_similarity_unavailable">—</string>
     <string name="summary_percent">%1$d %%</string>
     <string name="summary_add_favorite">Ajouter aux favoris</string>
     <string name="summary_remove_favorite">Retirer des favoris</string>
@@ -137,6 +150,16 @@
     <string name="create_target_reps_hint">Objectif (répétitions)</string>
     <string name="create_description_hint">Consigne d\'exécution (facultatif)</string>
     <string name="error_target_reps_invalid">Entre un objectif supérieur à 0</string>
+    <string name="reference_model_title">Mouvement de référence</string>
+    <string name="reference_model_help">Filmez une répétition complète. Pendant la séance, les angles de vos articulations seront comparés à ce modèle.</string>
+    <string name="reference_model_missing">Aucun modèle enregistré</string>
+    <string name="reference_model_available">Modèle enregistré · prêt pour la comparaison</string>
+    <string name="reference_model_record">Enregistrer ou remplacer le modèle</string>
+    <string name="reference_model_test">Tester le modèle</string>
+    <string name="reference_model_missing_toast">Enregistrez d’abord un mouvement de référence.</string>
+    <string name="similarity_threshold_value">Seuil de validation : %1$d %%</string>
+    <string name="similarity_threshold_default">Seuil de validation : 80 %</string>
+    <string name="similarity_threshold_description">Régler le score minimal de validation</string>
 
     <string name="exercise_no_longer_available">Cet exercice n\'est plus au catalogue.</string>
 

@@ -32,6 +32,7 @@ public class SummaryActivity extends AppCompatActivity {
     private static final String EXTRA_VALIDATED_REPS = "extra_validated_reps";
     private static final String EXTRA_FAILED_REPS = "extra_failed_reps";
     private static final String EXTRA_DURATION_MILLIS = "extra_duration_millis";
+    private static final String EXTRA_SIMILARITY_SCORE = "extra_similarity_score";
 
     private ActivitySummaryBinding binding;
     private FavoritesRepository favoritesRepository;
@@ -41,12 +42,14 @@ public class SummaryActivity extends AppCompatActivity {
                                    String exerciseId,
                                    int validatedReps,
                                    int failedReps,
-                                   long durationMillis) {
+                                   long durationMillis,
+                                   int similarityScore) {
         Intent intent = new Intent(context, SummaryActivity.class);
         intent.putExtra(EXTRA_EXERCISE_ID, exerciseId);
         intent.putExtra(EXTRA_VALIDATED_REPS, validatedReps);
         intent.putExtra(EXTRA_FAILED_REPS, failedReps);
         intent.putExtra(EXTRA_DURATION_MILLIS, durationMillis);
+        intent.putExtra(EXTRA_SIMILARITY_SCORE, similarityScore);
         return intent;
     }
 
@@ -73,14 +76,16 @@ public class SummaryActivity extends AppCompatActivity {
                 getIntent().getIntExtra(EXTRA_VALIDATED_REPS, 0),
                 getIntent().getIntExtra(EXTRA_FAILED_REPS, 0),
                 getIntent().getLongExtra(EXTRA_DURATION_MILLIS, 0L));
+        int similarityScore = getIntent().getIntExtra(
+                EXTRA_SIMILARITY_SCORE, SessionEntry.SCORE_UNAVAILABLE);
 
-        bindSession(session);
+        bindSession(session, similarityScore);
         bindFavoriteButton();
 
         // Une séance n'est journalisée qu'une fois : après une rotation, l'écran est recréé
         // avec les mêmes extras et l'écrirait une seconde fois.
         if (savedInstanceState == null) {
-            logSession(session);
+            logSession(session, similarityScore);
         }
 
         binding.restartButton.setOnClickListener(view -> {
@@ -90,7 +95,7 @@ public class SummaryActivity extends AppCompatActivity {
         binding.backHomeButton.setOnClickListener(view -> finish());
     }
 
-    private void bindSession(ExerciseSession session) {
+    private void bindSession(ExerciseSession session, int similarityScore) {
         binding.exerciseName.setText(exercise.getName());
 
         boolean goalReached = session.isGoalReached(exercise.getTargetReps());
@@ -115,6 +120,11 @@ public class SummaryActivity extends AppCompatActivity {
 
         binding.statFailedReps.statValue.setText(String.valueOf(session.getFailedReps()));
         binding.statFailedReps.statLabel.setText(R.string.summary_stat_failed_reps);
+
+        binding.statSimilarity.statValue.setText(similarityScore == SessionEntry.SCORE_UNAVAILABLE
+                ? getString(R.string.summary_similarity_unavailable)
+                : getString(R.string.summary_percent, similarityScore));
+        binding.statSimilarity.statLabel.setText(R.string.summary_stat_similarity);
     }
 
     /**
@@ -123,11 +133,10 @@ public class SummaryActivity extends AppCompatActivity {
      * <p>Les réglages actifs et le nom de la condition de test accompagnent la séance : sans
      * eux, une mesure ne peut pas être rattachée à la configuration qui l'a produite.</p>
      *
-     * <p>Le score de similarité reste indisponible tant que le moteur de comparaison de pose
-     * n'est pas branché sur la séance : il part à {@code null} plutôt qu'à zéro, pour ne pas
-     * se confondre avec un mouvement raté lors de l'analyse.</p>
+     * <p>Une séance manuelle conserve explicitement un score indisponible plutôt que zéro, afin
+     * de ne pas se confondre avec une comparaison réellement mesurée.</p>
      */
-    private void logSession(ExerciseSession session) {
+    private void logSession(ExerciseSession session, int similarityScore) {
         SessionLog.record(new SessionEntry(
                 System.currentTimeMillis(),
                 exercise.getId(),
@@ -136,7 +145,7 @@ public class SummaryActivity extends AppCompatActivity {
                 session.getFailedReps(),
                 exercise.getTargetReps(),
                 session.getDurationMillis(),
-                SessionEntry.SCORE_UNAVAILABLE,
+                similarityScore,
                 GameSettings.snapshot(),
                 GameSettings.getConditionName()));
     }

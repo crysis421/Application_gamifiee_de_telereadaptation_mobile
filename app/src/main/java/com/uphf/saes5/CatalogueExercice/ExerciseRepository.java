@@ -43,6 +43,8 @@ public final class ExerciseRepository {
     private static final String FIELD_STARS = "stars";
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_TARGET_REPS = "targetReps";
+    private static final String FIELD_REFERENCE_MOVEMENT = "referenceMovementId";
+    private static final String FIELD_SIMILARITY_THRESHOLD = "similarityThreshold";
 
     @Nullable
     private static SharedPreferences preferences;
@@ -191,6 +193,8 @@ public final class ExerciseRepository {
                 object.put(FIELD_STARS, exercise.getStars());
                 object.put(FIELD_DESCRIPTION, exercise.getDescription());
                 object.put(FIELD_TARGET_REPS, exercise.getTargetReps());
+                object.put(FIELD_REFERENCE_MOVEMENT, exercise.getReferenceMovementId());
+                object.put(FIELD_SIMILARITY_THRESHOLD, exercise.getSimilarityThreshold());
             } catch (JSONException e) {
                 Log.w(TAG, "Exercice non enregistré : " + exercise.getId(), e);
                 continue;
@@ -214,8 +218,9 @@ public final class ExerciseRepository {
             JSONArray array = new JSONArray(stored);
             for (int i = 0; i < array.length(); i++) {
                 JSONObject object = array.getJSONObject(i);
+                String id = object.getString(FIELD_ID);
                 result.add(new Exercise(
-                        object.getString(FIELD_ID),
+                        id,
                         object.getString(FIELD_NAME),
                         object.optString(FIELD_MUSCLE, ""),
                         object.optString(FIELD_DIFFICULTY, ""),
@@ -223,7 +228,10 @@ public final class ExerciseRepository {
                         object.optString(FIELD_EQUIPMENT, "Aucun"),
                         object.optInt(FIELD_STARS, 1),
                         object.optString(FIELD_DESCRIPTION, ""),
-                        object.optInt(FIELD_TARGET_REPS, Exercise.DEFAULT_TARGET_REPS)));
+                        object.optInt(FIELD_TARGET_REPS, Exercise.DEFAULT_TARGET_REPS),
+                        object.optString(FIELD_REFERENCE_MOVEMENT, id),
+                        object.optInt(FIELD_SIMILARITY_THRESHOLD,
+                                Exercise.DEFAULT_SIMILARITY_THRESHOLD)));
             }
         } catch (JSONException e) {
             Log.w(TAG, "Catalogue enregistré illisible, il est ignoré", e);

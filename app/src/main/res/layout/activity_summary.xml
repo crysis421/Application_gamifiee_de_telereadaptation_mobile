@@ -129,12 +129,30 @@
                 android:layout_weight="1" />
         </LinearLayout>
 
-        <include
-            android:id="@+id/statFailedReps"
-            layout="@layout/view_stat_tile"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <include
+                android:id="@+id/statFailedReps"
+                layout="@layout/view_stat_tile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="wrap_content" />
+
+            <include
+                android:id="@+id/statSimilarity"
+                layout="@layout/view_stat_tile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/favoriteButton"
