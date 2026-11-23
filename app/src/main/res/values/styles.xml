@@ -18,6 +18,25 @@
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
+    <!-- Notice de consentement (US-9.1) : lisible sans zoomer. -->
+    <style name="TextAppearance.SAES5.ConsentHeading" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.SAES5.ConsentBody" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">@dimen/text_body_large</item>
+        <item name="android:lineSpacingMultiplier">1.15</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
     <!-- Boutons -->
     <style name="Widget.SAES5.Button" parent="Widget.Material3.Button">
         <item name="cornerRadius">14dp</item>

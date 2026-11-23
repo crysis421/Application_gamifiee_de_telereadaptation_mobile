@@ -176,6 +176,13 @@ public final class SessionLog {
         }
     }
 
+    /** Efface tout le journal : retrait du consentement du participant (US-9.1). */
+    public static synchronized void clear() {
+        if (file != null && file.exists() && !file.delete()) {
+            Log.w(TAG, "Journal impossible à effacer");
+        }
+    }
+
     /** Nombre de séances journalisées. */
     public static synchronized int count() {
         return readAll().size();

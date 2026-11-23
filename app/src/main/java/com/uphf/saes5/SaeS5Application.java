@@ -18,6 +18,7 @@ public class SaeS5Application extends Application {
         ExerciseRepository.init(this);
         GameSettings.init(this);
         AnalysisSettings.init(this);
+        Consent.init(this);
         SessionLog.init(this);
     }
 }

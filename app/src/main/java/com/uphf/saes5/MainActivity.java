@@ -50,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // US-9.1 : rien ne démarre, caméra comprise, avant l'accord éclairé du participant.
+        if (Consent.isRequired()) {
+            startActivity(new Intent(this, ConsentActivity.class));
+            finish();
+            return;
+        }
         EdgeToEdge.enable(this);
 
         detailsExpanded = savedInstanceState != null

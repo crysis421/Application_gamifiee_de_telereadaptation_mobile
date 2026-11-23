@@ -21,6 +21,7 @@
         <activity android:name=".ExercisePlayerActivity" android:exported="false"/>
         <activity android:name=".CreateExerciseActivity" android:exported="false"/>
         <activity android:name=".SettingsActivity" android:exported="false"/>
+        <activity android:name=".ConsentActivity" android:exported="false"/>
         <activity android:name=".accueil.ui.ExerciseActivity" android:exported="false" android:keepScreenOn="true" android:parentActivityName=".MainActivity" android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".accueil.ui.SummaryActivity" android:exported="false" android:parentActivityName=".MainActivity"/>
         <activity android:name=".HolisticCameraActivity" android:exported="false" />

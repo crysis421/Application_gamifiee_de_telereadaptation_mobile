@@ -235,6 +235,26 @@
     <string name="settings_export_all">Tout l\'historique</string>
     <string name="settings_export_7_days">7 derniers jours</string>
     <string name="settings_export_30_days">30 derniers jours</string>
+    <!-- Notice et consentement (US-9.1). Texte à valider par l'équipe et l'encadrement. -->
+    <string name="consent_title">Avant de commencer</string>
+    <string name="consent_intro">Cette application est développée dans le cadre d\'une étude du laboratoire LAMIH (UMR CNRS 8201, Université Polytechnique Hauts-de-France) sur les exercices de rééducation à domicile. Merci de lire ces informations avant de l\'utiliser.</string>
+    <string name="consent_camera_title">La caméra</string>
+    <string name="consent_camera_body">Pendant un exercice, la caméra frontale filme vos mouvements pour les comparer au geste attendu. L\'analyse se fait entièrement sur votre téléphone. Aucune image ni aucune vidéo n\'est enregistrée ou envoyée.</string>
+    <string name="consent_data_title">Ce qui est enregistré</string>
+    <string name="consent_data_body">Pour chaque séance : la date, l\'exercice, le nombre de répétitions réussies et ratées, la durée, un score de ressemblance au geste, vos points et les réglages actifs de l\'application. Ces données restent sur votre téléphone. Elles ne sont transmises que si le chercheur les exporte, avec votre accord.</string>
+    <string name="consent_steps_title">Le nombre de pas</string>
+    <string name="consent_steps_body">Si vous l\'autorisez, l\'accueil affiche vos pas du jour, comptés par le téléphone. Ce nombre n\'est pas enregistré dans le journal des séances.</string>
+    <string name="consent_rights_title">Vos droits</string>
+    <string name="consent_rights_body">Votre participation est volontaire. Vous pouvez la retirer à tout moment depuis les réglages : vos séances enregistrées sont alors effacées du téléphone. Désinstaller l\'application les efface aussi.</string>
+    <string name="consent_checkbox">J\'ai lu ces informations et j\'accepte de participer.</string>
+    <string name="consent_accept">Accepter et continuer</string>
+    <string name="consent_refuse">Refuser et quitter</string>
+    <string name="consent_accepted_on">Accepté le %1$s.</string>
+    <string name="consent_close">Fermer</string>
+    <string name="consent_withdraw">Retirer mon consentement</string>
+    <string name="consent_withdraw_confirm">Vos séances enregistrées sur ce téléphone seront effacées, et l\'application se fermera. Continuer ?</string>
+    <string name="consent_withdraw_ok">Retirer et effacer</string>
+    <string name="settings_consent_open">Notice et consentement</string>
     <string name="settings_condition_save">Enregistrer cette condition</string>
     <string name="settings_condition_apply">Appliquer une condition enregistrée…</string>
     <string name="settings_condition_name_required">Donnez d\'abord un nom à la condition.</string>

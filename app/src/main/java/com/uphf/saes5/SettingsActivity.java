@@ -52,6 +52,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         refreshSnapshot();
         findViewById(R.id.settings_back_button).setOnClickListener(v -> finish());
+        findViewById(R.id.settings_consent_button).setOnClickListener(
+                v -> startActivity(ConsentActivity.reviewIntent(this)));
     }
 
     private void buildFeatureSwitches() {

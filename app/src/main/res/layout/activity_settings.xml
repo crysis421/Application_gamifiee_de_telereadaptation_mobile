@@ -224,6 +224,15 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Notice et retrait du consentement (US-9.1). -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/settings_consent_button"
+            style="@style/Widget.SAES5.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/settings_consent_open" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/settings_back_button"
             android:layout_width="match_parent"
