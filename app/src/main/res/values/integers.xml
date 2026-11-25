@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Durée du glissement entre onglets : courte pour que l'écran réponde aussitôt, assez longue pour qu'on lise le sens. -->
-    <integer name="tab_transition_duration">200</integer>
+    <!-- Durée du glissement entre onglets : quasi instantané, juste assez pour deviner de quel côté arrive l'écran. -->
+    <integer name="tab_transition_duration">100</integer>
 </resources>
