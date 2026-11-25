@@ -3,6 +3,7 @@ package com.uphf.saes5;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.Locale;
@@ -260,5 +261,11 @@ public class MainActivity extends AppCompatActivity {
         binding.dailyExerciseCard.doneBadge.setVisibility(doneToday ? View.VISIBLE : View.GONE);
         binding.dailyExerciseCard.startButton.setText(
                 doneToday ? R.string.daily_exercise_restart : R.string.daily_exercise_start);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
+        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }

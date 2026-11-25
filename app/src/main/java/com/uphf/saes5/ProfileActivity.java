@@ -1,6 +1,7 @@
 package com.uphf.saes5;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -126,5 +127,11 @@ public class ProfileActivity extends AppCompatActivity {
         adapter.submitList(summary.getHistory());
         history.setAdapter(adapter);
         history.setNestedScrollingEnabled(false);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
+        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }

@@ -31,6 +31,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  * <p>Les changements d'onglet glissent dans le sens de la barre : un onglet situé à droite
  * arrive par la droite, un onglet situé à gauche arrive par la gauche, et le retour rejoue
  * le mouvement à l'envers.</p>
+ *
+ * <p>On change aussi d'onglet en balayant l'écran vers la gauche ou la droite : voir
+ * {@link TabSwipe}, qui s'appuie sur {@link #neighbourOf}.</p>
  */
 public final class Navigation {
 
@@ -188,6 +191,32 @@ public final class Navigation {
         }
         if (itemId == R.id.nav_profile) {
             return ProfileActivity.class;
+        }
+        return null;
+    }
+
+    /**
+     * L'onglet voisin de l'écran dans la barre, en sautant ceux que les réglages masquent.
+     *
+     * @param step {@code +1} pour l'onglet de droite, {@code -1} pour celui de gauche
+     * @return l'écran de cet onglet, ou {@code null} s'il n'y en a pas de ce côté, ou si
+     *         l'écran n'est pas lui-même un onglet — un écran de détail ne se balaie pas
+     */
+    @Nullable
+    static Class<? extends Activity> neighbourOf(Activity activity, int step) {
+        BottomNavigationView navigation = activity.findViewById(R.id.bottom_nav);
+        if (navigation == null) {
+            return null;
+        }
+        int own = navigation.getSelectedItemId();
+        if (!activity.getClass().equals(screenOf(own))) {
+            return null;
+        }
+        for (int i = positionOf(own) + step; i >= 0 && i < TAB_ORDER.length; i += step) {
+            MenuItem item = navigation.getMenu().findItem(TAB_ORDER[i]);
+            if (item != null && item.isVisible()) {
+                return screenOf(TAB_ORDER[i]);
+            }
         }
         return null;
     }

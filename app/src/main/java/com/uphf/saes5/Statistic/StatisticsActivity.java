@@ -1,6 +1,7 @@
 package com.uphf.saes5;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -99,5 +100,11 @@ public class StatisticsActivity extends AppCompatActivity {
             if (selectedMuscle.equals(statistic.getMuscleGroup())) result.add(statistic);
         }
         return result;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
+        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }

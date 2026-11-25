@@ -2,6 +2,7 @@ package com.uphf.saes5;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.PopupMenu;
@@ -135,5 +136,11 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         if (checkedId == View.NO_ID || checkedId == allChipId) return "";
         Chip chip = group.findViewById(checkedId);
         return chip.getText().toString();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
+        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }
