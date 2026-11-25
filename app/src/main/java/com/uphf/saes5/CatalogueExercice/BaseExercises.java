@@ -1,5 +1,16 @@
 package com.uphf.saes5;
 
+import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.Nullable;
+
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,17 +26,58 @@ import java.util.List;
  *
  * <p>Ils sont ajoutés une seule fois par {@link ExerciseRepository#init}, sans remplacer un
  * exercice existant du même nom ni le modèle qu'un utilisateur aurait enregistré.</p>
+ *
+ * <p>Chacun a aussi sa démonstration, dans {@code assets/demos/<id>.json} : le même mouvement
+ * vu sous l'angle qui le rend le plus lisible, et posé au sol, pour le mannequin de l'écran
+ * d'exercice. Le modèle, lui, est vu comme le filmera le téléphone — de face, un squat se lit
+ * mal.</p>
  */
 public final class BaseExercises {
 
     /** Dossier des modèles dans les assets ; le fichier porte l'identifiant de l'exercice. */
     public static final String ASSET_DIRECTORY = "movements";
+    /** Dossier des démonstrations dans les assets, mêmes noms de fichiers. */
+    public static final String DEMO_DIRECTORY = "demos";
 
     private static final String FACE = "Téléphone posé face à vous, le corps entier dans le cadre. ";
     private static final String SIDE = "Placez-vous de profil par rapport au téléphone, "
             + "le corps entier dans le cadre. ";
 
     private BaseExercises() {
+    }
+
+    /**
+     * La démonstration à montrer pour un exercice : celle de l'exercice de base de même
+     * identifiant, ou à défaut de même nom — un « Squat » enregistré par l'utilisateur avant
+     * l'arrivée des exercices de base garde son propre modèle, mais profite de la
+     * démonstration du Squat de base.
+     *
+     * @return le chemin de l'asset, ou {@code null} : l'exercice montre alors son propre modèle
+     */
+    @Nullable
+    public static String demoAssetFor(Exercise exercise) {
+        if (exercise == null) return null;
+        for (Exercise base : all()) {
+            if (base.getId().equals(exercise.getId())
+                    || base.getName().trim().equalsIgnoreCase(exercise.getName().trim())) {
+                return DEMO_DIRECTORY + "/" + base.getId() + ".json";
+            }
+        }
+        return null;
+    }
+
+    /** Charge la démonstration d'un exercice, ou {@code null} s'il n'en a pas ou qu'elle est illisible. */
+    @Nullable
+    public static Movement loadDemo(Context context, Exercise exercise) {
+        String asset = demoAssetFor(exercise);
+        if (asset == null) return null;
+        try (Reader reader = new InputStreamReader(
+                context.getAssets().open(asset), StandardCharsets.UTF_8)) {
+            return new Gson().fromJson(reader, Movement.class);
+        } catch (IOException | RuntimeException e) {
+            Log.w("BaseExercises", "Démonstration illisible : " + asset, e);
+            return null;
+        }
     }
 
     public static List<Exercise> all() {

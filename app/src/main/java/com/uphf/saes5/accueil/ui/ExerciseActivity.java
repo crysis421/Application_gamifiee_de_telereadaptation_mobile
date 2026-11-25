@@ -25,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
 import com.uphf.saes5.ArcadeScore;
+import com.uphf.saes5.BaseExercises;
 import com.uphf.saes5.BodyVisibility;
 import com.uphf.saes5.GameSettings;
 import com.uphf.saes5.LatencyTracker;
@@ -200,8 +201,11 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         binding.failRepButton.setVisibility(View.GONE);
         binding.comparisonStatus.setText(getString(R.string.exercise_reference_ready,
                 exercise.getSimilarityThreshold()));
-        // Le mannequin rejoue ce même modèle : le geste attendu reste sous les yeux.
-        if (binding.modelPreview.setMovement(reference.frames, reference.sampleIntervalMs)) {
+        // Le mannequin montre le geste attendu : la démonstration de l'exercice de base, vue
+        // sous l'angle le plus lisible, ou à défaut le modèle lui-même.
+        Movement demo = BaseExercises.loadDemo(this, exercise);
+        Movement shown = demo != null ? demo : reference;
+        if (binding.modelPreview.setMovement(shown.frames, shown.sampleIntervalMs)) {
             binding.modelPreview.setVisibility(View.VISIBLE);
         }
 

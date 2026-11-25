@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Consumer;
 
 /**
@@ -21,7 +23,11 @@ import java.util.function.Consumer;
  * l'image : seuls comptent donc les mouvements de ces articulations et l'angle de vue.
  * Chaque modèle décrit une répétition : pose de départ tenue, mouvement, retour tenu.</p>
  *
- * <p>Usage : {@code java tools/GenerateReferenceMovements.java app/src/main/assets/movements}</p>
+ * <p>Il écrit aussi, dans {@code assets/demos}, la démonstration de chaque exercice : le même
+ * mouvement, vu sous l'angle qui le rend le plus lisible, pour le mannequin de l'écran
+ * d'exercice (voir {@link #DEMO_YAW}).</p>
+ *
+ * <p>Usage : {@code java tools/GenerateReferenceMovements.java app/src/main/assets}</p>
  */
 public class GenerateReferenceMovements {
 
@@ -119,6 +125,31 @@ public class GenerateReferenceMovements {
 
     static final Pose STANDING = new Pose();
 
+    /**
+     * Angle de vue des démonstrations, en degrés autour du sujet : 0 = de face, 90 = de profil.
+     *
+     * <p>Le modèle de comparaison est vu comme le filmera le téléphone ; la démonstration,
+     * elle, sert à comprendre le geste, et se regarde sous l'angle qui le rend le plus
+     * lisible : de trois quarts ou de profil pour les flexions (la profondeur d'un squat ne se
+     * voit pas de face), presque de face pour les bras écartés sur le côté.</p>
+     */
+    static final Map<String, Double> DEMO_YAW = Map.ofEntries(
+            Map.entry("base_assis_debout", 70.0),
+            Map.entry("base_squat", 50.0),
+            Map.entry("base_fentes_alternees", 70.0),
+            Map.entry("base_flexion_coudes", 60.0),
+            Map.entry("base_developpe_tete", 20.0),
+            Map.entry("base_dips_chaise", 70.0),
+            Map.entry("base_pompes_mur", 75.0),
+            Map.entry("base_pompes_genoux", 75.0),
+            Map.entry("base_pompes", 75.0),
+            Map.entry("base_elevations_y", 20.0),
+            Map.entry("base_rowing_elastique", 65.0),
+            Map.entry("base_charniere_hanche", 75.0),
+            Map.entry("base_montees_genoux", 55.0),
+            Map.entry("base_pont_fessier", 80.0),
+            Map.entry("base_planche", 75.0));
+
     static List<Movement> movements() {
         List<Movement> list = new ArrayList<>();
 
@@ -208,11 +239,13 @@ public class GenerateReferenceMovements {
                 key(0.9, kneeArms.with(p -> { p.hipFlexR = 110; p.kneeR = 110; })), key(0.9, kneeArms)));
 
         // Pont fessier, de profil : allongé sur le dos, bassin soulevé. Seules les hanches
-        // bougent franchement : bras et genoux varient de moins de 20°, sans quoi ils
-        // dilueraient le mouvement et le pont ne se distinguerait plus de la pose au sol.
-        Pose bridgeDown = STANDING.pitch(-90).arms(10, 10, 5).legs(65, 6, 112);
+        // bougent : bras et genoux restent fixes, sans quoi ils dilueraient le mouvement et le
+        // pont ne se distinguerait plus de la pose au sol. Cuisse levée de 60° et genou plié
+        // à 125° : le pied touche le sol au départ comme en haut du pont.
+        Pose bridgeDown = STANDING.pitch(-90).arms(0, 10, 5).legs(60, 6, 125);
         list.add(movement("base_pont_fessier", View.SIDE, ElbowPlane.SAGITTAL, bridgeDown,
-                key(1.1, STANDING.pitch(-65).arms(10, 10, 5).legs(0, 6, 98)), key(1.1, bridgeDown)));
+                // Buste à -115° : épaules au sol, plus bas que le bassin soulevé.
+                key(1.1, STANDING.pitch(-115).arms(0, 10, 5).legs(0, 6, 125)), key(1.1, bridgeDown)));
 
         // Planche, de profil : posture tenue, sur les avant-bras. Légère respiration.
         Pose plank = STANDING.pitch(80).arms(80, 10, 90);
@@ -337,24 +370,88 @@ public class GenerateReferenceMovements {
         return out;
     }
 
+    /**
+     * Projection d'une démonstration, caméra tournée de {@code yaw} degrés autour du sujet
+     * (0 = de face, 90 = de profil, côté gauche du sujet), en longueurs de torse.
+     *
+     * <p>Contrairement au modèle, l'image n'est pas recentrée sur les hanches : le squelette
+     * est calculé à partir d'elles, et les garder fixes ferait monter les pieds au lieu de
+     * descendre le bassin. {@link #grounded} pose ensuite le corps au sol.</p>
+     */
+    static float[] projectDemo(V[] pts, double yaw) {
+        double t = Math.toRadians(yaw);
+        V right = new V(-Math.cos(t), 0, Math.sin(t));   // droite de l'image
+        V toward = new V(Math.sin(t), 0, Math.cos(t));   // vers la caméra
+        float[] out = new float[66];
+        for (int i = 0; i < 33; i++) {
+            V p = pts[i];
+            double k = CAMERA_DISTANCE / (CAMERA_DISTANCE - p.dot(toward));
+            out[2 * i] = (float) (p.dot(right) * k);
+            out[2 * i + 1] = (float) (-p.y() * k); // y de l'image vers le bas
+        }
+        return out;
+    }
+
+    /** Hauteur, en longueurs de torse, sous laquelle un pied compte comme posé au sol. */
+    static final double FOOT_ON_GROUND = 0.15;
+
+    /**
+     * Pose le corps au sol, image par image : son point le plus bas touche le sol, et il reste
+     * en place horizontalement, ancré sur ses pieds. L'ancrage pondère chaque cheville selon
+     * sa hauteur : un pied qui se lève cesse de compter progressivement, sans que le corps
+     * saute d'un appui à l'autre.
+     */
+    static List<float[]> grounded(List<float[]> frames) {
+        List<float[]> out = new ArrayList<>();
+        for (float[] f : frames) {
+            double lowest = -Double.MAX_VALUE;
+            for (int i = 0; i < 33; i++) lowest = Math.max(lowest, f[2 * i + 1]);
+            double anchorX = 0, weights = 0;
+            for (int ankle : new int[]{27, 28}) {
+                double w = Math.exp(-(lowest - f[2 * ankle + 1]) / FOOT_ON_GROUND);
+                anchorX += w * f[2 * ankle];
+                weights += w;
+            }
+            anchorX /= weights;
+            float[] g = new float[66];
+            for (int i = 0; i < 33; i++) {
+                g[2 * i] = round4(f[2 * i] - anchorX);
+                g[2 * i + 1] = round4(f[2 * i + 1] - lowest);
+            }
+            out.add(g);
+        }
+        return out;
+    }
+
     static float round4(double v) {
         return Math.round(v * 10000.0) / 10000f;
     }
 
+    /** Le modèle de comparaison : vu comme le filmera le téléphone. */
     static List<float[]> frames(Movement m) {
+        return frames(m, pts -> project(pts, m.view()));
+    }
+
+    /** La démonstration : même mouvement, sous l'angle qui le rend le plus lisible. */
+    static List<float[]> demoFrames(Movement m) {
+        double yaw = DEMO_YAW.getOrDefault(m.id(), m.view() == View.FRONT ? 0.0 : 90.0);
+        return grounded(frames(m, pts -> projectDemo(pts, yaw)));
+    }
+
+    static List<float[]> frames(Movement m, Function<V[], float[]> camera) {
         List<float[]> frames = new ArrayList<>();
         int hold = (int) Math.round(HOLD_SEC * 1000 / SAMPLE_MS);
-        for (int i = 0; i < hold; i++) frames.add(project(skeleton(m.start(), m.elbows()), m.view()));
+        for (int i = 0; i < hold; i++) frames.add(camera.apply(skeleton(m.start(), m.elbows())));
         Pose from = m.start();
         for (Key k : m.keys()) {
             int steps = (int) Math.round(k.seconds() * 1000 / SAMPLE_MS);
             for (int i = 1; i <= steps; i++) {
                 Pose p = Pose.lerp(from, k.pose(), i / (double) steps);
-                frames.add(project(skeleton(p, m.elbows()), m.view()));
+                frames.add(camera.apply(skeleton(p, m.elbows())));
             }
             from = k.pose();
         }
-        for (int i = 0; i < hold; i++) frames.add(project(skeleton(from, m.elbows()), m.view()));
+        for (int i = 0; i < hold; i++) frames.add(camera.apply(skeleton(from, m.elbows())));
         return frames;
     }
 
@@ -377,13 +474,17 @@ public class GenerateReferenceMovements {
     }
 
     public static void main(String[] args) throws IOException {
-        Path dir = Path.of(args.length > 0 ? args[0] : "app/src/main/assets/movements");
-        Files.createDirectories(dir);
+        Path assets = Path.of(args.length > 0 ? args[0] : "app/src/main/assets");
+        Path models = Files.createDirectories(assets.resolve("movements"));
+        Path demos = Files.createDirectories(assets.resolve("demos"));
         for (Movement m : movements()) {
             List<float[]> frames = frames(m);
-            Files.writeString(dir.resolve(m.id() + ".json"), toJson(m.id(), frames),
+            Files.writeString(models.resolve(m.id() + ".json"), toJson(m.id(), frames),
                     StandardCharsets.UTF_8);
-            System.out.printf("%-24s %-5s %3d images%n", m.id(), m.view(), frames.size());
+            Files.writeString(demos.resolve(m.id() + ".json"), toJson(m.id(), demoFrames(m)),
+                    StandardCharsets.UTF_8);
+            System.out.printf("%-24s %-5s %3d images, démonstration à %.0f°%n", m.id(), m.view(),
+                    frames.size(), DEMO_YAW.getOrDefault(m.id(), Double.NaN));
         }
     }
 }

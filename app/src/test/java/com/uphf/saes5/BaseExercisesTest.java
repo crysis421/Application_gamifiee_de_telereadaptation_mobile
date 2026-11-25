@@ -2,6 +2,7 @@ package com.uphf.saes5;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
@@ -37,6 +38,45 @@ public class BaseExercisesTest {
         try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
             return new Gson().fromJson(reader, Movement.class);
         }
+    }
+
+    private static Movement read(File file) throws Exception {
+        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+            return new Gson().fromJson(reader, Movement.class);
+        }
+    }
+
+    @Test
+    public void everyBaseExercise_hasADrawableDemo_standingOnTheGround() throws Exception {
+        for (Exercise exercise : BaseExercises.all()) {
+            File file = new File("src/main/assets/" + BaseExercises.demoAssetFor(exercise));
+            assertTrue("démonstration manquante : " + file, file.isFile());
+            Movement demo = read(file);
+
+            // Le mannequin sait l'animer...
+            new ModelAnimation(demo.frames, demo.sampleIntervalMs);
+            // ...et il est posé au sol : à chaque image, son point le plus bas est au niveau 0.
+            for (float[] frame : demo.frames) {
+                float lowest = -Float.MAX_VALUE;
+                for (int i = 1; i < frame.length; i += 2) lowest = Math.max(lowest, frame[i]);
+                assertEquals(exercise.getId() + " : corps décollé du sol", 0f, lowest, 1e-3f);
+            }
+        }
+    }
+
+    @Test
+    public void demo_isFoundById_thenByName_andAbsentOtherwise() {
+        Exercise base = BaseExercises.all().get(0);
+        assertEquals(BaseExercises.DEMO_DIRECTORY + "/" + base.getId() + ".json",
+                BaseExercises.demoAssetFor(base));
+
+        // Un « squat » enregistré par l'utilisateur avant les exercices de base.
+        Exercise userSquat = new Exercise("squat", " SQUAT ", "Jambes", "Facile", 5, "Aucun", 3);
+        assertEquals(BaseExercises.DEMO_DIRECTORY + "/base_squat.json",
+                BaseExercises.demoAssetFor(userSquat));
+
+        Exercise custom = new Exercise("custom_1", "Mon exercice", "Bras", "Facile", 5, "Aucun", 3);
+        assertNull(BaseExercises.demoAssetFor(custom));
     }
 
     @Test

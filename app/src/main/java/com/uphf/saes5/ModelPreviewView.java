@@ -47,6 +47,7 @@ public class ModelPreviewView extends View {
     private final Paint farPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint bodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint spinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint groundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path torso = new Path();
 
     @Nullable
@@ -70,6 +71,10 @@ public class ModelPreviewView extends View {
         spinePaint.setColor(near);
         spinePaint.setStyle(Paint.Style.STROKE);
         spinePaint.setStrokeCap(Paint.Cap.ROUND);
+        groundPaint.setColor(ContextCompat.getColor(context, R.color.colorOnSurfaceVariant));
+        groundPaint.setAlpha(110);
+        groundPaint.setStrokeWidth(2f * getResources().getDisplayMetrics().density);
+        groundPaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
     /**
@@ -119,6 +124,12 @@ public class ModelPreviewView extends View {
         farPaint.setStrokeWidth(stroke);
         bodyPaint.setStrokeWidth(stroke * 0.6f);
         spinePaint.setStrokeWidth(Math.max(stroke, TORSO_WIDTH * scale));
+
+        // Sol : sous le point le plus bas du mouvement. Il donne la mesure d'un squat ou d'un
+        // pont, que le mannequin seul, flottant dans son cadre, ne montre pas.
+        float groundY = current.maxY * scale + offsetY + stroke / 2f;
+        canvas.drawLine(getPaddingLeft() + stroke, groundY,
+                getWidth() - getPaddingRight() - stroke, groundY, groundPaint);
 
         // Côté droit d'abord, en retrait ; puis le tronc, le côté gauche et la tête.
         drawLimbs(canvas, pose, RIGHT_LIMBS, farPaint, scale, offsetX, offsetY);
