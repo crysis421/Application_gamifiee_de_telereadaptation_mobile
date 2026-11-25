@@ -12,7 +12,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,15 +23,21 @@ import java.util.UUID;
  * arrive (voir le remaniement « base de données et modèle de données » du backlog), et seule
  * cette classe sera à remplacer le jour venu.</p>
  *
+ * <p>Un exercice n'existe qu'avec son modèle de référence : c'est à lui que le mouvement est
+ * comparé. Le catalogue démarre donc vide — aucun modèle ne peut être livré avec
+ * l'application — et ne se remplit que d'exercices créés avec leur modèle (voir
+ * {@code CreateExerciseActivity}).</p>
+ *
  * <p>{@link #init(Context)} doit être appelé au démarrage de l'application. Sans lui — en test
- * unitaire par exemple — le catalogue fonctionne en mémoire avec les exercices d'origine et
- * n'écrit rien.</p>
+ * unitaire par exemple — le catalogue fonctionne en mémoire et n'écrit rien.</p>
  */
 public final class ExerciseRepository {
 
     private static final String TAG = "ExerciseRepository";
     private static final String PREFS_NAME = "exergame_prefs";
     private static final String KEY_EXERCISES = "catalogue_exercises";
+    /** Posée une fois les exercices sans modèle retirés des catalogues déjà enregistrés. */
+    private static final String KEY_WITHOUT_MODEL_REMOVED = "catalogue_without_model_removed";
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
@@ -49,31 +54,10 @@ public final class ExerciseRepository {
     @Nullable
     private static SharedPreferences preferences;
 
-    /** Liste modifiable, amorcée avec le catalogue d'origine puis remplacée par init(). */
-    private static final List<Exercise> exercises = new ArrayList<>(defaults());
+    /** Liste modifiable, vide au départ puis remplie par init(). */
+    private static final List<Exercise> exercises = new ArrayList<>();
 
     private ExerciseRepository() {}
-
-    /** Le catalogue livré avec l'application, utilisé à la première ouverture. */
-    private static List<Exercise> defaults() {
-        return Arrays.asList(
-                new Exercise("squat", "Squat", "Jambes", "Facile", 5, "Aucun", 3,
-                        "Pieds écartés à la largeur des épaules, descends en fléchissant les genoux "
-                                + "en gardant le dos droit, puis remonte.", 10),
-                new Exercise("pompes", "Pompes", "Pectoraux", "Moyen", 7, "Tapis", 4,
-                        "Mains au sol à l'aplomb des épaules, corps gainé. Descends jusqu'à frôler "
-                                + "le sol, puis pousse pour remonter.", 12),
-                new Exercise("fentes", "Fentes", "Jambes", "Facile", 6, "Aucun", 2,
-                        "Avance une jambe et fléchis les deux genoux jusqu'à l'angle droit, puis "
-                                + "reviens en poussant sur la jambe avant. Alterne à chaque répétition.", 14),
-                new Exercise("planche", "Planche", "Tronc", "Difficile", 4, "Aucun", 5,
-                        "En appui sur les avant-bras et la pointe des pieds, garde le corps aligné "
-                                + "des épaules aux talons sans creuser le dos.", 8),
-                new Exercise("rowing", "Rowing élastique", "Dos", "Moyen", 8, "Élastique", 1,
-                        "Élastique sous les pieds, buste légèrement penché. Tire les coudes vers "
-                                + "l'arrière en serrant les omoplates, puis relâche en contrôlant.", 12)
-        );
-    }
 
     /**
      * Branche le catalogue sur le stockage et recharge son contenu.
@@ -85,16 +69,34 @@ public final class ExerciseRepository {
                 .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
         String stored = preferences.getString(KEY_EXERCISES, null);
-        if (stored == null) {
-            // Première ouverture : on écrit le catalogue d'origine.
-            save();
+        if (stored != null) {
+            List<Exercise> loaded = deserialize(stored);
+            if (loaded != null) {
+                exercises.clear();
+                exercises.addAll(loaded);
+            }
+        }
+        removeExercisesWithoutModelOnce(context);
+    }
+
+    /**
+     * Retire, une seule fois par appareil, les exercices enregistrés avant que le modèle ne
+     * devienne obligatoire : les cinq exercices autrefois livrés avec l'application, et ceux
+     * créés sans enregistrer de mouvement. Ceux dont le modèle a été enregistré entre-temps
+     * sont conservés.
+     */
+    private static void removeExercisesWithoutModelOnce(Context context) {
+        if (preferences.getBoolean(KEY_WITHOUT_MODEL_REMOVED, false)) {
             return;
         }
-        List<Exercise> loaded = deserialize(stored);
-        if (loaded != null) {
-            exercises.clear();
-            exercises.addAll(loaded);
+        for (int i = exercises.size() - 1; i >= 0; i--) {
+            if (!MovementStorage.exists(context, exercises.get(i).getReferenceMovementId())) {
+                Log.i(TAG, "Exercice sans modèle retiré : " + exercises.get(i).getId());
+                exercises.remove(i);
+            }
         }
+        save();
+        preferences.edit().putBoolean(KEY_WITHOUT_MODEL_REMOVED, true).apply();
     }
 
     public static synchronized List<Exercise> getAll() {
@@ -160,14 +162,6 @@ public final class ExerciseRepository {
 
     public static String newId() {
         return "custom_" + UUID.randomUUID();
-    }
-
-    /** Rétablit le catalogue d'origine. Exposé pour les tests et un éventuel « réinitialiser ». */
-    @VisibleForTesting
-    public static synchronized void resetToDefaults() {
-        exercises.clear();
-        exercises.addAll(defaults());
-        save();
     }
 
     /** Écrit le catalogue. Sans effet tant que {@link #init(Context)} n'a pas été appelé. */

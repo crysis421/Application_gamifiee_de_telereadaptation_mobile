@@ -6,11 +6,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.uphf.saes5.Exercise;
-import com.uphf.saes5.ExerciseRepository;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +18,12 @@ import java.util.Set;
 
 /** Tirage de l'exercice du jour parmi le catalogue (US-4.2). */
 public class DailyExerciseProviderTest {
+
+    /** Un catalogue de test : le vrai démarre vide, faute de modèle livré avec l'application. */
+    private static List<Exercise> catalogue() {
+        return Arrays.asList(exercise("squat"), exercise("pompes"), exercise("fentes"),
+                exercise("planche"), exercise("rowing"));
+    }
 
     private static Exercise exercise(String id) {
         return new Exercise(id, id, "Jambes", "Facile", 5, "Aucun", 3);
@@ -31,7 +37,7 @@ public class DailyExerciseProviderTest {
 
     @Test
     public void pick_isStable_forTheSameDay() {
-        List<Exercise> catalogue = ExerciseRepository.getAll();
+        List<Exercise> catalogue = catalogue();
 
         Exercise first = DailyExerciseProvider.pickForDay(catalogue, "2026-09-30");
         Exercise second = DailyExerciseProvider.pickForDay(catalogue, "2026-09-30");
@@ -41,7 +47,7 @@ public class DailyExerciseProviderTest {
 
     @Test
     public void pick_comesFromTheCatalogue() {
-        List<Exercise> catalogue = ExerciseRepository.getAll();
+        List<Exercise> catalogue = catalogue();
         Set<String> catalogueIds = new HashSet<>();
         for (Exercise candidate : catalogue) {
             catalogueIds.add(candidate.getId());
@@ -67,7 +73,7 @@ public class DailyExerciseProviderTest {
 
     @Test
     public void pick_variesAcrossDays() {
-        List<Exercise> catalogue = ExerciseRepository.getAll();
+        List<Exercise> catalogue = catalogue();
         Set<String> picked = new HashSet<>();
 
         for (int day = 1; day <= 31; day++) {

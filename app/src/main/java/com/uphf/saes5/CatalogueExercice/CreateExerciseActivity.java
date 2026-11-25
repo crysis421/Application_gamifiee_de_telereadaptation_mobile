@@ -152,6 +152,14 @@ public class CreateExerciseActivity extends AppCompatActivity {
 
             int starsValue = Math.max(1, Math.round(stars.getRating()));
 
+            // Un exercice n'existe qu'avec son modèle : sans lui, rien à quoi comparer le
+            // mouvement. La création attend donc qu'il ait été enregistré.
+            if (edited == null && !MovementStorage.exists(this, referenceMovementId)) {
+                Toast.makeText(this, R.string.reference_model_missing_toast,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
             // En modification on garde l'identifiant : les favoris et l'exercice du jour
             // qui le référencent continuent de pointer sur le bon exercice.
             Exercise result = new Exercise(
