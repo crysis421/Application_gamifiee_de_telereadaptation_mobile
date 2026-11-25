@@ -76,4 +76,17 @@
         <item name="boxCornerRadiusBottomStart">14dp</item>
         <item name="boxCornerRadiusBottomEnd">14dp</item>
     </style>
+
+    <!-- Texte posé sur l'image de la caméra : une ombre portée le détache de n'importe quel fond. -->
+    <style name="SAES5.CameraText" parent="">
+        <item name="android:shadowColor">#CC000000</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">8</item>
+    </style>
+
+    <!-- Bouton à contour sur l'image de la caméra : fond translucide pour rester lisible. -->
+    <style name="Widget.SAES5.Button.Outlined.OverCamera">
+        <item name="backgroundTint">@color/camera_hud_surface</item>
+    </style>
 </resources>

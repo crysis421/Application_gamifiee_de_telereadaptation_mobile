@@ -1,82 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Écran d'exécution de l'exercice.
-    Tous les éléments clés (compteur, chrono, feedback, boutons) sont surdimensionnés :
+
+    L'image de la caméra occupe tout l'écran, barres système comprises : c'est elle que
+    l'utilisateur regarde pendant qu'il bouge. Tout le reste est posé par-dessus, dans #hud,
+    qui reçoit seul les marges des barres système. Deux dégradés, en haut et en bas,
+    assombrissent l'image là où se trouvent les textes, et ceux-ci portent une ombre :
+    ils restent lisibles quelle que soit la pièce filmée.
+
+    Tous les éléments clés (compteur, chrono, feedback, boutons) restent surdimensionnés :
     l'utilisateur doit pouvoir les lire et les atteindre à plusieurs mètres de l'écran (US-3.1).
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/screen_margin">
+    android:background="@android:color/black">
+
+    <!--
+        Recadrage au centre pour remplir l'écran : l'image de la caméra est moins allongée que
+        l'écran, ses bords gauche et droit sont donc rognés à l'affichage. L'analyse de pose,
+        elle, travaille toujours sur l'image entière.
+    -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/exercise_camera_preview_description"
+        app:implementationMode="compatible"
+        app:scaleType="fillCenter" />
+
+    <!-- Même cadre et même recadrage que l'aperçu : le squelette reste calé sur le corps. -->
+    <com.uphf.saes5.OverlayView
+        android:id="@+id/poseOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_camera_scrim_top"
+        android:importantForAccessibility="no" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="420dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_camera_scrim_bottom"
+        android:importantForAccessibility="no" />
 
     <LinearLayout
+        android:id="@+id/hud"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/screen_margin">
 
-        <TextView
-            android:id="@+id/exerciseName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
-            android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold"
-            tools:text="Élévations latérales" />
-
-        <TextView
-            android:id="@+id/chronometer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:fontFeatureSettings="tnum"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="@dimen/text_session_chrono"
-            android:textStyle="bold"
-            tools:text="01:24" />
-    </LinearLayout>
-
-    <!-- Filet primaire sous le titre, comme sur les autres écrans de l'application. -->
-    <View
-        android:layout_width="48dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="8dp"
-        android:background="?attr/colorPrimary" />
-
-    <FrameLayout
-        android:id="@+id/cameraContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/block_spacing"
-        android:layout_weight="1"
-        android:background="@drawable/bg_camera_placeholder">
-
-        <androidx.camera.view.PreviewView
-            android:id="@+id/cameraPreview"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/exercise_camera_preview_description"
-            app:implementationMode="compatible"
-            app:scaleType="fillCenter" />
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <com.uphf.saes5.OverlayView
-            android:id="@+id/poseOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:importantForAccessibility="no" />
+            <TextView
+                android:id="@+id/exerciseName"
+                style="@style/SAES5.CameraText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textColor="@color/colorOnSurface"
+                android:textStyle="bold"
+                tools:text="Élévations latérales" />
 
+            <TextView
+                android:id="@+id/chronometer"
+                style="@style/SAES5.CameraText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFeatureSettings="tnum"
+                android:textColor="@color/colorOnSurface"
+                android:textSize="@dimen/text_session_chrono"
+                android:textStyle="bold"
+                tools:text="01:24" />
+        </LinearLayout>
+
+        <!-- Filet primaire sous le titre, comme sur les autres écrans de l'application. -->
+        <View
+            android:layout_width="48dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:background="?attr/colorPrimary" />
+
+        <!-- Score de similarité et état de la comparaison, en pastille sous le titre. -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_margin="12dp"
-            android:background="@drawable/bg_feedback_banner"
-            android:gravity="center"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:background="@drawable/bg_camera_chip"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingVertical="10dp">
@@ -94,7 +120,6 @@
                 android:id="@+id/comparisonStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:maxWidth="@dimen/session_status_max_width"
                 android:text="@string/exercise_similarity_waiting"
                 android:textColor="@color/colorOnSurfaceVariant"
@@ -114,6 +139,12 @@
                 tools:visibility="visible" />
         </LinearLayout>
 
+        <!-- Le milieu de l'écran reste dégagé : c'est là que se trouve le corps filmé. -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <!--
             Bandeau de feedback (US-3.2). La couleur est posée par le code via un tint : le
             fond reste donc arrondi comme les cartes du reste de l'application.
@@ -122,8 +153,6 @@
             android:id="@+id/feedbackBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_margin="12dp"
             android:background="@drawable/bg_feedback_banner"
             android:backgroundTint="@color/app_success"
             android:gravity="center"
@@ -134,69 +163,73 @@
             android:visibility="invisible"
             tools:text="Répétition validée"
             tools:visibility="visible" />
-    </FrameLayout>
 
-    <TextView
-        android:id="@+id/repCounter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/block_spacing"
-        android:gravity="center"
-        android:textColor="?attr/colorPrimary"
-        android:textSize="@dimen/text_counter_huge"
-        android:textStyle="bold"
-        tools:text="7 / 12" />
+        <TextView
+            android:id="@+id/repCounter"
+            style="@style/SAES5.CameraText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_counter_huge"
+            android:textStyle="bold"
+            tools:text="7 / 12" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/exercise_reps_label"
-        android:textAppearance="@style/TextAppearance.SAES5.Label"
-        android:textSize="16sp" />
+        <TextView
+            style="@style/SAES5.CameraText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/exercise_reps_label"
+            android:textAppearance="@style/TextAppearance.SAES5.Label"
+            android:textColor="@color/colorOnSurface"
+            android:textSize="16sp" />
 
-    <!-- Score arcade et multiplicateur (US-4.4), masqué si l'élément de jeu est désactivé. -->
-    <TextView
-        android:id="@+id/arcadeScore"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:fontFeatureSettings="tnum"
-        android:gravity="center"
-        android:textColor="?attr/colorOnSurface"
-        android:textSize="@dimen/text_session_score"
-        android:textStyle="bold"
-        android:visibility="gone"
-        tools:text="1 240 pts · ×3"
-        tools:visibility="visible" />
+        <!-- Score arcade et multiplicateur (US-4.4), masqué si l'élément de jeu est désactivé. -->
+        <TextView
+            android:id="@+id/arcadeScore"
+            style="@style/SAES5.CameraText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFeatureSettings="tnum"
+            android:gravity="center"
+            android:textColor="@color/colorOnSurface"
+            android:textSize="@dimen/text_session_score"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="1 240 pts · ×3"
+            tools:visibility="visible" />
 
-    <!-- Secours pour les anciens exercices sans modèle ou si la caméra est refusée. -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/validateRepButton"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height_large"
-        android:layout_marginTop="@dimen/block_spacing"
-        android:text="@string/exercise_validate_rep"
-        android:textSize="@dimen/button_text_large"
-        android:visibility="gone" />
+        <!-- Secours pour les anciens exercices sans modèle ou si la caméra est refusée. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/validateRepButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_marginTop="@dimen/block_spacing"
+            android:text="@string/exercise_validate_rep"
+            android:textSize="@dimen/button_text_large"
+            android:visibility="gone" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/failRepButton"
-        style="@style/Widget.SAES5.Button.Outlined"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/exercise_fail_rep"
-        android:textSize="18sp"
-        android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/failRepButton"
+            style="@style/Widget.SAES5.Button.Outlined.OverCamera"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/exercise_fail_rep"
+            android:textSize="18sp"
+            android:visibility="gone" />
 
-    <!-- Grand bouton contrasté : on doit pouvoir l'atteindre sans viser en revenant vers l'écran. -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/finishButton"
-        style="@style/Widget.SAES5.Button.Outlined"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height_large"
-        android:layout_marginTop="8dp"
-        android:text="@string/exercise_finish"
-        android:textSize="@dimen/button_text_large" />
-</LinearLayout>
+        <!-- Grand bouton contrasté : on doit pouvoir l'atteindre sans viser en revenant vers l'écran. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/finishButton"
+            style="@style/Widget.SAES5.Button.Outlined.OverCamera"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_marginTop="8dp"
+            android:text="@string/exercise_finish"
+            android:textSize="@dimen/button_text_large" />
+    </LinearLayout>
+</FrameLayout>

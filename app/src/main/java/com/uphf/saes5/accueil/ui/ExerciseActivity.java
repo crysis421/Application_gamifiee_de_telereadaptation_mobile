@@ -127,7 +127,9 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         binding = ActivityExerciseBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        EdgeToEdgeSupport.applySystemBarInsets(binding.main);
+        // Les marges des barres système vont au calque d'informations, pas à la racine : la
+        // caméra passe ainsi sous la barre d'état et la barre de navigation, en plein écran.
+        EdgeToEdgeSupport.applySystemBarInsets(binding.hud);
 
         dailyExerciseTracker = new DailyExerciseTracker(this);
         soundFeedback = new SoundFeedback(this);

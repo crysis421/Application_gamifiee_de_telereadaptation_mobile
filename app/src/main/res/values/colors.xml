@@ -38,4 +38,7 @@
     -->
     <color name="app_success">#2ED47A</color>
     <color name="app_error">#FF4D4F</color>
+
+    <!-- Fond translucide des éléments posés sur l'image de la caméra (écran d'exercice). -->
+    <color name="camera_hud_surface">#99000000</color>
 </resources>
