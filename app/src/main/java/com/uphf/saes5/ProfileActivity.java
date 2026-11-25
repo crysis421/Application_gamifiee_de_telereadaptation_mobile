@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class ProfileActivity extends AppCompatActivity {
     @Override
@@ -83,20 +82,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void configureNavigation() {
-        BottomNavigationView navigation = findViewById(R.id.bottom_nav);
-        Navigation.applyGameSettings(navigation);
-        navigation.setSelectedItemId(R.id.nav_profile);
-        // Navigation.openTab plutôt que startActivity + finish : les onglets se réutilisent
-        // au lieu de s'empiler, et le catalogue devient atteignable depuis le profil.
-        navigation.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_home) {
-                Navigation.openTab(this, MainActivity.class);
-            } else if (item.getItemId() == R.id.nav_statistics) {
-                Navigation.openTab(this, StatisticsActivity.class);
-            } else if (item.getItemId() == R.id.nav_catalog) {
-                Navigation.openTab(this, ExerciseCatalogActivity.class);
-            }
-            return true;
-        });
+        Navigation.bind(this, findViewById(R.id.bottom_nav), R.id.nav_profile);
     }
 }

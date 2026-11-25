@@ -34,6 +34,13 @@ import kotlin.math.min
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
 
+    var bodyOnly = false
+        set(value) {
+            field = value
+            initPaints()
+            invalidate()
+        }
+
     private var results: HolisticLandmarkerResult? = null
     private var pointPaint = Paint()
     private var poseLinePaint = Paint()
@@ -66,7 +73,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         pointPaint.style = Paint.Style.FILL
 
         poseLinePaint.color = ContextCompat.getColor(context!!, R.color.colorPrimary)
-        poseLinePaint.strokeWidth = LANDMARK_STROKE_WIDTH
+        poseLinePaint.strokeWidth = if (bodyOnly) 2f * resources.displayMetrics.density else LANDMARK_STROKE_WIDTH
         poseLinePaint.style = Paint.Style.STROKE
 
         faceLinePaint.color = Color.CYAN
@@ -95,7 +102,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             // 1. Draw Pose Landmarks & Connections
             val poseLandmarks = holisticResult.poseLandmarks()
             if (poseLandmarks.isNotEmpty()) {
-                for (landmark in poseLandmarks) {
+                if (!bodyOnly) for (landmark in poseLandmarks) {
                     canvas.drawPoint(
                         landmark.x() * imageWidth * scaleFactor + offsetX,
                         landmark.y() * imageHeight * scaleFactor + offsetY,
@@ -104,6 +111,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 }
 
                 PoseLandmarker.POSE_LANDMARKS.forEach { connection ->
+                    if (bodyOnly && (connection.start() < 11 || connection.end() < 11)) return@forEach
                     val start = poseLandmarks.getOrNull(connection.start())
                     val end = poseLandmarks.getOrNull(connection.end())
                     if (start != null && end != null) {
@@ -117,6 +125,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     }
                 }
             }
+
+            if (bodyOnly) return
 
             // 2. Draw Face Landmarks & Connectors
 //            val faceLandmarks = holisticResult.faceLandmarks()

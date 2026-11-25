@@ -1,171 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Écran d'exécution de l'exercice.
-    Tous les éléments clés (compteur, chrono, feedback, boutons) sont surdimensionnés :
-    l'utilisateur doit pouvoir les lire et les atteindre à plusieurs mètres de l'écran (US-3.1).
--->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/screen_margin">
+    android:background="@color/app_background">
 
-    <LinearLayout
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:contentDescription="@string/exercise_camera_preview_description"
+        app:implementationMode="compatible"
+        app:scaleType="fillCenter" />
 
-        <TextView
-            android:id="@+id/exerciseName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
-            android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold"
-            tools:text="Élévations latérales" />
+    <com.uphf.saes5.OverlayView
+        android:id="@+id/poseOverlay"
+        android:alpha="0.70"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
-        <TextView
-            android:id="@+id/chronometer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="@dimen/text_title"
-            tools:text="01:24" />
-    </LinearLayout>
-
-    <!-- Filet primaire sous le titre, comme sur les autres écrans de l'application. -->
     <View
-        android:layout_width="48dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="8dp"
-        android:background="?attr/colorPrimary" />
+        android:id="@+id/feedbackTint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.20"
+        android:visibility="invisible" />
 
     <FrameLayout
-        android:id="@+id/cameraContainer"
+        android:id="@+id/controls"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/block_spacing"
-        android:layout_weight="1"
-        android:background="@drawable/bg_camera_placeholder">
-
-        <androidx.camera.view.PreviewView
-            android:id="@+id/cameraPreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/exercise_camera_preview_description"
-            app:implementationMode="compatible"
-            app:scaleType="fillCenter" />
-
-        <com.uphf.saes5.OverlayView
-            android:id="@+id/poseOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:importantForAccessibility="no" />
+        android:layout_height="match_parent"
+        android:padding="12dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_margin="12dp"
-            android:background="@drawable/bg_feedback_banner"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="10dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:background="@drawable/session_panel"
+            android:padding="10dp">
 
-            <TextView
-                android:id="@+id/similarityScore"
+            <ImageView
+                android:id="@+id/referenceImage"
+                android:layout_width="76dp"
+                android:layout_height="76dp"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@string/session_reference"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/exerciseName"
+                    style="@style/SessionText"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/comparisonStatus"
+                    style="@style/SessionText"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/similarityScore"
+                    style="@style/SessionText"
+                    android:text="@string/exercise_similarity_unavailable" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/exercise_similarity_unavailable"
-                android:textColor="@color/colorOnSurface"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:gravity="end"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/comparisonStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:maxWidth="220dp"
-                android:text="@string/exercise_similarity_waiting"
-                android:textColor="@color/colorOnSurfaceVariant"
-                android:textSize="14sp" />
+                <TextView
+                    android:id="@+id/chronometer"
+                    style="@style/SessionText" />
+
+                <TextView
+                    android:id="@+id/repCounter"
+                    style="@style/SessionText"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!--
-            Bandeau de feedback (US-3.2). La couleur est posée par le code via un tint : le
-            fond reste donc arrondi comme les cartes du reste de l'application.
-        -->
         <TextView
             android:id="@+id/feedbackBanner"
+            style="@style/SessionText"
+            android:layout_gravity="center"
+            android:background="@drawable/session_panel"
+            android:gravity="center"
+            android:padding="12dp"
+            android:textSize="20sp"
+            android:accessibilityLiveRegion="polite"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/countdown"
+            style="@style/SessionText"
+            android:layout_gravity="center"
+            android:background="@drawable/session_panel"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textSize="32sp"
+            android:accessibilityLiveRegion="polite" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_margin="12dp"
-            android:background="@drawable/bg_feedback_banner"
-            android:backgroundTint="@color/app_success"
             android:gravity="center"
-            android:padding="16dp"
-            android:textColor="@color/colorOnPrimary"
-            android:textSize="@dimen/text_body_large"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            tools:text="Répétition validée"
-            tools:visibility="visible" />
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/validateRepButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/exercise_validate_rep"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/failRepButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/exercise_fail_rep"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/finishButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exercise_finish" />
+        </LinearLayout>
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/repCounter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/block_spacing"
-        android:gravity="center"
-        android:textColor="?attr/colorPrimary"
-        android:textSize="@dimen/text_counter_huge"
-        android:textStyle="bold"
-        tools:text="7 / 12" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/exercise_reps_label"
-        android:textAppearance="@style/TextAppearance.SAES5.Label"
-        android:textSize="16sp" />
-
-    <!-- Secours pour les anciens exercices sans modèle ou si la caméra est refusée. -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/validateRepButton"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height_large"
-        android:layout_marginTop="@dimen/block_spacing"
-        android:text="@string/exercise_validate_rep"
-        android:textSize="@dimen/button_text_large"
-        android:visibility="gone" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/failRepButton"
-        style="@style/Widget.SAES5.Button.Outlined"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/exercise_fail_rep"
-        android:textSize="18sp"
-        android:visibility="gone" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/finishButton"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="4dp"
-        android:text="@string/exercise_finish"
-        android:textSize="18sp" />
-</LinearLayout>
+</FrameLayout>

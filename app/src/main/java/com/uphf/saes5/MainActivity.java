@@ -56,17 +56,7 @@ public class MainActivity extends AppCompatActivity {
         binding.openSettingsButton.setOnClickListener(view ->
                 startActivity(new Intent(this, SettingsActivity.class)));
 
-        binding.bottomNav.setSelectedItemId(R.id.nav_home);
-        binding.bottomNav.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_catalog) {
-                Navigation.openTab(this, ExerciseCatalogActivity.class);
-            } else if (item.getItemId() == R.id.nav_statistics) {
-                Navigation.openTab(this, StatisticsActivity.class);
-            } else if (item.getItemId() == R.id.nav_profile) {
-                Navigation.openTab(this, ProfileActivity.class);
-            }
-            return true;
-        });
+        Navigation.bind(this, binding.bottomNav, R.id.nav_home);
 
         favoritesRepository = new FavoritesRepository(this);
         dailyExerciseTracker = new DailyExerciseTracker(this);

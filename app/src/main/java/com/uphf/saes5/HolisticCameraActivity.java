@@ -43,7 +43,7 @@ public class HolisticCameraActivity extends AppCompatActivity
     public static final String MODE_COMPARE = "compare";
 
     private static final String TAG = "HolisticCameraActivity";
-    private static final int COUNTDOWN_SEC = 3;
+    private static final int COUNTDOWN_SEC = 5;
     private static final int RECORD_SEC = 6;
     private static final long SAMPLE_INTERVAL_MS = 100;
     private static final int MIN_FRAMES = 20;

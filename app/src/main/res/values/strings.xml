@@ -192,4 +192,7 @@
     <string name="settings_export_30_days">30 derniers jours</string>
     <string name="settings_export_empty">Aucune séance enregistrée pour le moment.</string>
     <string name="settings_export_failed">Export impossible.</string>
+    <string name="session_reference">Posture de référence</string>
+    <string name="session_countdown">Place-toi\n%d</string>
+    <string name="session_stars">Étoiles obtenues : %1$d sur 3</string>
 </resources>

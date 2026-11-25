@@ -40,12 +40,21 @@ public final class Navigation {
         from.startActivity(intent);
     }
 
-    /**
-     * Masque les onglets dont l'élément de jeu est désactivé (US-4.1).
-     *
-     * <p>À appeler depuis chaque écran portant la barre : un onglet laissé visible mènerait
-     * à un écran que la condition de test est censée retirer.</p>
-     */
+    /** Relie la barre à son écran et conserve son onglet lors des allers-retours. */
+    public static void bind(Activity screen, BottomNavigationView bar, int currentTab) {
+        applyGameSettings(bar);
+        bar.getMenu().findItem(currentTab).setChecked(true);
+        bar.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) openTab(screen, MainActivity.class);
+            else if (id == R.id.nav_catalog) openTab(screen, ExerciseCatalogActivity.class);
+            else if (id == R.id.nav_profile) openTab(screen, ProfileActivity.class);
+            else if (id == R.id.nav_statistics) openTab(screen, StatisticsActivity.class);
+            // Chaque activité conserve la sélection de son propre onglet au retour.
+            return id == currentTab;
+        });
+    }
+
     public static void applyGameSettings(BottomNavigationView navigation) {
         MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
         if (statistics != null) {

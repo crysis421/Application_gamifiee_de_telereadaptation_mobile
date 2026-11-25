@@ -10,6 +10,16 @@ import org.junit.Test;
 public class ExerciseSessionTest {
 
     @Test
+    public void starsReflectBothCompletionAndSuccessRate() {
+        assertEquals(0, new ExerciseSession("id", 0, 5, 0).earnedStars(10));
+        assertEquals(1, new ExerciseSession("id", 4, 0, 0).earnedStars(10));
+        assertEquals(1, new ExerciseSession("id", 5, 5, 0).earnedStars(10));
+        assertEquals(2, new ExerciseSession("id", 5, 2, 0).earnedStars(10));
+        assertEquals(2, new ExerciseSession("id", 10, 5, 0).earnedStars(10));
+        assertEquals(3, new ExerciseSession("id", 10, 2, 0).earnedStars(10));
+    }
+
+    @Test
     public void successRate_isZero_whenNoAttempt() {
         ExerciseSession session = new ExerciseSession("id", 0, 0, 0L);
 

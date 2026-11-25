@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
@@ -96,20 +95,6 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void configureNavigation() {
-        BottomNavigationView navigation = findViewById(R.id.bottom_nav);
-        Navigation.applyGameSettings(navigation);
-        navigation.setSelectedItemId(R.id.nav_statistics);
-        // Pas de finish() : Navigation.openTab s'en charge via CLEAR_TOP, et fermer l'écran
-        // en plus laisserait une pile incohérente d'un onglet à l'autre.
-        navigation.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_home) {
-                Navigation.openTab(this, MainActivity.class);
-            } else if (item.getItemId() == R.id.nav_catalog) {
-                Navigation.openTab(this, ExerciseCatalogActivity.class);
-            } else if (item.getItemId() == R.id.nav_profile) {
-                Navigation.openTab(this, ProfileActivity.class);
-            }
-            return true;
-        });
+        Navigation.bind(this, findViewById(R.id.bottom_nav), R.id.nav_statistics);
     }
 }

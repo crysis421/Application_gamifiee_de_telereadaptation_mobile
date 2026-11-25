@@ -53,6 +53,13 @@ public class ExerciseSession {
         return Math.round((validatedReps * 100f) / attempts);
     }
 
+    public int earnedStars(int targetReps) {
+        if (validatedReps <= 0 || targetReps <= 0) return 0;
+        if (validatedReps >= targetReps && getSuccessRate() >= 80) return 3;
+        if (validatedReps >= (targetReps + 1L) / 2 && getSuccessRate() >= 60) return 2;
+        return 1;
+    }
+
     /** Durée moyenne d'une répétition validée, en millisecondes. 0 si aucune répétition. */
     public long getAverageMillisPerRep() {
         if (validatedReps == 0) {

@@ -4,7 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.os.CountDownTimer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -72,6 +73,11 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private int completedSimilarityTotal;
     private int completedSimilarityCount;
     private long startElapsedRealtime;
+    private CountDownTimer preparation;
+    private boolean waitingForPermission;
+    private boolean correctionSignalled;
+    private long correctionSince;
+    private long attemptDuration;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable chronometerTick = new Runnable() {
@@ -81,9 +87,13 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
             handler.postDelayed(this, 1_000L);
         }
     };
-    private final Runnable hideFeedback = () -> binding.feedbackBanner.setVisibility(View.INVISIBLE);
+    private final Runnable hideFeedback = () -> {
+        binding.feedbackBanner.setVisibility(View.INVISIBLE);
+        binding.feedbackTint.setVisibility(View.INVISIBLE);
+    };
     private final ActivityResultLauncher<String> requestCameraPermission =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                waitingForPermission = false;
                 if (granted) {
                     cameraPermissionRefused = false;
                     startCameraComparison();
@@ -91,6 +101,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                     cameraPermissionRefused = true;
                     enableManualFallback(R.string.exercise_camera_permission_required);
                 }
+                beginPreparation();
             });
 
     public static Intent newIntent(Context context, String exerciseId) {
@@ -114,11 +125,19 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         binding = ActivityExerciseBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        EdgeToEdgeSupport.applySystemBarInsets(binding.main);
+        EdgeToEdgeSupport.applySystemBarInsets(binding.controls);
 
         dailyExerciseTracker = new DailyExerciseTracker(this);
         soundFeedback = new SoundFeedback(this);
-        startElapsedRealtime = SystemClock.elapsedRealtime();
+        binding.poseOverlay.setBodyOnly(true);
+        setActionsEnabled(false);
+        if (savedInstanceState != null) {
+            validatedReps = savedInstanceState.getInt("valid");
+            failedReps = savedInstanceState.getInt("failed");
+            completedSimilarityCount = savedInstanceState.getInt("scores");
+            completedSimilarityTotal = savedInstanceState.getInt("total");
+            startElapsedRealtime = savedInstanceState.getLong("start");
+        }
 
         binding.exerciseName.setText(exercise.getName());
         updateRepCounter();
@@ -140,6 +159,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     @Override
     protected void onStart() {
         super.onStart();
+        if (binding == null) return;
         handler.post(chronometerTick);
         if (comparisonEngine != null && !cameraPermissionRefused
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -166,13 +186,69 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         super.onDestroy();
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putInt("valid", validatedReps);
+        out.putInt("failed", failedReps);
+        out.putInt("scores", completedSimilarityCount);
+        out.putInt("total", completedSimilarityTotal);
+        out.putLong("start", startElapsedRealtime);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        beginPreparation();
+    }
+
+    @Override
+    protected void onPause() {
+        if (preparation != null) preparation.cancel();
+        preparation = null;
+        super.onPause();
+    }
+
+    private void beginPreparation() {
+        if (binding == null || waitingForPermission || preparation != null || isFinishing()) return;
+        if (startElapsedRealtime != 0) {
+            setActionsEnabled(true);
+            binding.countdown.setVisibility(View.GONE);
+            return;
+        }
+        binding.countdown.setText(getString(R.string.session_countdown, 5));
+        preparation = new CountDownTimer(5000, 250) {
+            public void onTick(long remaining) {
+                binding.countdown.setText(getString(R.string.session_countdown, (remaining + 999) / 1000));
+            }
+            public void onFinish() {
+                preparation = null;
+                startElapsedRealtime = SystemClock.elapsedRealtime();
+                binding.countdown.setVisibility(View.GONE);
+                setActionsEnabled(true);
+            }
+        }.start();
+    }
+
+    private void setActionsEnabled(boolean enabled) {
+        binding.validateRepButton.setEnabled(enabled);
+        binding.failRepButton.setEnabled(enabled);
+        binding.finishButton.setEnabled(enabled);
+    }
+
     private void prepareReferenceComparison() {
         Movement reference = MovementStorage.load(this, exercise.getReferenceMovementId());
+        Bitmap illustration = ReferenceIllustration.create(exercise.getId(), reference);
+        if (illustration != null) {
+            binding.referenceImage.setImageBitmap(illustration);
+            binding.referenceImage.setVisibility(View.VISIBLE);
+        }
         if (!hasUsableReference(reference)) {
             enableManualFallback(R.string.exercise_reference_missing_fallback);
             return;
         }
 
+        attemptDuration = Math.max(POSE_SAMPLE_INTERVAL_MILLIS, reference.frames.size() * POSE_SAMPLE_INTERVAL_MILLIS);
         comparisonEngine = new MovementComparisonEngine(
                 reference.frames, exercise.getSimilarityThreshold());
         binding.validateRepButton.setVisibility(View.GONE);
@@ -182,6 +258,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
+            waitingForPermission = true;
             requestCameraPermission.launch(Manifest.permission.CAMERA);
         }
     }
@@ -196,6 +273,10 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     private void startCameraComparison() {
         if (comparisonEngine == null || cameraController != null || isFinishing()) return;
+        correctionSince = 0;
+        correctionSignalled = false;
+        binding.validateRepButton.setVisibility(View.GONE);
+        binding.failRepButton.setVisibility(View.GONE);
         comparisonActive = true;
         comparisonExecutor.execute(comparisonEngine::reset);
         cameraController = new PoseCameraController(
@@ -223,7 +304,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     @Override
     public void onResults(@NonNull HolisticLandmarkerHelper.ResultBundle resultBundle) {
         long now = SystemClock.elapsedRealtime();
-        if (!comparisonActive || now - lastPoseSampleRealtime < POSE_SAMPLE_INTERVAL_MILLIS
+        if (startElapsedRealtime == 0 || !comparisonActive || now - lastPoseSampleRealtime < POSE_SAMPLE_INTERVAL_MILLIS
                 || !comparisonInFlight.compareAndSet(false, true)) return;
 
         float[] frame = MovementMath.normalize(
@@ -258,8 +339,16 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         }
 
         if (result.isMovementValid()) {
+            correctionSince = 0;
+            correctionSignalled = false;
             showComparisonStatus(R.string.exercise_similarity_valid, R.color.app_success);
         } else {
+            long now = SystemClock.elapsedRealtime();
+            if (correctionSince == 0) correctionSince = now;
+            if (!correctionSignalled && now - correctionSince >= attemptDuration) {
+                correctionSignalled = true;
+                onRepetitionFailed();
+            }
             showComparisonStatus(R.string.exercise_similarity_correct, R.color.app_error);
         }
         if (result.isRepetitionValidated()) {
@@ -271,6 +360,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     @Override
     public void onEmpty() {
+        correctionSince = 0;
+        correctionSignalled = false;
         showComparisonStatus(R.string.exercise_pose_not_detected,
                 R.color.colorOnSurfaceVariant);
     }
@@ -310,20 +401,13 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     }
 
     private long elapsedMillis() {
-        return SystemClock.elapsedRealtime() - startElapsedRealtime;
+        return startElapsedRealtime == 0 ? 0 : SystemClock.elapsedRealtime() - startElapsedRealtime;
     }
 
-    /**
-     * Affiche le bandeau de feedback dans la couleur demandée.
-     *
-     * <p>C'est un tint et non une couleur de fond : le fond arrondi défini dans le layout est
-     * ainsi conservé. Le texte reste toujours sur {@code colorOnPrimary} (noir), lisible aussi
-     * bien sur le vert que sur le rouge.</p>
-     */
     private void showFeedback(@StringRes int messageRes, @ColorRes int backgroundRes) {
         binding.feedbackBanner.setText(messageRes);
-        binding.feedbackBanner.setBackgroundTintList(
-                ColorStateList.valueOf(ContextCompat.getColor(this, backgroundRes)));
+        binding.feedbackTint.setBackgroundColor(ContextCompat.getColor(this, backgroundRes));
+        binding.feedbackTint.setVisibility(View.VISIBLE);
         binding.feedbackBanner.setVisibility(View.VISIBLE);
 
         handler.removeCallbacks(hideFeedback);

@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -84,20 +83,7 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         findViewById(R.id.create_exercise_button).setOnClickListener(v ->
                 startActivity(CreateExerciseActivity.newIntent(this)));
 
-        BottomNavigationView navigation = findViewById(R.id.bottom_nav);
-        Navigation.applyGameSettings(navigation);
-        navigation.setSelectedItemId(R.id.nav_catalog);
-        navigation.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_home) {
-                Navigation.openTab(this, MainActivity.class);
-            } else if (item.getItemId() == R.id.nav_statistics) {
-                Navigation.openTab(this, StatisticsActivity.class);
-
-            } else if (item.getItemId() == R.id.nav_profile) {
-                Navigation.openTab(this, ProfileActivity.class);
-            }
-            return true;
-        });
+        Navigation.bind(this, findViewById(R.id.bottom_nav), R.id.nav_catalog);
     }
 
     @Override

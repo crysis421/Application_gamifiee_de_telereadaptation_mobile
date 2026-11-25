@@ -80,6 +80,18 @@ public class SummaryActivity extends AppCompatActivity {
                 EXTRA_SIMILARITY_SCORE, SessionEntry.SCORE_UNAVAILABLE);
 
         bindSession(session, similarityScore);
+        if (GameSettings.isEnabled(GameSettings.Feature.STARS)) {
+            int stars = session.earnedStars(exercise.getTargetReps());
+            binding.sessionStars.setText("★★★".substring(0, stars) + "☆☆☆".substring(stars));
+            binding.sessionStars.setContentDescription(getString(R.string.session_stars, stars));
+            binding.sessionStars.setVisibility(View.VISIBLE);
+            if (savedInstanceState == null && android.animation.ValueAnimator.areAnimatorsEnabled()) {
+                binding.sessionStars.setAlpha(0f);
+                binding.sessionStars.setScaleX(0.85f);
+                binding.sessionStars.setScaleY(0.85f);
+                binding.sessionStars.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(450).start();
+            }
+        }
         bindFavoriteButton();
 
         // Une séance n'est journalisée qu'une fois : après une rotation, l'écran est recréé
