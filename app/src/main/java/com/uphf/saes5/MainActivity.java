@@ -14,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import com.uphf.saes5.accueil.data.DailyExerciseProvider;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
                     granted -> bindSteps());
     private FavoritesRepository favoritesRepository;
     private DailyExerciseTracker dailyExerciseTracker;
+    private BottomNavigationView bottomNav;
     private DailyExerciseProvider dailyExerciseProvider;
 
     @Nullable
@@ -72,17 +75,8 @@ public class MainActivity extends AppCompatActivity {
         binding.openSettingsButton.setOnClickListener(view ->
                 startActivity(new Intent(this, SettingsActivity.class)));
 
-        binding.bottomNav.setSelectedItemId(R.id.nav_home);
-        binding.bottomNav.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_catalog) {
-                Navigation.openTab(this, ExerciseCatalogActivity.class);
-            } else if (item.getItemId() == R.id.nav_statistics) {
-                Navigation.openTab(this, StatisticsActivity.class);
-            } else if (item.getItemId() == R.id.nav_profile) {
-                Navigation.openTab(this, ProfileActivity.class);
-            }
-            return true;
-        });
+        bottomNav = findViewById(R.id.bottom_nav);
+        Navigation.setupTabs(this, bottomNav, R.id.nav_home);
 
         favoritesRepository = new FavoritesRepository(this);
         stepCounter = new StepCounter(this);
@@ -103,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // L'accueil reste l'onglet sélectionné au retour d'un autre écran.
-        binding.bottomNav.setSelectedItemId(R.id.nav_home);
+        bottomNav.setSelectedItemId(R.id.nav_home);
         // Les réglages ont pu changer : on réapplique avant de reconstruire la carte.
         applyGameSettings();
         // Le catalogue a pu changer entre-temps : un exercice créé devient éligible aussitôt.
@@ -166,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
     private void applyGameSettings() {
         boolean statistics = GameSettings.isEnabled(GameSettings.Feature.STATISTICS);
         binding.openStatisticsButton.setVisibility(statistics ? View.VISIBLE : View.GONE);
-        Navigation.applyGameSettings(binding.bottomNav);
+        Navigation.applyGameSettings(bottomNav);
 
         binding.dailyExerciseCard.favoriteButton.setVisibility(
                 GameSettings.isEnabled(GameSettings.Feature.FAVORITES) ? View.VISIBLE : View.GONE);

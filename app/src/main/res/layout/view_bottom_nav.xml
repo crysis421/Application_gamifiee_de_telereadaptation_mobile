@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Barre d'onglets, unique pour toute l'application.
+
+    Elle était redéclarée dans chaque écran, et les copies avaient divergé : l'écran de profil
+    teintait tout en colorPrimary, si bien que l'onglet actif ne se distinguait plus des autres.
+    Un seul fichier inclus partout empêche la divergence de revenir.
+
+    Les teintes passent par @color/bottom_nav_item, un sélecteur : couleur primaire pour
+    l'onglet sélectionné, gris pour les autres.
+-->
+<com.google.android.material.bottomnavigation.BottomNavigationView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_nav"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorSurface"
+    app:itemIconTint="@color/bottom_nav_item"
+    app:itemTextColor="@color/bottom_nav_item"
+    app:menu="@menu/bottom_nav_menu" />

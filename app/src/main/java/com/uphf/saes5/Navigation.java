@@ -4,25 +4,62 @@ import android.app.Activity;
 import android.content.Intent;
 import android.view.MenuItem;
 
+import androidx.annotation.IdRes;
+import androidx.annotation.Nullable;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
- * Navigation de la barre d'onglets.
+ * Barre d'onglets de l'application.
  *
- * <p>Les trois onglets ne doivent jamais s'empiler : chacun appelait
- * {@code startActivity} sans drapeau, si bien qu'un aller-retour Accueil → Catalogue →
- * Accueil créait trois écrans au lieu d'en réutiliser un. Le bouton retour remontait alors
- * tout l'historique des onglets, et plusieurs catalogues coexistaient, chacun avec ses
- * propres filtres.</p>
+ * <p>Chaque écran recâblait sa barre à la main, et les copies avaient divergé : l'un oubliait
+ * de marquer l'onglet courant, un autre ne proposait pas le catalogue, un autre encore
+ * laissait des {@code finish()} qui réempilaient les écrans. Tout passe désormais par
+ * {@link #setupTabs}, et la barre elle-même vient du layout partagé
+ * {@code view_bottom_nav.xml}.</p>
  *
- * <p>{@code CLEAR_TOP} ramène au premier plan l'écran déjà présent dans la pile en fermant
- * ceux empilés par-dessus ; {@code SINGLE_TOP} évite de le recréer. Associés au
- * {@code launchMode="singleTop"} déclaré au manifeste, la pile reste bornée aux trois
- * onglets et le retour quitte l'application depuis l'accueil.</p>
+ * <p>Les onglets ne doivent jamais s'empiler : {@code CLEAR_TOP} ramène au premier plan
+ * l'écran déjà présent dans la pile en fermant ceux empilés par-dessus, {@code SINGLE_TOP}
+ * évite de le recréer. Associés au {@code launchMode="singleTop"} déclaré au manifeste, la
+ * pile reste bornée aux quatre onglets et le retour quitte l'application depuis l'accueil.</p>
  */
 public final class Navigation {
 
     private Navigation() {
+    }
+
+    /**
+     * Installe la barre d'onglets d'un écran.
+     *
+     * <p>Applique les réglages de gamification, marque l'onglet courant et branche la
+     * navigation vers les trois autres.</p>
+     *
+     * @param selectedItemId l'onglet à marquer comme actif, ou {@code 0} pour n'en marquer
+     *                       aucun — un écran qui n'est pas lui-même un onglet
+     */
+    public static void setupTabs(Activity activity,
+                                 @Nullable BottomNavigationView navigation,
+                                 @IdRes int selectedItemId) {
+        if (navigation == null) {
+            return;
+        }
+        applyGameSettings(navigation);
+        if (selectedItemId != 0) {
+            navigation.setSelectedItemId(selectedItemId);
+        }
+        navigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                openTab(activity, MainActivity.class);
+            } else if (id == R.id.nav_statistics) {
+                openTab(activity, StatisticsActivity.class);
+            } else if (id == R.id.nav_catalog) {
+                openTab(activity, ExerciseCatalogActivity.class);
+            } else if (id == R.id.nav_profile) {
+                openTab(activity, ProfileActivity.class);
+            }
+            return true;
+        });
     }
 
     /**
@@ -43,8 +80,9 @@ public final class Navigation {
     /**
      * Masque les onglets dont l'élément de jeu est désactivé (US-4.1).
      *
-     * <p>À appeler depuis chaque écran portant la barre : un onglet laissé visible mènerait
-     * à un écran que la condition de test est censée retirer.</p>
+     * <p>Appelé par {@link #setupTabs}, et à rappeler depuis {@code onResume} des écrans qui
+     * peuvent voir les réglages changer pendant leur affichage : un onglet laissé visible
+     * mènerait à un écran que la condition de test est censée retirer.</p>
      */
     public static void applyGameSettings(BottomNavigationView navigation) {
         MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
