@@ -7,7 +7,6 @@ import android.view.View;
 
 import java.util.Locale;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -19,7 +18,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.uphf.saes5.accueil.data.DailyExerciseProvider;
 import com.uphf.saes5.accueil.data.DailyExerciseTracker;
 import com.uphf.saes5.accueil.data.FavoritesRepository;
-import com.uphf.saes5.accueil.ui.EdgeToEdgeSupport;
 import com.uphf.saes5.accueil.ui.ExerciseActivity;
 import com.uphf.saes5.accueil.ui.ExerciseFormatter;
 import com.uphf.saes5.databinding.ActivityMainBinding;
@@ -59,14 +57,15 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
-        EdgeToEdge.enable(this);
-
         detailsExpanded = savedInstanceState != null
                 && savedInstanceState.getBoolean(STATE_DETAILS_EXPANDED, false);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        EdgeToEdgeSupport.applySystemBarInsets(binding.main);
+        // Pas de mode bord à bord ici : l'accueil était le seul écran à en faire usage, et la
+        // marge système appliquée à sa racine remontait la barre d'onglets de la hauteur de la
+        // barre de gestes, laissant une bande noire sous elle. Les quatre autres onglets
+        // laissent le système réserver ses barres ; l'accueil fait désormais pareil.
 
         binding.openStatisticsButton.setOnClickListener(view ->
                 Navigation.openTab(this, StatisticsActivity.class));
