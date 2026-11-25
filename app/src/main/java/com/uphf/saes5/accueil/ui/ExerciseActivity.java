@@ -25,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
 import com.uphf.saes5.ArcadeScore;
+import com.uphf.saes5.BodyVisibility;
 import com.uphf.saes5.GameSettings;
 import com.uphf.saes5.LatencyTracker;
 import com.uphf.saes5.Movement;
@@ -74,6 +75,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     private long lastPoseSampleRealtime;
     private boolean cameraPermissionRefused;
     private volatile boolean comparisonActive;
+    /** Le corps était visible à l'image précédente : sa sortie du cadre abandonne la tentative. */
+    private boolean bodyFullyVisible;
     private final ExecutorService comparisonExecutor = Executors.newSingleThreadExecutor();
     private final AtomicBoolean comparisonInFlight = new AtomicBoolean();
 
@@ -252,6 +255,14 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                 || !comparisonInFlight.compareAndSet(false, true)) return;
 
         showLatency();
+        // Corps en partie hors du cadre : MediaPipe devine les points qu'il ne voit pas, et
+        // la comparaison compterait des répétitions sur des membres inventés.
+        if (!BodyVisibility.isMostlyVisible(poseFrame.getPoseLandmarks())) {
+            comparisonInFlight.set(false);
+            onBodyNotFullyVisible();
+            return;
+        }
+        bodyFullyVisible = true;
         float[] frame = MovementMath.normalize(
                 poseFrame.getPoseLandmarks(),
                 poseFrame.getInputImageWidth(),
@@ -295,6 +306,23 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
             completedSimilarityCount++;
             onRepetitionValidated(result.getMovementScore());
         }
+    }
+
+    /**
+     * Rien n'est comparé tant que le corps n'est pas assez visible. La tentative en cours est
+     * abandonnée en sortant du cadre : une répétition ne peut pas se valider sur un mouvement
+     * vu en partie seulement.
+     */
+    private void onBodyNotFullyVisible() {
+        if (bodyFullyVisible && comparisonEngine != null) {
+            comparisonExecutor.execute(comparisonEngine::reset);
+        }
+        bodyFullyVisible = false;
+        if (postureFeedback != null) postureFeedback.reset();
+        binding.poseOverlay.setPostureState(PostureFeedback.State.NEUTRAL);
+        binding.similarityScore.setText(R.string.exercise_similarity_unavailable);
+        showComparisonStatus(R.string.exercise_body_not_fully_visible,
+                R.color.colorOnSurfaceVariant);
     }
 
     @Override

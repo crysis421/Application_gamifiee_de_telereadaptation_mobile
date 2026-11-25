@@ -121,6 +121,7 @@
     <string name="exercise_similarity_score">%1$d %%</string>
     <string name="exercise_similarity_waiting">Placez votre corps entier dans le cadre</string>
     <string name="exercise_pose_not_detected">Corps non détecté</string>
+    <string name="exercise_body_not_fully_visible">Reculez : le corps entier doit être dans le cadre</string>
     <string name="exercise_latency">Latence %1$d ms</string>
     <string name="exercise_goal_reached_auto_finish">Objectif atteint ! Fin dans %1$d s</string>
     <string name="exercise_posture_correct">Posture correcte</string>
