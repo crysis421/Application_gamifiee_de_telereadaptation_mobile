@@ -7,10 +7,16 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,8 +30,8 @@ import java.util.UUID;
  * cette classe sera à remplacer le jour venu.</p>
  *
  * <p>Un exercice n'existe qu'avec son modèle de référence : c'est à lui que le mouvement est
- * comparé. Le catalogue démarre donc vide — aucun modèle ne peut être livré avec
- * l'application — et ne se remplit que d'exercices créés avec leur modèle (voir
+ * comparé. Le catalogue démarre avec les exercices de base ({@link BaseExercises}), livrés
+ * avec leur modèle, puis ne s'enrichit que d'exercices créés avec le leur (voir
  * {@code CreateExerciseActivity}).</p>
  *
  * <p>{@link #init(Context)} doit être appelé au démarrage de l'application. Sans lui — en test
@@ -38,6 +44,8 @@ public final class ExerciseRepository {
     private static final String KEY_EXERCISES = "catalogue_exercises";
     /** Posée une fois les exercices sans modèle retirés des catalogues déjà enregistrés. */
     private static final String KEY_WITHOUT_MODEL_REMOVED = "catalogue_without_model_removed";
+    /** Posée une fois les exercices de base installés : un exercice supprimé ne revient pas. */
+    private static final String KEY_BASE_INSTALLED = "catalogue_base_exercises_installed";
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
@@ -77,6 +85,48 @@ public final class ExerciseRepository {
             }
         }
         removeExercisesWithoutModelOnce(context);
+        installBaseExercisesOnce(context);
+    }
+
+    /**
+     * Ajoute, une seule fois par appareil, les exercices de base et leur modèle.
+     *
+     * <p>Un exercice du même identifiant ou du même nom est laissé tel quel, avec le modèle que
+     * l'utilisateur lui a peut-être enregistré. Le modèle est copié avant l'exercice : si la
+     * copie échoue, l'exercice n'est pas ajouté.</p>
+     */
+    private static void installBaseExercisesOnce(Context context) {
+        if (preferences.getBoolean(KEY_BASE_INSTALLED, false)) {
+            return;
+        }
+        Gson gson = new Gson();
+        for (Exercise base : BaseExercises.all()) {
+            if (isAlreadyInCatalogue(base)) {
+                continue;
+            }
+            String asset = BaseExercises.ASSET_DIRECTORY + "/" + base.getReferenceMovementId() + ".json";
+            try (Reader reader = new InputStreamReader(
+                    context.getAssets().open(asset), StandardCharsets.UTF_8)) {
+                if (!MovementStorage.exists(context, base.getReferenceMovementId())) {
+                    MovementStorage.save(context, gson.fromJson(reader, Movement.class));
+                }
+                exercises.add(base);
+            } catch (IOException | RuntimeException e) {
+                Log.w(TAG, "Exercice de base non installé, modèle illisible : " + asset, e);
+            }
+        }
+        save();
+        preferences.edit().putBoolean(KEY_BASE_INSTALLED, true).apply();
+    }
+
+    private static boolean isAlreadyInCatalogue(Exercise candidate) {
+        for (Exercise exercise : exercises) {
+            if (exercise.getId().equals(candidate.getId())
+                    || exercise.getName().trim().equalsIgnoreCase(candidate.getName().trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
