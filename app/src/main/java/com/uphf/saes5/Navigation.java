@@ -1,7 +1,6 @@
 package com.uphf.saes5;
 
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.view.MenuItem;
@@ -112,10 +111,27 @@ public final class Navigation {
             return;
         }
         boolean towardsRight = toPosition > fromPosition;
-        ActivityOptions options = ActivityOptions.makeCustomAnimation(from,
+        from.startActivity(intent);
+        overrideTransition(from,
                 towardsRight ? R.anim.tab_enter_from_right : R.anim.tab_enter_from_left,
                 towardsRight ? R.anim.tab_exit_to_left : R.anim.tab_exit_to_right);
-        from.startActivity(intent, options.toBundle());
+    }
+
+    /**
+     * Impose l'animation de la transition qui vient d'être lancée.
+     *
+     * <p>{@code overridePendingTransition} plutôt qu'{@code ActivityOptions} : Android 14
+     * (constaté sur Samsung) ignore les options de lancement quand l'onglet visé est déjà
+     * dans la pile et que {@code CLEAR_TOP} le ramène — le cas de l'accueil, presque
+     * toujours. Le système jouait alors son animation par défaut, par le bas. Appelé juste
+     * après {@code startActivity}, cet appel prime sur toute autre animation, quel que soit
+     * le type de transition. Il est déprécié depuis Android 14 au profit
+     * d'{@code overrideActivityTransition}, qui ne convient pas ici : celui-ci fixe une
+     * animation par écran et non par trajet, et c'est ce dernier qui donne le sens.</p>
+     */
+    @SuppressWarnings("deprecation")
+    private static void overrideTransition(Activity from, int enterAnim, int exitAnim) {
+        from.overridePendingTransition(enterAnim, exitAnim);
     }
 
     /**
