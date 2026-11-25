@@ -3,8 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/screen_margin">
+    android:orientation="vertical">
+
+    <!--
+        La marge d'écran est portée par ce conteneur et non par la racine : sinon elle
+        s'appliquerait aussi à la barre d'onglets, qui se retrouverait encadrée de vide au
+        lieu d'aller d'un bord à l'autre comme sur les autres écrans.
+    -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="@dimen/screen_margin">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -243,6 +254,8 @@
             android:text="@string/create_exercise"
             app:icon="@drawable/ic_add" />
     </FrameLayout>
+
+    </LinearLayout>
 
     <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

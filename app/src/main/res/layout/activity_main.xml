@@ -14,15 +14,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
-    android:padding="@dimen/screen_margin"
     tools:context=".MainActivity">
 
+    <!--
+        La marge d'écran est portée par le contenu et non par la racine : sinon elle
+        s'appliquerait aussi à la barre d'onglets, qui se retrouverait encadrée de vide au lieu
+        d'aller d'un bord à l'autre comme sur les autres écrans.
+    -->
     <ScrollView
         android:id="@+id/home_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
+        android:padding="@dimen/screen_margin"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
