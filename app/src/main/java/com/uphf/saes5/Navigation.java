@@ -1,7 +1,9 @@
 package com.uphf.saes5;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Intent;
+import android.os.Build;
 import android.view.MenuItem;
 
 import androidx.annotation.IdRes;
@@ -26,8 +28,24 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  * <p>Corollaire : un écran ramené de la pile n'est pas recréé, donc sa barre n'est pas
  * reconstruite. Elle doit par conséquent ne jamais marquer autre chose que son propre
  * onglet — voir le refus de sélection dans {@link #setupTabs}.</p>
+ *
+ * <p>Les changements d'onglet glissent dans le sens de la barre : un onglet situé à droite
+ * arrive par la droite, un onglet situé à gauche arrive par la gauche, et le retour rejoue
+ * le mouvement à l'envers.</p>
  */
 public final class Navigation {
+
+    /**
+     * Position, dans la barre, de l'onglet depuis lequel un écran a été ouvert. L'écran qui
+     * l'a ouvert reste juste en dessous dans la pile : c'est donc là que le retour ramène,
+     * et le sens de l'animation de retour s'en déduit.
+     */
+    private static final String EXTRA_OPENER_POSITION = "com.uphf.saes5.OPENER_TAB_POSITION";
+
+    /** Les onglets, dans l'ordre de la barre — de gauche à droite. */
+    private static final int[] TAB_ORDER = {
+            R.id.nav_home, R.id.nav_statistics, R.id.nav_catalog, R.id.nav_profile
+    };
 
     private Navigation() {
     }
@@ -35,8 +53,8 @@ public final class Navigation {
     /**
      * Installe la barre d'onglets d'un écran.
      *
-     * <p>Applique les réglages de gamification, marque l'onglet courant et branche la
-     * navigation vers les trois autres.</p>
+     * <p>Applique les réglages de gamification, marque l'onglet courant, branche la
+     * navigation vers les trois autres et oriente l'animation de retour.</p>
      *
      * @param selectedItemId l'onglet à marquer comme actif, ou {@code 0} pour n'en marquer
      *                       aucun — un écran qui n'est pas lui-même un onglet
@@ -51,6 +69,7 @@ public final class Navigation {
         if (selectedItemId != 0) {
             navigation.setSelectedItemId(selectedItemId);
         }
+        orientBackTransition(activity, selectedItemId);
         navigation.setOnItemSelectedListener(item -> {
             Class<? extends Activity> target = screenOf(item.getItemId());
             if (target == null) {
@@ -67,6 +86,76 @@ public final class Navigation {
             // par-dessus — affichait un écran en en désignant un autre dans la barre.
             return false;
         });
+    }
+
+    /**
+     * Bascule vers l'onglet demandé, en glissant dans le sens de la barre.
+     *
+     * <p>Sans effet si l'on y est déjà : réappuyer sur son propre onglet ne doit pas
+     * recharger l'écran.</p>
+     */
+    public static void openTab(Activity from, Class<? extends Activity> target) {
+        if (from.getClass().equals(target)) {
+            return;
+        }
+        int fromPosition = positionOf(currentTab(from));
+        int toPosition = positionOf(tabOf(target));
+
+        Intent intent = new Intent(from, target);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(EXTRA_OPENER_POSITION, fromPosition);
+
+        if (fromPosition < 0 || toPosition < 0 || fromPosition == toPosition) {
+            // Pas de sens à donner — un écran de détail qui rejoint son propre onglet, par
+            // exemple : l'animation par défaut du système convient.
+            from.startActivity(intent);
+            return;
+        }
+        boolean towardsRight = toPosition > fromPosition;
+        ActivityOptions options = ActivityOptions.makeCustomAnimation(from,
+                towardsRight ? R.anim.tab_enter_from_right : R.anim.tab_enter_from_left,
+                towardsRight ? R.anim.tab_exit_to_left : R.anim.tab_exit_to_right);
+        from.startActivity(intent, options.toBundle());
+    }
+
+    /**
+     * Masque les onglets dont l'élément de jeu est désactivé (US-4.1).
+     *
+     * <p>Appelé par {@link #setupTabs}, et à rappeler depuis {@code onResume} des écrans qui
+     * peuvent voir les réglages changer pendant leur affichage : un onglet laissé visible
+     * mènerait à un écran que la condition de test est censée retirer.</p>
+     */
+    public static void applyGameSettings(BottomNavigationView navigation) {
+        MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
+        if (statistics != null) {
+            statistics.setVisible(GameSettings.isEnabled(GameSettings.Feature.STATISTICS));
+        }
+    }
+
+    /**
+     * Oriente l'animation de retour : l'écran d'en dessous revient du côté de son onglet.
+     *
+     * <p>L'extra lu ici est celui de la création de l'écran. Un retour sur l'écran par
+     * {@code SINGLE_TOP} passe par {@code onNewIntent} sans remplacer cet intent, et c'est
+     * voulu : l'écran situé en dessous dans la pile ne change pas.</p>
+     *
+     * <p>Android 14 et plus seulement, car {@code overrideActivityTransition} n'existe pas
+     * avant et c'est aussi la seule voie que respecte le retour prédictif. En dessous, le
+     * retour garde l'animation du système ; l'aller reste orienté sur toutes les versions.</p>
+     */
+    private static void orientBackTransition(Activity activity, @IdRes int selectedItemId) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            return;
+        }
+        int own = positionOf(selectedItemId);
+        int opener = activity.getIntent().getIntExtra(EXTRA_OPENER_POSITION, -1);
+        if (own < 0 || opener < 0 || own == opener) {
+            return;
+        }
+        boolean openerOnLeft = opener < own;
+        activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE,
+                openerOnLeft ? R.anim.tab_enter_from_left : R.anim.tab_enter_from_right,
+                openerOnLeft ? R.anim.tab_exit_to_right : R.anim.tab_exit_to_left);
     }
 
     /** L'écran derrière un onglet, ou {@code null} si l'élément n'est pas un onglet. */
@@ -87,32 +176,34 @@ public final class Navigation {
         return null;
     }
 
-    /**
-     * Bascule vers l'onglet demandé.
-     *
-     * <p>Sans effet si l'on y est déjà : réappuyer sur son propre onglet ne doit pas
-     * recharger l'écran.</p>
-     */
-    public static void openTab(Activity from, Class<? extends Activity> target) {
-        if (from.getClass().equals(target)) {
-            return;
+    /** L'onglet d'un écran, ou {@code 0} si l'écran n'est pas un onglet. */
+    @IdRes
+    private static int tabOf(Class<? extends Activity> screen) {
+        for (int itemId : TAB_ORDER) {
+            if (screen.equals(screenOf(itemId))) {
+                return itemId;
+            }
         }
-        Intent intent = new Intent(from, target);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        from.startActivity(intent);
+        return 0;
     }
 
     /**
-     * Masque les onglets dont l'élément de jeu est désactivé (US-4.1).
-     *
-     * <p>Appelé par {@link #setupTabs}, et à rappeler depuis {@code onResume} des écrans qui
-     * peuvent voir les réglages changer pendant leur affichage : un onglet laissé visible
-     * mènerait à un écran que la condition de test est censée retirer.</p>
+     * L'onglet que marque la barre de l'écran — celui de son onglet parent pour un écran
+     * de détail, ce qui situe aussi ce dernier dans la barre.
      */
-    public static void applyGameSettings(BottomNavigationView navigation) {
-        MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
-        if (statistics != null) {
-            statistics.setVisible(GameSettings.isEnabled(GameSettings.Feature.STATISTICS));
+    @IdRes
+    private static int currentTab(Activity activity) {
+        BottomNavigationView navigation = activity.findViewById(R.id.bottom_nav);
+        return navigation != null ? navigation.getSelectedItemId() : tabOf(activity.getClass());
+    }
+
+    /** Position de l'onglet dans la barre, de gauche à droite, ou {@code -1}. */
+    private static int positionOf(@IdRes int itemId) {
+        for (int i = 0; i < TAB_ORDER.length; i++) {
+            if (TAB_ORDER[i] == itemId) {
+                return i;
+            }
         }
+        return -1;
     }
 }
