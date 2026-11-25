@@ -41,4 +41,8 @@
 
     <!-- Fond translucide des éléments posés sur l'image de la caméra (écran d'exercice). -->
     <color name="camera_hud_surface">#99000000</color>
+
+    <!-- Mannequin de démonstration : cadre presque opaque, côté droit du corps en retrait. -->
+    <color name="model_preview_surface">#EB161616</color>
+    <color name="model_preview_far">#A88C00</color>
 </resources>

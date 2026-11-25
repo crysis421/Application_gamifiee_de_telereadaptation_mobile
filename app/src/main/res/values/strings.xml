@@ -116,6 +116,7 @@
 
     <!-- Écran d\'exécution d\'un exercice -->
     <string name="exercise_camera_preview_description">Aperçu caméra avec squelette de posture</string>
+    <string name="exercise_model_preview_description">Démonstration animée du mouvement à reproduire</string>
     <string name="exercise_similarity_unavailable">— %</string>
     <string name="exercise_similarity_score">%1$d %%</string>
     <string name="exercise_similarity_waiting">Placez votre corps entier dans le cadre</string>

@@ -197,6 +197,10 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         binding.failRepButton.setVisibility(View.GONE);
         binding.comparisonStatus.setText(getString(R.string.exercise_reference_ready,
                 exercise.getSimilarityThreshold()));
+        // Le mannequin rejoue ce même modèle : le geste attendu reste sous les yeux.
+        if (binding.modelPreview.setMovement(reference.frames, reference.sampleIntervalMs)) {
+            binding.modelPreview.setVisibility(View.VISIBLE);
+        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
