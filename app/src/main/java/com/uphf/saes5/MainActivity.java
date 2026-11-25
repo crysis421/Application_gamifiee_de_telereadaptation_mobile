@@ -95,8 +95,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // L'accueil reste l'onglet sélectionné au retour d'un autre écran.
-        bottomNav.setSelectedItemId(R.id.nav_home);
         // Les réglages ont pu changer : on réapplique avant de reconstruire la carte.
         applyGameSettings();
         // Le catalogue a pu changer entre-temps : un exercice créé devient éligible aussitôt.

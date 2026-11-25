@@ -22,6 +22,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  * l'écran déjà présent dans la pile en fermant ceux empilés par-dessus, {@code SINGLE_TOP}
  * évite de le recréer. Associés au {@code launchMode="singleTop"} déclaré au manifeste, la
  * pile reste bornée aux quatre onglets et le retour quitte l'application depuis l'accueil.</p>
+ *
+ * <p>Corollaire : un écran ramené de la pile n'est pas recréé, donc sa barre n'est pas
+ * reconstruite. Elle doit par conséquent ne jamais marquer autre chose que son propre
+ * onglet — voir le refus de sélection dans {@link #setupTabs}.</p>
  */
 public final class Navigation {
 
@@ -48,18 +52,39 @@ public final class Navigation {
             navigation.setSelectedItemId(selectedItemId);
         }
         navigation.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                openTab(activity, MainActivity.class);
-            } else if (id == R.id.nav_statistics) {
-                openTab(activity, StatisticsActivity.class);
-            } else if (id == R.id.nav_catalog) {
-                openTab(activity, ExerciseCatalogActivity.class);
-            } else if (id == R.id.nav_profile) {
-                openTab(activity, ProfileActivity.class);
+            Class<? extends Activity> target = screenOf(item.getItemId());
+            if (target == null) {
+                return false;
             }
-            return true;
+            if (activity.getClass().equals(target)) {
+                // Déjà sur cet onglet : on garde la marque, sans rien recharger.
+                return true;
+            }
+            openTab(activity, target);
+            // La sélection est refusée à dessein : l'écran que l'on quitte doit continuer de
+            // marquer son propre onglet. Sinon il gardait la marque de l'onglet touché, et le
+            // rouvrir — bouton retour, ou nouvel appui sur son onglet depuis un écran empilé
+            // par-dessus — affichait un écran en en désignant un autre dans la barre.
+            return false;
         });
+    }
+
+    /** L'écran derrière un onglet, ou {@code null} si l'élément n'est pas un onglet. */
+    @Nullable
+    private static Class<? extends Activity> screenOf(@IdRes int itemId) {
+        if (itemId == R.id.nav_home) {
+            return MainActivity.class;
+        }
+        if (itemId == R.id.nav_statistics) {
+            return StatisticsActivity.class;
+        }
+        if (itemId == R.id.nav_catalog) {
+            return ExerciseCatalogActivity.class;
+        }
+        if (itemId == R.id.nav_profile) {
+            return ProfileActivity.class;
+        }
+        return null;
     }
 
     /**
