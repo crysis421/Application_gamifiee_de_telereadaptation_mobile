@@ -1,43 +1,59 @@
 package com.uphf.saes5.ui.catalog;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.databinding.ActivityExercisePlayerBinding;
 import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.exercise.ExerciseActivity;
 
+/**
+ * Fiche d'un exercice ouverte depuis le catalogue, avec le bouton qui lance la séance.
+ *
+ * <p>Elle porte la barre d'onglets, sur l'onglet Catalogue, sans être elle-même un onglet.</p>
+ */
 public class ExerciseDetailActivity extends AppCompatActivity {
+
+    private static final String EXTRA_EXERCISE_ID = "exercise_id";
+
+    public static Intent newIntent(Context context, String exerciseId) {
+        return new Intent(context, ExerciseDetailActivity.class)
+                .putExtra(EXTRA_EXERCISE_ID, exerciseId);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_exercise_player);
-        String exerciseId = getIntent().getStringExtra("exercise_id");
-        Exercise exercise = null;
-        for (Exercise candidate : AppContainer.from(getApplicationContext()).exerciseRepository.getAll()) {
-            if (candidate.getId().equals(exerciseId)) {
-                exercise = candidate;
-                break;
-            }
-        }
+        ActivityExercisePlayerBinding binding =
+                ActivityExercisePlayerBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        String exerciseId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
+        AppContainer container = AppContainer.from(this);
+        ExerciseDetailViewModel viewModel = new ViewModelProvider(this, ViewModelFactory.of(
+                ExerciseDetailViewModel.class,
+                () -> new ExerciseDetailViewModel(
+                        exerciseId, container.exerciseRepository, container.gameSettings)))
+                .get(ExerciseDetailViewModel.class);
+
+        Exercise exercise = viewModel.getExercise();
         if (exercise != null) {
-            ((android.widget.TextView) findViewById(R.id.player_name)).setText(exercise.getName());
-            ((android.widget.TextView) findViewById(R.id.player_metadata)).setText(
-                    exercise.getMuscleGroup() + " • " + exercise.getDifficulty()
-                            + " • " + exercise.getEquipment());
-            Exercise selected = exercise;
-            // Lance la vraie séance, celle de la carte « Exercice du jour » : ce bouton
-            // n'affichait qu'un Toast, le catalogue ne menait donc nulle part.
-            findViewById(R.id.start_button).setOnClickListener(v ->
-                    startActivity(ExerciseActivity.newIntent(this, selected.getId())));
+            binding.playerName.setText(exercise.getName());
+            binding.playerMetadata.setText(exercise.getMuscleGroup() + " • "
+                    + exercise.getDifficulty() + " • " + exercise.getEquipment());
+            binding.startButton.setOnClickListener(v ->
+                    startActivity(ExerciseActivity.newIntent(this, exercise.getId())));
         }
         Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_catalog);
         Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
-                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
+                viewModel.isStatisticsTabVisible());
     }
 }

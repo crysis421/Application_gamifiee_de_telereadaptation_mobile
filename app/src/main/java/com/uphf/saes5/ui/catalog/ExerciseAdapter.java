@@ -10,9 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.GameFeature;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +29,21 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
     private final List<Exercise> exercises = new ArrayList<>();
     private final OnExerciseClickListener listener;
     private final OnExerciseMenuListener menuListener;
+    private boolean starsVisible = true;
 
     public ExerciseAdapter(OnExerciseClickListener listener, OnExerciseMenuListener menuListener) {
         this.listener = listener;
         this.menuListener = menuListener;
     }
 
-    public void submitList(List<Exercise> newExercises) {
+    /**
+     * @param starsVisible les étoiles sont un élément de jeu désactivable (US-4.1) : c'est
+     *                     l'état de l'écran qui le dit, l'adaptateur ne lit aucun réglage
+     */
+    public void submitList(List<Exercise> newExercises, boolean starsVisible) {
         exercises.clear();
         if (newExercises != null) exercises.addAll(newExercises);
+        this.starsVisible = starsVisible;
         notifyDataSetChanged();
     }
 
@@ -57,9 +61,7 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
         holder.name.setText(exercise.getName());
         holder.metadata.setText(exercise.getDifficulty() + " • " + exercise.getEquipment()
                 + " • " + exercise.getDurationMinutes() + " min");
-        // Les rangs sont un élément de jeu désactivable (US-4.1).
-        boolean showStars = AppContainer.from(holder.itemView.getContext()).gameSettings.isEnabled(GameFeature.STARS);
-        holder.stars.setVisibility(showStars ? View.VISIBLE : View.GONE);
+        holder.stars.setVisibility(starsVisible ? View.VISIBLE : View.GONE);
         holder.stars.setText(stars(exercise.getStars()));
         holder.itemView.setOnClickListener(view -> listener.onClick(exercise));
         holder.menuButton.setOnClickListener(view -> menuListener.onMenuClick(exercise, view));

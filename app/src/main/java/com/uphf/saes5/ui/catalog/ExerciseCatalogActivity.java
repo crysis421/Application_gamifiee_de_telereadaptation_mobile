@@ -1,108 +1,109 @@
 package com.uphf.saes5.ui.catalog;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.databinding.ActivityExerciseCatalogBinding;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.GameFeature;
-import com.uphf.saes5.ui.common.Navigation;
-import com.uphf.saes5.ui.common.TabSwipe;
+import com.uphf.saes5.ui.common.TabActivity;
 
-public class ExerciseCatalogActivity extends AppCompatActivity {
+/**
+ * Catalogue d'exercices : liste filtrable, création, modification et suppression.
+ *
+ * <p>Vue du MVVM : les filtres saisis sont transmis à {@link CatalogViewModel}, qui renvoie
+ * la liste à afficher.</p>
+ */
+public class ExerciseCatalogActivity extends TabActivity {
+
+    private ActivityExerciseCatalogBinding binding;
     private CatalogViewModel viewModel;
+
+    @Override
+    protected int tabId() {
+        return R.id.nav_catalog;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_exercise_catalog);
+        binding = ActivityExerciseCatalogBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        AppContainer container = AppContainer.from(this);
         viewModel = new ViewModelProvider(this, ViewModelFactory.of(CatalogViewModel.class,
-                () -> new CatalogViewModel(AppContainer.from(this).exerciseRepository)))
+                () -> new CatalogViewModel(container.exerciseRepository, container.gameSettings)))
                 .get(CatalogViewModel.class);
 
-        RecyclerView recycler = findViewById(R.id.exercises_recycler);
-        recycler.setLayoutManager(new LinearLayoutManager(this));
         ExerciseAdapter adapter = new ExerciseAdapter(
-                exercise -> {
-                    Intent intent = new Intent(this, ExerciseDetailActivity.class);
-                    intent.putExtra("exercise_id", exercise.getId());
-                    startActivity(intent);
-                },
+                exercise -> startActivity(ExerciseDetailActivity.newIntent(this, exercise.getId())),
                 this::showExerciseMenu);
-        recycler.setAdapter(adapter);
-        viewModel.getExercises().observe(this, adapter::submitList);
+        binding.exercisesRecycler.setLayoutManager(new LinearLayoutManager(this));
+        binding.exercisesRecycler.setAdapter(adapter);
 
-        ChipGroup muscleGroup = findViewById(R.id.muscle_chip_group);
-        ChipGroup difficultyGroup = findViewById(R.id.difficulty_chip_group);
-        EditText duration = findViewById(R.id.duration_input);
-        EditText equipment = findViewById(R.id.equipment_input);
-
-        View filtersContainer = findViewById(R.id.filters_container);
-        View filterMenuButton = findViewById(R.id.filter_menu_button);
-        filterMenuButton.setOnClickListener(v -> {
-            boolean willOpen = filtersContainer.getVisibility() != View.VISIBLE;
-            filtersContainer.setVisibility(willOpen ? View.VISIBLE : View.GONE);
-            filterMenuButton.setContentDescription(getString(willOpen
-                    ? R.string.close_filters
-                    : R.string.open_filters));
-        });
-
-        findViewById(R.id.apply_button).setOnClickListener(v -> {
-            Integer maxDuration = null;
-            String durationText = duration.getText().toString().trim();
-            if (!durationText.isEmpty()) {
-                try {
-                    maxDuration = Integer.parseInt(durationText);
-                } catch (NumberFormatException ignored) {
-                    // champ limité à 4 chiffres : on ignore une valeur invalide
-                }
-            }
+        binding.filterMenuButton.setOnClickListener(v ->
+                showFilters(binding.filtersContainer.getVisibility() != View.VISIBLE));
+        binding.applyButton.setOnClickListener(v -> {
             viewModel.filter(
-                    selectedFilter(muscleGroup, R.id.chip_muscle_all),
-                    selectedFilter(difficultyGroup, R.id.chip_difficulty_all),
-                    maxDuration,
-                    equipment.getText().toString().trim());
-            filtersContainer.setVisibility(View.GONE);
-            filterMenuButton.setContentDescription(getString(R.string.open_filters));
+                    selectedFilter(binding.muscleChipGroup, R.id.chip_muscle_all),
+                    selectedFilter(binding.difficultyChipGroup, R.id.chip_difficulty_all),
+                    maxDuration(),
+                    binding.equipmentInput.getText().toString().trim());
+            showFilters(false);
         });
-        findViewById(R.id.reset_button).setOnClickListener(v -> {
-            muscleGroup.check(R.id.chip_muscle_all);
-            difficultyGroup.check(R.id.chip_difficulty_all);
-            duration.setText("");
-            equipment.setText("");
+        binding.resetButton.setOnClickListener(v -> {
+            binding.muscleChipGroup.check(R.id.chip_muscle_all);
+            binding.difficultyChipGroup.check(R.id.chip_difficulty_all);
+            binding.durationInput.setText("");
+            binding.equipmentInput.setText("");
             viewModel.reset();
-            filtersContainer.setVisibility(View.GONE);
-            filterMenuButton.setContentDescription(getString(R.string.open_filters));
+            showFilters(false);
         });
-
-        findViewById(R.id.create_exercise_button).setOnClickListener(v ->
+        binding.createExerciseButton.setOnClickListener(v ->
                 startActivity(ExerciseEditorActivity.newIntent(this)));
 
-        Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_catalog);
-        Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
-                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
+        setupTabs(findViewById(R.id.bottom_nav));
+        viewModel.getState().observe(this, state -> {
+            showStatisticsTab(state.isStatisticsTabVisible());
+            adapter.submitList(state.getExercises(), state.isStarsVisible());
+        });
+        viewModel.getEvents().observe(this, event -> {
+            if (event.getContentIfNotHandled() == CatalogViewModel.CatalogEvent.DELETED) {
+                Toast.makeText(this, R.string.exercise_deleted, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         viewModel.refresh(); // reflète les créations, modifications et suppressions
+    }
+
+    private void showFilters(boolean open) {
+        binding.filtersContainer.setVisibility(open ? View.VISIBLE : View.GONE);
+        binding.filterMenuButton.setContentDescription(
+                getString(open ? R.string.close_filters : R.string.open_filters));
+    }
+
+    /** Durée maximale saisie, ou {@code null} : champ vide ou illisible (limité à 4 chiffres). */
+    private Integer maxDuration() {
+        String text = binding.durationInput.getText().toString().trim();
+        try {
+            return text.isEmpty() ? null : Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /** Menu « modifier / supprimer » d'un exercice, ancré sur son bouton. */
@@ -134,11 +135,8 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
                 .setTitle(R.string.delete_exercise_title)
                 .setMessage(getString(R.string.delete_exercise_message, exercise.getName()))
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.delete_exercise, (dialog, which) -> {
-                    AppContainer.from(getApplicationContext()).exerciseRepository.remove(exercise.getId());
-                    viewModel.refresh();
-                    Toast.makeText(this, R.string.exercise_deleted, Toast.LENGTH_SHORT).show();
-                })
+                .setPositiveButton(R.string.delete_exercise,
+                        (dialog, which) -> viewModel.delete(exercise.getId()))
                 .show();
     }
 
@@ -148,11 +146,5 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
         if (checkedId == View.NO_ID || checkedId == allChipId) return "";
         Chip chip = group.findViewById(checkedId);
         return chip.getText().toString();
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
-        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }
