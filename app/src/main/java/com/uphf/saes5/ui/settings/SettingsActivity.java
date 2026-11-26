@@ -7,7 +7,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,13 +14,16 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.session.SessionRepository;
+import com.uphf.saes5.databinding.ActivitySettingsBinding;
 import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.FrameSampling;
 import com.uphf.saes5.domain.model.GameFeature;
@@ -31,116 +33,168 @@ import com.uphf.saes5.ui.common.FeatureLabels;
 import com.uphf.saes5.ui.consent.ConsentActivity;
 
 import java.io.File;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 /**
- * Réglages des éléments de gamification (US-4.1), nommage de la condition de test (US-7.3)
- * et export du journal des séances (US-7.2).
+ * Réglages des éléments de gamification (US-4.1), de l'analyse (US-1.4), conditions de test
+ * (US-7.3) et export du journal des séances (US-7.2).
  *
- * <p>La liste des interrupteurs est construite à partir de {@link GameFeature} :
- * ajouter un élément de jeu ne demande aucune modification ici.</p>
+ * <p>Vue du MVVM : la liste des interrupteurs est construite à partir de {@link GameFeature},
+ * et chaque changement passe par {@link SettingsViewModel}. Ajouter un élément de jeu ne
+ * demande aucune modification ici.</p>
  */
 public class SettingsActivity extends AppCompatActivity {
 
     /** Périodes proposées à l'export, en jours. 0 signifie « tout l'historique ». */
     private static final int[] EXPORT_PERIODS_DAYS = {0, 7, 30};
 
+    private ActivitySettingsBinding binding;
+    private SettingsViewModel viewModel;
+    private final Map<GameFeature, MaterialSwitch> switches = new EnumMap<>(GameFeature.class);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_settings);
-        EdgeToEdgeSupport.applySystemBarInsets(findViewById(R.id.settings_root));
+        binding = ActivitySettingsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        EdgeToEdgeSupport.applySystemBarInsets(binding.settingsRoot);
+
+        AppContainer container = AppContainer.from(this);
+        viewModel = new ViewModelProvider(this, ViewModelFactory.of(SettingsViewModel.class,
+                () -> new SettingsViewModel(container.gameSettings, container.testConditions,
+                        container.analysisSettings, container.sessionRepository, container.clock)))
+                .get(SettingsViewModel.class);
 
         buildFeatureSwitches();
-        bindAnalysisSettings();
-        bindConditionName();
-        bindSavedConditions();
-        bindExport();
+        binding.settingsAnalysisModel.setOnClickListener(v -> chooseModel());
+        binding.settingsAnalysisStride.setOnClickListener(v -> chooseStride());
+        binding.settingsConditionName.setText(viewModel.getState().getValue().getConditionName());
+        binding.settingsConditionName.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
 
-        refreshSnapshot();
-        findViewById(R.id.settings_back_button).setOnClickListener(v -> finish());
-        findViewById(R.id.settings_consent_button).setOnClickListener(
+            @Override
+            public void afterTextChanged(Editable editable) {
+                viewModel.setConditionName(editable.toString());
+            }
+        });
+        binding.settingsConditionSave.setOnClickListener(v -> viewModel.saveCondition());
+        binding.settingsConditionApply.setOnClickListener(v -> chooseCondition());
+        binding.settingsExportButton.setOnClickListener(v -> askPeriodThenExport());
+        binding.settingsBackButton.setOnClickListener(v -> finish());
+        binding.settingsConsentButton.setOnClickListener(
                 v -> startActivity(ConsentActivity.reviewIntent(this)));
+
+        viewModel.getState().observe(this, this::render);
+        viewModel.getEvents().observe(this, event -> {
+            SettingsViewModel.SettingsEvent content = event.getContentIfNotHandled();
+            if (content != null) onEvent(content);
+        });
     }
 
-    private void buildFeatureSwitches() {
-        LinearLayout gameContainer = findViewById(R.id.settings_container);
-        LinearLayout homeContainer = findViewById(R.id.settings_home_container);
-        // Reconstruit aussi après l'application d'une condition (US-7.3).
-        gameContainer.removeAllViews();
-        homeContainer.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.refresh();
+    }
 
+    /** Un interrupteur par élément, dans la section de son groupe. */
+    private void buildFeatureSwitches() {
+        LayoutInflater inflater = LayoutInflater.from(this);
         for (GameFeature feature : GameFeature.values()) {
             LinearLayout container = feature.getGroup() == GameFeature.Group.HOME
-                    ? homeContainer
-                    : gameContainer;
+                    ? binding.settingsHomeContainer
+                    : binding.settingsContainer;
             View row = inflater.inflate(R.layout.item_setting, container, false);
-
             ((TextView) row.findViewById(R.id.setting_label)).setText(FeatureLabels.label(feature));
             ((TextView) row.findViewById(R.id.setting_help)).setText(FeatureLabels.help(feature));
 
             MaterialSwitch toggle = row.findViewById(R.id.setting_switch);
-            toggle.setChecked(AppContainer.from(getApplicationContext()).gameSettings.isEnabled(feature));
-            toggle.setOnCheckedChangeListener((button, checked) -> {
-                AppContainer.from(getApplicationContext()).gameSettings.setEnabled(feature, checked);
-                refreshSnapshot();
-            });
-
+            toggle.setOnCheckedChangeListener(
+                    (button, checked) -> viewModel.setFeatureEnabled(feature, checked));
             // Toute la ligne bascule l'interrupteur : la cible est plus large que le seul bouton.
             row.setOnClickListener(v -> toggle.toggle());
-
+            switches.put(feature, toggle);
             container.addView(row);
         }
     }
 
-    /** Modèle d'analyse et part d'images analysées (US-1.4). */
-    private void bindAnalysisSettings() {
-        refreshAnalysisButtons();
-
-        findViewById(R.id.settings_analysis_model).setOnClickListener(v -> {
-            AnalysisModel[] models = AnalysisModel.values();
-            String[] labels = new String[models.length];
-            for (int i = 0; i < models.length; i++) labels[i] = getString(FeatureLabels.label(models[i]));
-            new MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.settings_analysis_model_title)
-                    .setSingleChoiceItems(labels, AppContainer.from(getApplicationContext()).analysisSettings.getModel().ordinal(),
-                            (dialog, which) -> {
-                                AppContainer.from(getApplicationContext()).analysisSettings.setModel(models[which]);
-                                refreshAnalysisButtons();
-                                dialog.dismiss();
-                            })
-                    .setNegativeButton(R.string.cancel, null)
-                    .show();
-        });
-
-        findViewById(R.id.settings_analysis_stride).setOnClickListener(v -> {
-            String[] labels = new String[FrameSampling.MAX_FRAME_STRIDE];
-            for (int stride = 1; stride <= FrameSampling.MAX_FRAME_STRIDE; stride++) {
-                labels[stride - 1] = strideLabel(stride);
+    private void render(SettingsUiState state) {
+        for (SettingsUiState.FeatureToggle toggle : state.getFeatures()) {
+            MaterialSwitch view = switches.get(toggle.getFeature());
+            if (view != null && view.isChecked() != toggle.isEnabled()) {
+                view.setChecked(toggle.isEnabled());
             }
-            new MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.settings_analysis_stride_title)
-                    .setSingleChoiceItems(labels, AppContainer.from(getApplicationContext()).analysisSettings.getFrameStride() - 1,
-                            (dialog, which) -> {
-                                AppContainer.from(getApplicationContext()).analysisSettings.setFrameStride(which + 1);
-                                refreshAnalysisButtons();
-                                dialog.dismiss();
-                            })
-                    .setNegativeButton(R.string.cancel, null)
-                    .show();
-        });
+        }
+        binding.settingsAnalysisModel.setText(getString(R.string.settings_analysis_model_value,
+                getString(FeatureLabels.label(state.getModel()))));
+        binding.settingsAnalysisStride.setText(getString(R.string.settings_analysis_stride_value,
+                strideLabel(state.getFrameStride())));
+        binding.settingsSessionCount.setText(
+                getString(R.string.settings_sessions_recorded, state.getSessionCount()));
+        // La configuration telle qu'elle sera journalisée : le chercheur voit sans ambiguïté
+        // la condition de test qu'il vient de composer (US-7.3).
+        binding.settingsSnapshot.setText(state.getSnapshot());
     }
 
-    private void refreshAnalysisButtons() {
-        ((TextView) findViewById(R.id.settings_analysis_model)).setText(getString(
-                R.string.settings_analysis_model_value,
-                getString(FeatureLabels.label(AppContainer.from(getApplicationContext()).analysisSettings.getModel()))));
-        ((TextView) findViewById(R.id.settings_analysis_stride)).setText(getString(
-                R.string.settings_analysis_stride_value,
-                strideLabel(AppContainer.from(getApplicationContext()).analysisSettings.getFrameStride())));
+    private void onEvent(SettingsViewModel.SettingsEvent event) {
+        switch (event.getKind()) {
+            case CONDITION_NAME_REQUIRED:
+                toast(getString(R.string.settings_condition_name_required));
+                break;
+            case CONDITION_SAVED:
+                toast(getString(R.string.settings_condition_saved, event.getName()));
+                break;
+            case CONDITION_APPLIED:
+                binding.settingsConditionName.setText(event.getName());
+                toast(getString(R.string.settings_condition_applied, event.getName()));
+                break;
+            case EXPORT_EMPTY:
+                toast(getString(R.string.settings_export_empty));
+                break;
+            case EXPORT_FAILED:
+                toast(getString(R.string.settings_export_failed));
+                break;
+            case EXPORT_READY:
+                share(event.getFile(), event.getMimeType());
+                break;
+        }
+    }
+
+    // --- analyse (US-1.4) ------------------------------------------------------------------
+
+    private void chooseModel() {
+        AnalysisModel[] models = AnalysisModel.values();
+        String[] labels = new String[models.length];
+        for (int i = 0; i < models.length; i++) labels[i] = getString(FeatureLabels.label(models[i]));
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_analysis_model_title)
+                .setSingleChoiceItems(labels, viewModel.getState().getValue().getModel().ordinal(),
+                        (dialog, which) -> {
+                            viewModel.setModel(models[which]);
+                            dialog.dismiss();
+                        })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void chooseStride() {
+        String[] labels = new String[FrameSampling.MAX_FRAME_STRIDE];
+        for (int stride = 1; stride <= FrameSampling.MAX_FRAME_STRIDE; stride++) {
+            labels[stride - 1] = strideLabel(stride);
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_analysis_stride_title)
+                .setSingleChoiceItems(labels, viewModel.getState().getValue().getFrameStride() - 1,
+                        (dialog, which) -> {
+                            viewModel.setFrameStride(which + 1);
+                            dialog.dismiss();
+                        })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private String strideLabel(int stride) {
@@ -149,43 +203,18 @@ public class SettingsActivity extends AppCompatActivity {
                 : getString(R.string.settings_analysis_stride_one_in, stride);
     }
 
-    /**
-     * Conditions enregistrées (US-7.3) : la configuration courante se sauvegarde sous le nom
-     * saisi, et une condition enregistrée se réapplique d'un toucher avant chaque participant.
-     */
-    private void bindSavedConditions() {
-        findViewById(R.id.settings_condition_save).setOnClickListener(v -> {
-            String name = AppContainer.from(getApplicationContext()).gameSettings.getConditionName();
-            if (name.isEmpty()) {
-                Toast.makeText(this, R.string.settings_condition_name_required,
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-            AppContainer.from(getApplicationContext()).testConditions.saveCurrent(name);
-            Toast.makeText(this, getString(R.string.settings_condition_saved, name),
-                    Toast.LENGTH_SHORT).show();
-        });
-        findViewById(R.id.settings_condition_apply).setOnClickListener(v -> chooseCondition());
-    }
+    // --- conditions de test (US-7.3) -------------------------------------------------------
 
     private void chooseCondition() {
-        List<TestCondition> conditions = AppContainer.from(getApplicationContext()).testConditions.getSaved();
+        List<TestCondition> conditions = viewModel.getSavedConditions();
         if (conditions.isEmpty()) {
-            Toast.makeText(this, R.string.settings_condition_none, Toast.LENGTH_SHORT).show();
+            toast(getString(R.string.settings_condition_none));
             return;
         }
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_condition_choose)
-                .setItems(names(conditions), (dialog, which) -> {
-                    TestCondition condition = conditions.get(which);
-                    AppContainer.from(getApplicationContext()).testConditions.apply(condition);
-                    buildFeatureSwitches();
-                    ((EditText) findViewById(R.id.settings_condition_name))
-                            .setText(condition.getName());
-                    refreshSnapshot();
-                    Toast.makeText(this, getString(R.string.settings_condition_applied,
-                            condition.getName()), Toast.LENGTH_SHORT).show();
-                })
+                .setItems(names(conditions),
+                        (dialog, which) -> viewModel.applyCondition(conditions.get(which)))
                 .setNeutralButton(R.string.settings_condition_delete,
                         (dialog, which) -> chooseConditionToDelete(conditions))
                 .setNegativeButton(R.string.cancel, null)
@@ -200,7 +229,7 @@ public class SettingsActivity extends AppCompatActivity {
                     new MaterialAlertDialogBuilder(this)
                             .setMessage(getString(R.string.settings_condition_delete_confirm, name))
                             .setPositiveButton(R.string.settings_condition_delete_ok,
-                                    (confirm, ignored) -> AppContainer.from(getApplicationContext()).testConditions.delete(name))
+                                    (confirm, ignored) -> viewModel.deleteCondition(name))
                             .setNegativeButton(R.string.cancel, null)
                             .show();
                 })
@@ -214,49 +243,14 @@ public class SettingsActivity extends AppCompatActivity {
         return names;
     }
 
-    /** Nom donné à la condition de test, enregistré à chaque frappe (US-7.3). */
-    private void bindConditionName() {
-        EditText field = findViewById(R.id.settings_condition_name);
-        field.setText(AppContainer.from(getApplicationContext()).gameSettings.getConditionName());
-        field.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
+    // --- export (US-7.2) -------------------------------------------------------------------
 
-            @Override
-            public void afterTextChanged(Editable editable) {
-                AppContainer.from(getApplicationContext()).gameSettings.setConditionName(editable.toString());
-            }
-        });
-    }
-
-    private void bindExport() {
-        findViewById(R.id.settings_export_button).setOnClickListener(v -> askPeriodThenExport());
-        refreshSessionCount();
-    }
-
-    private void refreshSessionCount() {
-        ((TextView) findViewById(R.id.settings_session_count))
-                .setText(getString(R.string.settings_sessions_recorded, AppContainer.from(getApplicationContext()).sessionRepository.count()));
-    }
-
-    /**
-     * Demande la période puis produit l'export (US-7.2).
-     *
-     * <p>Exporter un journal vide n'aurait aucun sens : on le dit plutôt que de partager un
-     * fichier contenant {@code []}.</p>
-     */
     private void askPeriodThenExport() {
-        if (AppContainer.from(getApplicationContext()).sessionRepository.count() == 0) {
-            Toast.makeText(this, R.string.settings_export_empty, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         String[] labels = {
                 getString(R.string.settings_export_all),
                 getString(R.string.settings_export_7_days),
                 getString(R.string.settings_export_30_days),
         };
-
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_export_period)
                 .setItems(labels, (dialog, which) -> askFormatThenExport(EXPORT_PERIODS_DAYS[which]))
@@ -276,37 +270,23 @@ public class SettingsActivity extends AppCompatActivity {
         };
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_export_format)
-                .setItems(labels, (dialog, which) -> export(days, formats[which]))
+                .setItems(labels, (dialog, which) -> viewModel.export(days, formats[which]))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
-    private void export(int days, SessionRepository.ExportFormat format) {
-        long from = days == 0 ? 0L : System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days);
-        File exported = AppContainer.from(getApplicationContext()).sessionRepository.writeExport(from, Long.MAX_VALUE, format);
-        if (exported == null) {
-            Toast.makeText(this, R.string.settings_export_failed, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void share(File exported, String mimeType) {
         Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", exported);
         Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType(format.getMimeType());
+        share.setType(mimeType);
         share.putExtra(Intent.EXTRA_STREAM, uri);
         share.putExtra(Intent.EXTRA_SUBJECT, exported.getName());
         // Sans ce drapeau, l'application qui reçoit le fichier ne peut pas le lire.
         share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
         startActivity(Intent.createChooser(share, getString(R.string.settings_export_button)));
     }
 
-    /**
-     * Affiche la configuration active telle qu'elle sera journalisée.
-     *
-     * <p>Le chercheur voit ainsi, sans ambiguïté, la condition de test qu'il vient de
-     * composer (US-7.3).</p>
-     */
-    private void refreshSnapshot() {
-        ((TextView) findViewById(R.id.settings_snapshot)).setText(AppContainer.from(getApplicationContext()).gameSettings.snapshot());
+    private void toast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

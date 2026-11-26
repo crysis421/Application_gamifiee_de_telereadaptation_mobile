@@ -4,18 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.databinding.ActivityConsentBinding;
 import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
 import com.uphf.saes5.ui.home.HomeActivity;
 
@@ -36,6 +36,9 @@ public class ConsentActivity extends AppCompatActivity {
 
     private static final String EXTRA_REVIEW = "extra_review";
 
+    private ActivityConsentBinding binding;
+    private ConsentViewModel viewModel;
+
     /** Relecture depuis les réglages, consentement déjà donné. */
     public static Intent reviewIntent(Context context) {
         return new Intent(context, ConsentActivity.class).putExtra(EXTRA_REVIEW, true);
@@ -45,10 +48,27 @@ public class ConsentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_consent);
-        EdgeToEdgeSupport.applySystemBarInsets(findViewById(R.id.consent_root));
+        binding = ActivityConsentBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        EdgeToEdgeSupport.applySystemBarInsets(binding.consentRoot);
 
-        if (getIntent().getBooleanExtra(EXTRA_REVIEW, false) && !AppContainer.from(getApplicationContext()).consent.isRequired()) {
+        boolean review = getIntent().getBooleanExtra(EXTRA_REVIEW, false);
+        AppContainer container = AppContainer.from(this);
+        viewModel = new ViewModelProvider(this, ViewModelFactory.of(ConsentViewModel.class,
+                () -> new ConsentViewModel(container.consent, container.sessionRepository, review)))
+                .get(ConsentViewModel.class);
+        viewModel.getEvents().observe(this, event -> {
+            ConsentViewModel.ConsentEvent content = event.getContentIfNotHandled();
+            if (content == ConsentViewModel.ConsentEvent.OPEN_HOME) {
+                startActivity(new Intent(this, HomeActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                finish();
+            } else if (content == ConsentViewModel.ConsentEvent.CLOSE_APP) {
+                finishAffinity();
+            }
+        });
+
+        if (viewModel.isReviewMode()) {
             bindReview();
         } else {
             bindFirstLaunch();
@@ -56,16 +76,10 @@ public class ConsentActivity extends AppCompatActivity {
     }
 
     private void bindFirstLaunch() {
-        CheckBox checkbox = findViewById(R.id.consent_checkbox);
-        Button accept = findViewById(R.id.consent_accept);
-        checkbox.setOnCheckedChangeListener((button, checked) -> accept.setEnabled(checked));
-        accept.setOnClickListener(v -> {
-            AppContainer.from(getApplicationContext()).consent.accept();
-            startActivity(new Intent(this, HomeActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-            finish();
-        });
-        findViewById(R.id.consent_secondary).setOnClickListener(v -> finishAffinity());
+        binding.consentCheckbox.setOnCheckedChangeListener(
+                (button, checked) -> binding.consentAccept.setEnabled(checked));
+        binding.consentAccept.setOnClickListener(v -> viewModel.accept());
+        binding.consentSecondary.setOnClickListener(v -> finishAffinity());
 
         // Revenir en arrière ne doit pas contourner la notice.
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -77,30 +91,20 @@ public class ConsentActivity extends AppCompatActivity {
     }
 
     private void bindReview() {
-        findViewById(R.id.consent_checkbox).setVisibility(View.GONE);
+        binding.consentCheckbox.setVisibility(View.GONE);
+        binding.consentAcceptedOn.setVisibility(View.VISIBLE);
+        binding.consentAcceptedOn.setText(getString(R.string.consent_accepted_on,
+                DateFormat.getDateInstance(DateFormat.LONG).format(new Date(viewModel.acceptedAt()))));
 
-        TextView acceptedOn = findViewById(R.id.consent_accepted_on);
-        acceptedOn.setVisibility(View.VISIBLE);
-        acceptedOn.setText(getString(R.string.consent_accepted_on,
-                DateFormat.getDateInstance(DateFormat.LONG).format(new Date(AppContainer.from(getApplicationContext()).consent.acceptedAt()))));
+        binding.consentAccept.setEnabled(true);
+        binding.consentAccept.setText(R.string.consent_close);
+        binding.consentAccept.setOnClickListener(v -> finish());
 
-        Button close = findViewById(R.id.consent_accept);
-        close.setEnabled(true);
-        close.setText(R.string.consent_close);
-        close.setOnClickListener(v -> finish());
-
-        Button withdraw = findViewById(R.id.consent_secondary);
-        withdraw.setText(R.string.consent_withdraw);
-        withdraw.setOnClickListener(v -> new MaterialAlertDialogBuilder(this)
+        binding.consentSecondary.setText(R.string.consent_withdraw);
+        binding.consentSecondary.setOnClickListener(v -> new MaterialAlertDialogBuilder(this)
                 .setMessage(R.string.consent_withdraw_confirm)
-                .setPositiveButton(R.string.consent_withdraw_ok, (dialog, which) -> withdraw())
+                .setPositiveButton(R.string.consent_withdraw_ok, (dialog, which) -> viewModel.withdraw())
                 .setNegativeButton(R.string.cancel, null)
                 .show());
-    }
-
-    private void withdraw() {
-        AppContainer.from(getApplicationContext()).sessionRepository.clear();
-        AppContainer.from(getApplicationContext()).consent.withdraw();
-        finishAffinity();
     }
 }
