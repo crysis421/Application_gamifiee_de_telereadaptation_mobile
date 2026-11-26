@@ -20,7 +20,7 @@
         android:layout_gravity="top"
         android:gravity="center"
         android:padding="24dp"
-        android:text="Préparation de la caméra…"
+        android:text="@string/recording_preparing"
         android:textColor="@android:color/white"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="48dp"
-        android:text="Recommencer"
+        android:text="@string/recording_restart"
         android:visibility="gone" />
 
 </FrameLayout>

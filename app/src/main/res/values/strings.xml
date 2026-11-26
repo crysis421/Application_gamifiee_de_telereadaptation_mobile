@@ -273,4 +273,15 @@
     <string name="settings_export_format_json">JSON (scripts d\'analyse)</string>
     <string name="settings_export_empty">Aucune séance enregistrée pour le moment.</string>
     <string name="settings_export_failed">Export impossible.</string>
+    <!-- Enregistrement d'un modèle de référence -->
+    <string name="recording_preparing">Préparation de la caméra…</string>
+    <string name="recording_restart">Recommencer</string>
+    <string name="recording_countdown">Placez-vous… %1$d</string>
+    <string name="recording_in_progress">● En cours… %1$d s</string>
+    <string name="recording_too_short">Personne détectée trop peu de temps.\nCorps entier visible ? Recommencez.</string>
+    <string name="recording_score">Score : %1$d / 100</string>
+    <string name="recording_saved">« %1$s » enregistré (%2$d images)</string>
+    <string name="recording_save_failed">Erreur lors de l\'enregistrement</string>
+    <string name="recording_permission_refused">Permission caméra refusée</string>
+    <string name="recording_movement_not_found">Mouvement introuvable : %1$s</string>
 </resources>
