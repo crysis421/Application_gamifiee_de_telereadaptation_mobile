@@ -42,23 +42,8 @@ public class SummaryActivity extends AppCompatActivity {
     private FavoritesRepository favoritesRepository;
     private Exercise exercise;
 
-    public static Intent newIntent(Context context,
-                                   String exerciseId,
-                                   int validatedReps,
-                                   int failedReps,
-                                   long durationMillis,
-                                   int similarityScore,
-                                   int averageLatencyMillis,
-                                   int arcadePoints) {
-        Intent intent = new Intent(context, SummaryActivity.class);
-        intent.putExtra(EXTRA_ARCADE_POINTS, arcadePoints);
-        intent.putExtra(EXTRA_AVERAGE_LATENCY, averageLatencyMillis);
-        intent.putExtra(EXTRA_EXERCISE_ID, exerciseId);
-        intent.putExtra(EXTRA_VALIDATED_REPS, validatedReps);
-        intent.putExtra(EXTRA_FAILED_REPS, failedReps);
-        intent.putExtra(EXTRA_DURATION_MILLIS, durationMillis);
-        intent.putExtra(EXTRA_SIMILARITY_SCORE, similarityScore);
-        return intent;
+    public static Intent newIntent(Context context, SummaryArgs args) {
+        return args.writeTo(new Intent(context, SummaryActivity.class));
     }
 
     @Override

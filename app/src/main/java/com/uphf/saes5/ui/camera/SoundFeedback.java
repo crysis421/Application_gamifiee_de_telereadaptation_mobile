@@ -7,9 +7,6 @@ import android.media.SoundPool;
 import androidx.annotation.RawRes;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.settings.GameSettingsRepository;
-import com.uphf.saes5.di.AppContainer;
-import com.uphf.saes5.domain.model.GameFeature;
 
 /**
  * Retours sonores de la séance (US-3.3).
@@ -20,8 +17,8 @@ import com.uphf.saes5.domain.model.GameFeature;
  * <p>{@link SoundPool} plutôt que {@code MediaPlayer} : les sons sont courts, préchargés en
  * mémoire, et se déclenchent sans latence perceptible, y compris plusieurs fois de suite.</p>
  *
- * <p>Chaque lecture vérifie l'interrupteur « Retours sonores » (US-4.1) : couper le son en
- * cours de séance prend effet immédiatement.</p>
+ * <p>Les sons sont un élément de jeu désactivable (US-4.1) : l'écran dit à la création s'ils
+ * sont joués, d'après son état.</p>
  */
 public final class SoundFeedback {
 
@@ -32,9 +29,10 @@ public final class SoundFeedback {
     private final int validId;
     private final int failedId;
     private final int finishId;
-    private final GameSettingsRepository gameSettings;
+    private final boolean enabled;
 
-    public SoundFeedback(Context context) {
+    public SoundFeedback(Context context, boolean enabled) {
+        this.enabled = enabled;
         pool = new SoundPool.Builder()
                 .setMaxStreams(MAX_STREAMS)
                 .setAudioAttributes(new AudioAttributes.Builder()
@@ -44,7 +42,6 @@ public final class SoundFeedback {
                 .build();
 
         Context app = context.getApplicationContext();
-        gameSettings = AppContainer.from(app).gameSettings;
         validId = pool.load(app, R.raw.feedback_valid, 1);
         failedId = pool.load(app, R.raw.feedback_failed, 1);
         finishId = pool.load(app, R.raw.exercise_finish, 1);
@@ -66,7 +63,7 @@ public final class SoundFeedback {
     }
 
     private void play(int soundId) {
-        if (!gameSettings.isEnabled(GameFeature.SOUNDS)) {
+        if (!enabled) {
             return;
         }
         // Un son encore en cours de chargement ne joue tout simplement pas : mieux vaut un

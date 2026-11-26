@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mediapipe.tasks.vision.core.RunningMode;
 
-import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.FrameSampling;
 import com.uphf.saes5.ui.widget.OverlayView;
@@ -29,7 +28,7 @@ import java.util.concurrent.Executors;
  * Gère CameraX et MediaPipe pendant une séance, sans logique de score ni de compteur.
  *
  * <p>US-1.4 : le modèle (léger par défaut, ou holistic) et la part d'images analysées viennent
- * de {@link AnalysisSettings}. Une image sautée est rendue à CameraX sans passer par
+ * des réglages d'analyse, passés par l'écran. Une image sautée est rendue à CameraX sans passer par
  * MediaPipe, ce qui réduit réellement le calcul, et pas seulement l'affichage.</p>
  */
 public final class PoseCameraController {
@@ -63,14 +62,19 @@ public final class PoseCameraController {
     private boolean started;
     private long frameIndex;
 
+    /**
+     * @param model       modèle de détection choisi dans les réglages d'analyse
+     * @param frameStride une image analysée sur {@code frameStride}
+     */
     public PoseCameraController(AppCompatActivity activity, PreviewView previewView,
-                                OverlayView overlayView, Listener listener) {
+                                OverlayView overlayView, Listener listener,
+                                AnalysisModel model, int frameStride) {
         this.activity = activity;
         this.previewView = previewView;
         this.overlayView = overlayView;
         this.listener = listener;
-        this.model = AppContainer.from(activity).analysisSettings.getModel();
-        this.frameStride = AppContainer.from(activity).analysisSettings.getFrameStride();
+        this.model = model;
+        this.frameStride = frameStride;
     }
 
     public void start() {
