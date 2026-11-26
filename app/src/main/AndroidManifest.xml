@@ -8,23 +8,25 @@
     <!-- Nombre de pas sur l'accueil (US-5.1), lu via la Recording API. -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <application android:name=".SaeS5Application" android:allowBackup="true" android:dataExtractionRules="@xml/data_extraction_rules" android:fullBackupContent="@xml/backup_rules" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/Theme.SAES5">
-        <!-- Les trois onglets sont en singleTop : ils se réutilisent au lieu de s'empiler. -->
-        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop">
+        <!-- Les onglets sont en singleTop : ils se réutilisent au lieu de s'empiler. -->
+        <activity android:name=".ui.home.HomeActivity" android:exported="false" android:launchMode="singleTop"/>
+        <!-- Ancien nom de l'accueil, gardé pour que les raccourcis de lancement existants restent valides. -->
+        <activity-alias android:name=".MainActivity" android:targetActivity=".ui.home.HomeActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
-        <activity android:name=".StatisticsActivity" android:exported="false" android:launchMode="singleTop"/>
-        <activity android:name=".ExerciseCatalogActivity" android:exported="false" android:launchMode="singleTop"/>
-        <activity android:name=".ProfileActivity" android:exported="false" android:launchMode="singleTop"/>
-        <activity android:name=".ExercisePlayerActivity" android:exported="false"/>
-        <activity android:name=".CreateExerciseActivity" android:exported="false"/>
-        <activity android:name=".SettingsActivity" android:exported="false"/>
-        <activity android:name=".ConsentActivity" android:exported="false"/>
-        <activity android:name=".accueil.ui.ExerciseActivity" android:exported="false" android:keepScreenOn="true" android:parentActivityName=".MainActivity" android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".accueil.ui.SummaryActivity" android:exported="false" android:parentActivityName=".MainActivity"/>
-        <activity android:name=".HolisticCameraActivity" android:exported="false" />
+        </activity-alias>
+        <activity android:name=".ui.statistics.StatisticsActivity" android:exported="false" android:launchMode="singleTop"/>
+        <activity android:name=".ui.catalog.ExerciseCatalogActivity" android:exported="false" android:launchMode="singleTop"/>
+        <activity android:name=".ui.profile.ProfileActivity" android:exported="false" android:launchMode="singleTop"/>
+        <activity android:name=".ui.catalog.ExerciseDetailActivity" android:exported="false"/>
+        <activity android:name=".ui.catalog.ExerciseEditorActivity" android:exported="false"/>
+        <activity android:name=".ui.settings.SettingsActivity" android:exported="false"/>
+        <activity android:name=".ui.consent.ConsentActivity" android:exported="false"/>
+        <activity android:name=".ui.exercise.ExerciseActivity" android:exported="false" android:keepScreenOn="true" android:parentActivityName=".ui.home.HomeActivity" android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".ui.summary.SummaryActivity" android:exported="false" android:parentActivityName=".ui.home.HomeActivity"/>
+        <activity android:name=".ui.recording.MovementRecordingActivity" android:exported="false" />
 
         <!-- Partage des fichiers d'export du journal (US-7.2). -->
         <provider

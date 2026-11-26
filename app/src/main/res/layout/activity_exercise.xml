@@ -37,7 +37,7 @@
         app:scaleType="fillCenter" />
 
     <!-- Même cadre et même recadrage que l'aperçu : le squelette reste calé sur le corps. -->
-    <com.uphf.saes5.OverlayView
+    <com.uphf.saes5.ui.widget.OverlayView
         android:id="@+id/poseOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -170,7 +170,7 @@
                     sous les yeux. Petit mais net, sur un cadre presque opaque. Affiché par le code
                     seulement si le modèle est exploitable.
                 -->
-                <com.uphf.saes5.ModelPreviewView
+                <com.uphf.saes5.ui.widget.ModelPreviewView
                     android:id="@+id/modelPreview"
                     android:layout_width="@dimen/model_preview_size"
                     android:layout_height="@dimen/model_preview_size"

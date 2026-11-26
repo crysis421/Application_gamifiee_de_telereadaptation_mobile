@@ -100,7 +100,7 @@
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 
-            <com.uphf.saes5.MuscleBodyView
+            <com.uphf.saes5.ui.widget.MuscleBodyView
                 android:id="@+id/statistics_muscle_body"
                 android:layout_width="match_parent"
                 android:layout_height="460dp"

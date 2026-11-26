@@ -1,6 +1,11 @@
 package com.uphf.saes5;
 
 import android.app.Application;
+import com.uphf.saes5.data.exercise.ExerciseRepository;
+import com.uphf.saes5.data.session.SessionLog;
+import com.uphf.saes5.data.settings.AnalysisSettings;
+import com.uphf.saes5.data.settings.Consent;
+import com.uphf.saes5.data.settings.GameSettings;
 
 /**
  * Point d'entrée de l'application.
