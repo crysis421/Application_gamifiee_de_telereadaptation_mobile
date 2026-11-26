@@ -6,10 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /**
  * Journal des séances : calculs et sélection par période (US-7.1 / US-7.2).

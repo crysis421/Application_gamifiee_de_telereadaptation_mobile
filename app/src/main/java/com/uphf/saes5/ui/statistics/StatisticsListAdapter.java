@@ -11,9 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import com.uphf.saes5.R;
+
 import java.util.ArrayList;
 import java.util.List;
-import com.uphf.saes5.R;
 
 public class StatisticsListAdapter
         extends RecyclerView.Adapter<StatisticsListAdapter.StatisticViewHolder> {

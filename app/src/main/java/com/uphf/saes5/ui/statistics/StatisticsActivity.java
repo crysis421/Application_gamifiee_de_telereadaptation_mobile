@@ -12,13 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.uphf.saes5.R;
 import com.uphf.saes5.domain.statistics.MuscleStatistic;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.common.TabSwipe;
 import com.uphf.saes5.ui.widget.MuscleBodyView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StatisticsActivity extends AppCompatActivity {
     private StatisticsViewModel viewModel;

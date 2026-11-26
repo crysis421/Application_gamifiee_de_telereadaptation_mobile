@@ -8,10 +8,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.uphf.saes5.SaeS5Application;
+import com.uphf.saes5.domain.exercise.BaseExercises;
+import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.Movement;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,10 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import com.uphf.saes5.SaeS5Application;
-import com.uphf.saes5.domain.exercise.BaseExercises;
-import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.Movement;
 
 /**
  * Catalogue d'exercices.

@@ -4,9 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.util.Arrays;
 import java.util.Collections;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /** Nombre d'exercices réalisés, affiché sur l'accueil (US-5.2). */
 public class ActivityCounterTest {

@@ -4,10 +4,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.domain.model.Exercise;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CatalogViewModel extends ViewModel {
     private final MutableLiveData<List<Exercise>> filteredExercises = new MutableLiveData<>();

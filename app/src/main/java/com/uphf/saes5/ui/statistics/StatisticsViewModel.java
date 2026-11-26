@@ -4,14 +4,15 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.uphf.saes5.data.session.StatisticsRepository;
 import com.uphf.saes5.domain.statistics.ExerciseStatistic;
 import com.uphf.saes5.domain.statistics.ScoredSession;
 import com.uphf.saes5.domain.statistics.StatisticsCalculator;
 import com.uphf.saes5.domain.statistics.StatisticsExercise;
 import com.uphf.saes5.domain.statistics.StatisticsSummary;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StatisticsViewModel extends ViewModel {
     private final MutableLiveData<StatisticsScreenState> state = new MutableLiveData<>();

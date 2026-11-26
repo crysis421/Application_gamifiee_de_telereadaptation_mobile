@@ -21,7 +21,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+
 import androidx.core.content.ContextCompat
+
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
@@ -30,6 +32,7 @@ import com.google.mediapipe.tasks.vision.holisticlandmarker.HolisticLandmarkerRe
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import kotlin.math.max
 import kotlin.math.min
+
 import com.uphf.saes5.R
 import com.uphf.saes5.domain.movement.PostureFeedback
 

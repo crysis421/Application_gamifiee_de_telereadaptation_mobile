@@ -2,15 +2,16 @@ package com.uphf.saes5.domain.game;
 
 import androidx.annotation.Nullable;
 
+import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.SessionEntry;
+import com.uphf.saes5.domain.statistics.MuscleGroups;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.SessionEntry;
-import com.uphf.saes5.domain.statistics.MuscleGroups;
 
 /**
  * Rangs par groupe musculaire et étoiles par exercice (US-4.5), calculés à partir des points

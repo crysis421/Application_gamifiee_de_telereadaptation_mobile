@@ -17,6 +17,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputLayout;
+
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.exercise.MovementStorage;

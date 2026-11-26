@@ -28,17 +28,18 @@ import com.google.android.material.button.MaterialButton;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mediapipe.tasks.vision.core.RunningMode;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.exercise.MovementStorage;
 import com.uphf.saes5.domain.model.Movement;
 import com.uphf.saes5.domain.movement.MovementMath;
 import com.uphf.saes5.ui.camera.HolisticLandmarkerHelper;
 import com.uphf.saes5.ui.widget.OverlayView;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MovementRecordingActivity extends AppCompatActivity
         implements HolisticLandmarkerHelper.LandmarkerListener {

@@ -11,14 +11,13 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import com.uphf.saes5.data.settings.GameSettings;
 
 /** Conditions de test nommées, enregistrées et réappliquées (US-7.3). */
 public class TestConditionTest {
 
     private static TestCondition withoutSounds(String name) {
         return TestCondition.capture(name,
-                feature -> feature != GameSettings.Feature.SOUNDS);
+                feature -> feature != GameFeature.SOUNDS);
     }
 
     @Test
@@ -26,53 +25,19 @@ public class TestConditionTest {
         TestCondition condition = withoutSounds("B");
 
         assertEquals("B", condition.getName());
-        assertFalse(condition.isEnabled(GameSettings.Feature.SOUNDS));
-        assertTrue(condition.isEnabled(GameSettings.Feature.ARCADE));
+        assertFalse(condition.isEnabled(GameFeature.SOUNDS));
+        assertTrue(condition.isEnabled(GameFeature.ARCADE));
     }
 
     @Test
     public void apply_setsEveryFeature() {
-        Map<GameSettings.Feature, Boolean> applied = new EnumMap<>(GameSettings.Feature.class);
+        Map<GameFeature, Boolean> applied = new EnumMap<>(GameFeature.class);
 
         withoutSounds("B").applyTo(applied::put);
 
-        assertEquals(GameSettings.Feature.values().length, applied.size());
-        assertFalse(applied.get(GameSettings.Feature.SOUNDS));
-        assertTrue(applied.get(GameSettings.Feature.FAVORITES));
-    }
-
-    @Test
-    public void aFeatureAddedAfterTheConditionWasSaved_isApplied_enabled() {
-        // Condition enregistrée avant l'existence d'un interrupteur : il reprend sa valeur par
-        // défaut, et non celle qui traînait, pour que la condition reste reproductible.
-        TestCondition old = TestCondition.fromJson(
-                "[{\"name\":\"Ancienne\",\"features\":{\"sounds\":false}}]").get(0);
-        Map<GameSettings.Feature, Boolean> applied = new EnumMap<>(GameSettings.Feature.class);
-
-        old.applyTo(applied::put);
-
-        assertFalse(applied.get(GameSettings.Feature.SOUNDS));
-        assertTrue(applied.get(GameSettings.Feature.HOME_STEPS));
-    }
-
-    @Test
-    public void json_roundTrip_keepsNamesAndValues() {
-        List<TestCondition> conditions = new ArrayList<>();
-        conditions.add(withoutSounds("A - sans son"));
-        conditions.add(TestCondition.capture("B - tout", feature -> true));
-
-        List<TestCondition> read = TestCondition.fromJson(TestCondition.toJson(conditions));
-
-        assertEquals(2, read.size());
-        assertEquals("A - sans son", read.get(0).getName());
-        assertFalse(read.get(0).isEnabled(GameSettings.Feature.SOUNDS));
-        assertTrue(read.get(1).isEnabled(GameSettings.Feature.SOUNDS));
-    }
-
-    @Test
-    public void unreadableJson_meansNoCondition() {
-        assertTrue(TestCondition.fromJson("pas du json").isEmpty());
-        assertTrue(TestCondition.fromJson(null).isEmpty());
+        assertEquals(GameFeature.values().length, applied.size());
+        assertFalse(applied.get(GameFeature.SOUNDS));
+        assertTrue(applied.get(GameFeature.FAVORITES));
     }
 
     @Test
@@ -83,7 +48,7 @@ public class TestConditionTest {
         List<TestCondition> saved = TestCondition.save(conditions, withoutSounds("a"));
 
         assertEquals(1, saved.size());
-        assertFalse(saved.get(0).isEnabled(GameSettings.Feature.SOUNDS));
+        assertFalse(saved.get(0).isEnabled(GameFeature.SOUNDS));
     }
 
     @Test

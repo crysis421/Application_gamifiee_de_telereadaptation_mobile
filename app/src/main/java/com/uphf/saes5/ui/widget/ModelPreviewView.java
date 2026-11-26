@@ -12,9 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import java.util.List;
 import com.uphf.saes5.R;
 import com.uphf.saes5.domain.movement.ModelAnimation;
+
+import java.util.List;
 
 /**
  * Mannequin qui rejoue en boucle le modèle de l'exercice, pour montrer le geste à reproduire.

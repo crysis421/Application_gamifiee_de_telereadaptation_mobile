@@ -9,9 +9,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Test;
 
+import com.uphf.saes5.domain.model.Exercise;
+
 import java.util.Collections;
 import java.util.List;
-import com.uphf.saes5.domain.model.Exercise;
 
 /**
  * Modification et suppression d'un exercice du catalogue.

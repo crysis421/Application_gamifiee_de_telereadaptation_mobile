@@ -6,13 +6,14 @@ import android.content.SharedPreferences;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.uphf.saes5.data.exercise.ExerciseRepository;
+import com.uphf.saes5.domain.model.Exercise;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
-import com.uphf.saes5.domain.model.Exercise;
 
 /**
  * Choisit l'exercice du jour (US-4.2) parmi ceux du catalogue.

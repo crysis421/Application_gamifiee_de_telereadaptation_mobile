@@ -5,13 +5,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.SessionEntry;
 import com.uphf.saes5.domain.statistics.ScoredSession;
 import com.uphf.saes5.domain.statistics.StatisticsExercise;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /** Les statistiques viennent des vraies séances, plus de données en dur. */
 public class StatisticsRepositoryTest {

@@ -17,10 +17,13 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mediapipe.tasks.vision.core.RunningMode;
 
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.domain.model.AnalysisModel;
+import com.uphf.saes5.domain.model.FrameSampling;
+import com.uphf.saes5.ui.widget.OverlayView;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.uphf.saes5.data.settings.AnalysisSettings;
-import com.uphf.saes5.ui.widget.OverlayView;
 
 /**
  * Gère CameraX et MediaPipe pendant une séance, sans logique de score ni de compteur.
@@ -50,7 +53,7 @@ public final class PoseCameraController {
     private final OverlayView overlayView;
     private final Listener listener;
     private final int cameraFacing = CameraSelector.LENS_FACING_FRONT;
-    private final AnalysisSettings.Model model;
+    private final AnalysisModel model;
     private final int frameStride;
 
     private ExecutorService backgroundExecutor;
@@ -66,8 +69,8 @@ public final class PoseCameraController {
         this.previewView = previewView;
         this.overlayView = overlayView;
         this.listener = listener;
-        this.model = AnalysisSettings.getModel();
-        this.frameStride = AnalysisSettings.getFrameStride();
+        this.model = AppContainer.from(activity).analysisSettings.getModel();
+        this.frameStride = AppContainer.from(activity).analysisSettings.getFrameStride();
     }
 
     public void start() {
@@ -77,7 +80,7 @@ public final class PoseCameraController {
         backgroundExecutor = Executors.newSingleThreadExecutor();
         backgroundExecutor.execute(() -> {
             try {
-                detector = model == AnalysisSettings.Model.FULL
+                detector = model == AnalysisModel.FULL
                         ? holisticDetector()
                         : liteDetector();
             } catch (LinkageError error) {
@@ -185,7 +188,7 @@ public final class PoseCameraController {
 
     private void detectPose(ImageProxy imageProxy) {
         Detector current = detector;
-        boolean analyze = AnalysisSettings.shouldAnalyze(frameIndex++, frameStride);
+        boolean analyze = FrameSampling.shouldAnalyze(frameIndex++, frameStride);
         if (!started || current == null || current.isClosed() || !analyze) {
             imageProxy.close();
             return;
@@ -218,7 +221,7 @@ public final class PoseCameraController {
         }
     }
 
-    public AnalysisSettings.Model getModel() {
+    public AnalysisModel getModel() {
         return model;
     }
 

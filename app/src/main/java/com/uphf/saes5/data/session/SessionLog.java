@@ -11,6 +11,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.TimeZone;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /**
  * Journal des séances d'exercice (US-7.1) et export (US-7.2).

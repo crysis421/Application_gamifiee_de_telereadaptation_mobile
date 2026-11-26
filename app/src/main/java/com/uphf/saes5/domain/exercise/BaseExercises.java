@@ -7,15 +7,16 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 
+import com.uphf.saes5.data.exercise.ExerciseRepository;
+import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.Movement;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
-import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.Movement;
 
 /**
  * Exercices de base livrés avec l'application : un par difficulté pour chaque groupe

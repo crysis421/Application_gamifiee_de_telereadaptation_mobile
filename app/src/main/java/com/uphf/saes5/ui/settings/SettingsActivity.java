@@ -19,22 +19,26 @@ import androidx.core.content.FileProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import com.uphf.saes5.R;
+import com.uphf.saes5.data.session.SessionLog;
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.domain.model.AnalysisModel;
+import com.uphf.saes5.domain.model.FrameSampling;
+import com.uphf.saes5.domain.model.GameFeature;
+import com.uphf.saes5.domain.model.TestCondition;
+import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
+import com.uphf.saes5.ui.common.FeatureLabels;
+import com.uphf.saes5.ui.consent.ConsentActivity;
+
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.uphf.saes5.R;
-import com.uphf.saes5.data.session.SessionLog;
-import com.uphf.saes5.data.settings.AnalysisSettings;
-import com.uphf.saes5.data.settings.GameSettings;
-import com.uphf.saes5.domain.model.TestCondition;
-import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
-import com.uphf.saes5.ui.consent.ConsentActivity;
 
 /**
  * Réglages des éléments de gamification (US-4.1), nommage de la condition de test (US-7.3)
  * et export du journal des séances (US-7.2).
  *
- * <p>La liste des interrupteurs est construite à partir de {@link GameSettings.Feature} :
+ * <p>La liste des interrupteurs est construite à partir de {@link GameFeature} :
  * ajouter un élément de jeu ne demande aucune modification ici.</p>
  */
 public class SettingsActivity extends AppCompatActivity {
@@ -69,19 +73,19 @@ public class SettingsActivity extends AppCompatActivity {
         homeContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        for (GameSettings.Feature feature : GameSettings.Feature.values()) {
-            LinearLayout container = feature.getGroup() == GameSettings.Group.HOME
+        for (GameFeature feature : GameFeature.values()) {
+            LinearLayout container = feature.getGroup() == GameFeature.Group.HOME
                     ? homeContainer
                     : gameContainer;
             View row = inflater.inflate(R.layout.item_setting, container, false);
 
-            ((TextView) row.findViewById(R.id.setting_label)).setText(feature.getLabelRes());
-            ((TextView) row.findViewById(R.id.setting_help)).setText(feature.getHelpRes());
+            ((TextView) row.findViewById(R.id.setting_label)).setText(FeatureLabels.label(feature));
+            ((TextView) row.findViewById(R.id.setting_help)).setText(FeatureLabels.help(feature));
 
             MaterialSwitch toggle = row.findViewById(R.id.setting_switch);
-            toggle.setChecked(GameSettings.isEnabled(feature));
+            toggle.setChecked(AppContainer.from(getApplicationContext()).gameSettings.isEnabled(feature));
             toggle.setOnCheckedChangeListener((button, checked) -> {
-                GameSettings.setEnabled(feature, checked);
+                AppContainer.from(getApplicationContext()).gameSettings.setEnabled(feature, checked);
                 refreshSnapshot();
             });
 
@@ -97,14 +101,14 @@ public class SettingsActivity extends AppCompatActivity {
         refreshAnalysisButtons();
 
         findViewById(R.id.settings_analysis_model).setOnClickListener(v -> {
-            AnalysisSettings.Model[] models = AnalysisSettings.Model.values();
+            AnalysisModel[] models = AnalysisModel.values();
             String[] labels = new String[models.length];
-            for (int i = 0; i < models.length; i++) labels[i] = getString(models[i].getLabelRes());
+            for (int i = 0; i < models.length; i++) labels[i] = getString(FeatureLabels.label(models[i]));
             new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.settings_analysis_model_title)
-                    .setSingleChoiceItems(labels, AnalysisSettings.getModel().ordinal(),
+                    .setSingleChoiceItems(labels, AppContainer.from(getApplicationContext()).analysisSettings.getModel().ordinal(),
                             (dialog, which) -> {
-                                AnalysisSettings.setModel(models[which]);
+                                AppContainer.from(getApplicationContext()).analysisSettings.setModel(models[which]);
                                 refreshAnalysisButtons();
                                 dialog.dismiss();
                             })
@@ -113,15 +117,15 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.settings_analysis_stride).setOnClickListener(v -> {
-            String[] labels = new String[AnalysisSettings.MAX_FRAME_STRIDE];
-            for (int stride = 1; stride <= AnalysisSettings.MAX_FRAME_STRIDE; stride++) {
+            String[] labels = new String[FrameSampling.MAX_FRAME_STRIDE];
+            for (int stride = 1; stride <= FrameSampling.MAX_FRAME_STRIDE; stride++) {
                 labels[stride - 1] = strideLabel(stride);
             }
             new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.settings_analysis_stride_title)
-                    .setSingleChoiceItems(labels, AnalysisSettings.getFrameStride() - 1,
+                    .setSingleChoiceItems(labels, AppContainer.from(getApplicationContext()).analysisSettings.getFrameStride() - 1,
                             (dialog, which) -> {
-                                AnalysisSettings.setFrameStride(which + 1);
+                                AppContainer.from(getApplicationContext()).analysisSettings.setFrameStride(which + 1);
                                 refreshAnalysisButtons();
                                 dialog.dismiss();
                             })
@@ -133,10 +137,10 @@ public class SettingsActivity extends AppCompatActivity {
     private void refreshAnalysisButtons() {
         ((TextView) findViewById(R.id.settings_analysis_model)).setText(getString(
                 R.string.settings_analysis_model_value,
-                getString(AnalysisSettings.getModel().getLabelRes())));
+                getString(FeatureLabels.label(AppContainer.from(getApplicationContext()).analysisSettings.getModel()))));
         ((TextView) findViewById(R.id.settings_analysis_stride)).setText(getString(
                 R.string.settings_analysis_stride_value,
-                strideLabel(AnalysisSettings.getFrameStride())));
+                strideLabel(AppContainer.from(getApplicationContext()).analysisSettings.getFrameStride())));
     }
 
     private String strideLabel(int stride) {
@@ -151,13 +155,13 @@ public class SettingsActivity extends AppCompatActivity {
      */
     private void bindSavedConditions() {
         findViewById(R.id.settings_condition_save).setOnClickListener(v -> {
-            String name = GameSettings.getConditionName();
+            String name = AppContainer.from(getApplicationContext()).gameSettings.getConditionName();
             if (name.isEmpty()) {
                 Toast.makeText(this, R.string.settings_condition_name_required,
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-            GameSettings.saveCurrentCondition(name);
+            AppContainer.from(getApplicationContext()).testConditions.saveCurrent(name);
             Toast.makeText(this, getString(R.string.settings_condition_saved, name),
                     Toast.LENGTH_SHORT).show();
         });
@@ -165,7 +169,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void chooseCondition() {
-        List<TestCondition> conditions = GameSettings.getSavedConditions();
+        List<TestCondition> conditions = AppContainer.from(getApplicationContext()).testConditions.getSaved();
         if (conditions.isEmpty()) {
             Toast.makeText(this, R.string.settings_condition_none, Toast.LENGTH_SHORT).show();
             return;
@@ -174,7 +178,7 @@ public class SettingsActivity extends AppCompatActivity {
                 .setTitle(R.string.settings_condition_choose)
                 .setItems(names(conditions), (dialog, which) -> {
                     TestCondition condition = conditions.get(which);
-                    GameSettings.applyCondition(condition);
+                    AppContainer.from(getApplicationContext()).testConditions.apply(condition);
                     buildFeatureSwitches();
                     ((EditText) findViewById(R.id.settings_condition_name))
                             .setText(condition.getName());
@@ -196,7 +200,7 @@ public class SettingsActivity extends AppCompatActivity {
                     new MaterialAlertDialogBuilder(this)
                             .setMessage(getString(R.string.settings_condition_delete_confirm, name))
                             .setPositiveButton(R.string.settings_condition_delete_ok,
-                                    (confirm, ignored) -> GameSettings.deleteCondition(name))
+                                    (confirm, ignored) -> AppContainer.from(getApplicationContext()).testConditions.delete(name))
                             .setNegativeButton(R.string.cancel, null)
                             .show();
                 })
@@ -213,14 +217,14 @@ public class SettingsActivity extends AppCompatActivity {
     /** Nom donné à la condition de test, enregistré à chaque frappe (US-7.3). */
     private void bindConditionName() {
         EditText field = findViewById(R.id.settings_condition_name);
-        field.setText(GameSettings.getConditionName());
+        field.setText(AppContainer.from(getApplicationContext()).gameSettings.getConditionName());
         field.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
 
             @Override
             public void afterTextChanged(Editable editable) {
-                GameSettings.setConditionName(editable.toString());
+                AppContainer.from(getApplicationContext()).gameSettings.setConditionName(editable.toString());
             }
         });
     }
@@ -303,6 +307,6 @@ public class SettingsActivity extends AppCompatActivity {
      * composer (US-7.3).</p>
      */
     private void refreshSnapshot() {
-        ((TextView) findViewById(R.id.settings_snapshot)).setText(GameSettings.snapshot());
+        ((TextView) findViewById(R.id.settings_snapshot)).setText(AppContainer.from(getApplicationContext()).gameSettings.snapshot());
     }
 }

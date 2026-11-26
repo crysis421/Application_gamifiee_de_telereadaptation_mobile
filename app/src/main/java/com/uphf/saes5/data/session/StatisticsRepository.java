@@ -1,14 +1,15 @@
 package com.uphf.saes5.data.session;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.SessionEntry;
 import com.uphf.saes5.domain.statistics.ScoredSession;
 import com.uphf.saes5.domain.statistics.StatisticsExercise;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Données des écrans Statistiques et Profil, tirées des vraies séances.

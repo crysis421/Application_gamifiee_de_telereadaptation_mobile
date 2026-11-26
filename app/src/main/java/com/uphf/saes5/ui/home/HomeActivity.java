@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.Locale;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -16,16 +14,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import com.uphf.saes5.databinding.ActivityMainBinding;
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.activity.StepCounter;
 import com.uphf.saes5.data.home.DailyExerciseProvider;
 import com.uphf.saes5.data.home.DailyExerciseTracker;
 import com.uphf.saes5.data.home.FavoritesRepository;
 import com.uphf.saes5.data.session.SessionLog;
-import com.uphf.saes5.data.settings.Consent;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.databinding.ActivityMainBinding;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.statistics.ActivityCounter;
 import com.uphf.saes5.ui.catalog.ExerciseCatalogActivity;
 import com.uphf.saes5.ui.common.ExerciseFormatter;
@@ -35,6 +33,8 @@ import com.uphf.saes5.ui.consent.ConsentActivity;
 import com.uphf.saes5.ui.exercise.ExerciseActivity;
 import com.uphf.saes5.ui.settings.SettingsActivity;
 import com.uphf.saes5.ui.statistics.StatisticsActivity;
+
+import java.util.Locale;
 
 /**
  * Accueil. Il porte la carte « Exercice du jour » (US-4.2) ainsi que les raccourcis vers les
@@ -66,7 +66,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // US-9.1 : rien ne démarre, caméra comprise, avant l'accord éclairé du participant.
-        if (Consent.isRequired()) {
+        if (AppContainer.from(getApplicationContext()).consent.isRequired()) {
             startActivity(new Intent(this, ConsentActivity.class));
             finish();
             return;
@@ -126,7 +126,7 @@ public class HomeActivity extends AppCompatActivity {
         binding.stepsTile.getRoot().setOnClickListener(null);
         binding.stepsTile.getRoot().setClickable(false);
         // Bloc masqué (US-5.4) : inutile de lire les pas, ni d'inviter à la permission.
-        if (!GameSettings.isEnabled(GameSettings.Feature.HOME_STEPS)) return;
+        if (!AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.HOME_STEPS)) return;
         stepCounter.readToday(new StepCounter.Callback() {
             @Override
             public void onSteps(int steps) {
@@ -169,22 +169,22 @@ public class HomeActivity extends AppCompatActivity {
      * de test n'est pas réellement comparable.</p>
      */
     private void applyGameSettings() {
-        boolean statistics = GameSettings.isEnabled(GameSettings.Feature.STATISTICS);
+        boolean statistics = AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.STATISTICS);
         binding.openStatisticsButton.setVisibility(statistics ? View.VISIBLE : View.GONE);
         Navigation.applyGameSettings(bottomNav);
 
         binding.dailyExerciseCard.favoriteButton.setVisibility(
-                GameSettings.isEnabled(GameSettings.Feature.FAVORITES) ? View.VISIBLE : View.GONE);
+                AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.FAVORITES) ? View.VISIBLE : View.GONE);
 
         // Blocs de l'accueil (US-5.4) : même règle, un bloc masqué ne laisse pas de trou.
-        boolean steps = GameSettings.isEnabled(GameSettings.Feature.HOME_STEPS);
-        boolean exercisesDone = GameSettings.isEnabled(GameSettings.Feature.HOME_EXERCISES_DONE);
+        boolean steps = AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.HOME_STEPS);
+        boolean exercisesDone = AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.HOME_EXERCISES_DONE);
         binding.stepsTile.getRoot().setVisibility(steps ? View.VISIBLE : View.GONE);
         binding.exercisesDoneTile.getRoot().setVisibility(exercisesDone ? View.VISIBLE : View.GONE);
         binding.homeActivitySpacer.setVisibility(steps && exercisesDone ? View.VISIBLE : View.GONE);
         binding.homeActivityRow.setVisibility(steps || exercisesDone ? View.VISIBLE : View.GONE);
         binding.openCatalogButton.setVisibility(
-                GameSettings.isEnabled(GameSettings.Feature.HOME_CATALOG) ? View.VISIBLE : View.GONE);
+                AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.HOME_CATALOG) ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -195,7 +195,7 @@ public class HomeActivity extends AppCompatActivity {
      */
     private void bindExerciseOfTheDay() {
         // Élément de jeu désactivé : ni carte, ni message « catalogue vide ».
-        if (!GameSettings.isEnabled(GameSettings.Feature.DAILY_EXERCISE)) {
+        if (!AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.DAILY_EXERCISE)) {
             exerciseOfTheDay = null;
             binding.dailyExerciseCard.getRoot().setVisibility(View.GONE);
             binding.emptyCatalogMessage.setVisibility(View.GONE);

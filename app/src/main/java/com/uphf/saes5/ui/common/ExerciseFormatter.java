@@ -2,10 +2,11 @@ package com.uphf.saes5.ui.common;
 
 import android.content.Context;
 
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 import com.uphf.saes5.R;
 import com.uphf.saes5.domain.model.Exercise;
+
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /** Mise en forme des métadonnées d'exercice pour l'affichage. */
 public final class ExerciseFormatter {

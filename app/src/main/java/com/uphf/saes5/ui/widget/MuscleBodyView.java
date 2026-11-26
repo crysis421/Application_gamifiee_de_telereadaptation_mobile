@@ -14,13 +14,14 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import com.uphf.saes5.R;
 import com.uphf.saes5.domain.game.MuscleProgress;
 import com.uphf.saes5.domain.statistics.MuscleGroups;
 import com.uphf.saes5.domain.statistics.MuscleStatistic;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MuscleBodyView extends View {
     public interface OnMuscleSelectedListener {

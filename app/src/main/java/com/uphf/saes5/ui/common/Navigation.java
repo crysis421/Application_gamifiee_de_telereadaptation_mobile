@@ -9,8 +9,10 @@ import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.ui.catalog.ExerciseCatalogActivity;
 import com.uphf.saes5.ui.home.HomeActivity;
 import com.uphf.saes5.ui.profile.ProfileActivity;
@@ -153,7 +155,7 @@ public final class Navigation {
     public static void applyGameSettings(BottomNavigationView navigation) {
         MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
         if (statistics != null) {
-            statistics.setVisible(GameSettings.isEnabled(GameSettings.Feature.STATISTICS));
+            statistics.setVisible(AppContainer.from(navigation.getContext()).gameSettings.isEnabled(GameFeature.STATISTICS));
         }
     }
 

@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import com.uphf.saes5.domain.model.Movement;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.uphf.saes5.domain.model.Movement;
 
 public final class MovementStorage {
 

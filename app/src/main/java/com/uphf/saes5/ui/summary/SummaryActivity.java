@@ -10,13 +10,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import com.uphf.saes5.databinding.ActivitySummaryBinding;
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.home.FavoritesRepository;
-import com.uphf.saes5.data.session.SessionRecorder;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.databinding.ActivitySummaryBinding;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.model.SessionEntry;
 import com.uphf.saes5.domain.model.SessionResult;
 import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
@@ -157,7 +157,7 @@ public class SummaryActivity extends AppCompatActivity {
      * de ne pas se confondre avec une comparaison réellement mesurée.</p>
      */
     private void logSession(SessionResult session, int similarityScore) {
-        SessionRecorder.record(
+        AppContainer.from(getApplicationContext()).sessionRecorder.record(
                 exercise,
                 session.getValidatedReps(),
                 session.getFailedReps(),
@@ -170,7 +170,7 @@ public class SummaryActivity extends AppCompatActivity {
 
     private void bindFavoriteButton() {
         // Les favoris sont un élément de jeu désactivable (US-4.1).
-        if (!GameSettings.isEnabled(GameSettings.Feature.FAVORITES)) {
+        if (!AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.FAVORITES)) {
             binding.favoriteButton.setVisibility(View.GONE);
             return;
         }

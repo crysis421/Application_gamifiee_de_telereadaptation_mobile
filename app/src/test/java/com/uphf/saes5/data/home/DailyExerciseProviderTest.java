@@ -7,13 +7,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.uphf.saes5.domain.model.Exercise;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.uphf.saes5.domain.model.Exercise;
 
 /** Tirage de l'exercice du jour parmi le catalogue (US-4.2). */
 public class DailyExerciseProviderTest {

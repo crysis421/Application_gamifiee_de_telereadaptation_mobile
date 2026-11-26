@@ -1,20 +1,12 @@
 package com.uphf.saes5.domain.model;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import com.uphf.saes5.data.settings.GameSettings;
 
 /**
  * Une condition de test : une combinaison nommée d'éléments de jeu et de blocs de l'accueil
@@ -24,21 +16,19 @@ import com.uphf.saes5.data.settings.GameSettings;
  * chaque participant, sans risquer d'oublier un interrupteur. Son nom accompagne ensuite
  * chaque séance journalisée.</p>
  *
- * <p>Les valeurs sont rangées par clé stable ({@link GameSettings.Feature#getKey()}), comme
- * dans les journaux : renommer une constante Java ne casse pas les conditions enregistrées.
- * Un interrupteur ajouté après l'enregistrement reprend sa valeur par défaut (activé), pour
- * que réappliquer une condition donne toujours le même résultat.</p>
+ * <p>Les valeurs sont rangées par clé stable ({@link GameFeature#getKey()}), comme dans les
+ * journaux : renommer une constante Java ne casse pas les conditions enregistrées. Un
+ * interrupteur ajouté après l'enregistrement reprend sa valeur par défaut (activé), pour que
+ * réappliquer une condition donne toujours le même résultat.</p>
  */
 public final class TestCondition {
 
-    /** Reçoit les valeurs à appliquer : {@code GameSettings::setEnabled} dans l'application. */
+    /** Reçoit les valeurs à appliquer, élément par élément. */
     public interface Setter {
-        void set(GameSettings.Feature feature, boolean enabled);
+        void set(GameFeature feature, boolean enabled);
     }
 
-    private static final Gson GSON = new Gson();
-    private static final Type LIST_TYPE = new TypeToken<List<TestCondition>>() {}.getType();
-
+    // Noms de champs relus par Gson dans les conditions déjà enregistrées : ne pas renommer.
     private final String name;
     private final Map<String, Boolean> features;
 
@@ -49,25 +39,26 @@ public final class TestCondition {
 
     /** Photographie la configuration courante sous un nom. */
     public static TestCondition capture(@NonNull String name,
-                                        @NonNull Predicate<GameSettings.Feature> isEnabled) {
+                                        @NonNull Predicate<GameFeature> isEnabled) {
         Map<String, Boolean> values = new LinkedHashMap<>();
-        for (GameSettings.Feature feature : GameSettings.Feature.values()) {
+        for (GameFeature feature : GameFeature.values()) {
             values.put(feature.getKey(), isEnabled.test(feature));
         }
         return new TestCondition(name.trim(), values);
     }
 
+    /** Nom de la condition, ou {@code null} pour une condition enregistrée illisible. */
     public String getName() {
         return name;
     }
 
-    public boolean isEnabled(GameSettings.Feature feature) {
+    public boolean isEnabled(GameFeature feature) {
         Boolean value = features == null ? null : features.get(feature.getKey());
         return value == null || value;
     }
 
     public void applyTo(@NonNull Setter setter) {
-        for (GameSettings.Feature feature : GameSettings.Feature.values()) {
+        for (GameFeature feature : GameFeature.values()) {
             setter.set(feature, isEnabled(feature));
         }
     }
@@ -87,25 +78,5 @@ public final class TestCondition {
             if (!condition.getName().equalsIgnoreCase(name)) result.add(condition);
         }
         return result;
-    }
-
-    public static String toJson(List<TestCondition> conditions) {
-        return GSON.toJson(conditions, LIST_TYPE);
-    }
-
-    /** Liste vide si le texte est absent ou illisible : on ne bloque jamais l'écran. */
-    public static List<TestCondition> fromJson(@Nullable String json) {
-        if (json == null || json.trim().isEmpty()) return new ArrayList<>();
-        try {
-            List<TestCondition> read = GSON.fromJson(json, LIST_TYPE);
-            if (read == null) return new ArrayList<>();
-            List<TestCondition> valid = new ArrayList<>();
-            for (TestCondition condition : read) {
-                if (condition != null && condition.name != null) valid.add(condition);
-            }
-            return valid;
-        } catch (JsonParseException | IllegalStateException e) {
-            return new ArrayList<>(Collections.emptyList());
-        }
     }
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
 import com.uphf.saes5.domain.model.SessionEntry;
 
 /** Points et multiplicateurs du mode arcade (US-4.4). */

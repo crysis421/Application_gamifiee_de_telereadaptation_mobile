@@ -9,11 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.uphf.saes5.R;
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.GameFeature;
+
 import java.util.ArrayList;
 import java.util.List;
-import com.uphf.saes5.R;
-import com.uphf.saes5.data.settings.GameSettings;
-import com.uphf.saes5.domain.model.Exercise;
 
 public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.ExerciseViewHolder> {
     public interface OnExerciseClickListener { void onClick(Exercise exercise); }
@@ -56,7 +58,7 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
         holder.metadata.setText(exercise.getDifficulty() + " • " + exercise.getEquipment()
                 + " • " + exercise.getDurationMinutes() + " min");
         // Les rangs sont un élément de jeu désactivable (US-4.1).
-        boolean showStars = GameSettings.isEnabled(GameSettings.Feature.STARS);
+        boolean showStars = AppContainer.from(holder.itemView.getContext()).gameSettings.isEnabled(GameFeature.STARS);
         holder.stars.setVisibility(showStars ? View.VISIBLE : View.GONE);
         holder.stars.setText(stars(exercise.getStars()));
         holder.itemView.setOnClickListener(view -> listener.onClick(exercise));

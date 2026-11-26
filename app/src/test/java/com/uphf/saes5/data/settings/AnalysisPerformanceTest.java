@@ -5,16 +5,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import com.uphf.saes5.domain.model.AnalysisModel;
+import com.uphf.saes5.domain.model.FrameSampling;
 import com.uphf.saes5.domain.model.SessionEntry;
 import com.uphf.saes5.domain.movement.LatencyTracker;
+import com.uphf.saes5.testing.InMemoryPreferenceStore;
 
 /** Réglages d'analyse et mesure de latence (US-1.4). */
 public class AnalysisPerformanceTest {
 
+    private final AnalysisSettingsRepository settings =
+            new AnalysisSettingsRepository(new InMemoryPreferenceStore());
+
     @Test
     public void strideOne_analyzesEveryFrame() {
         for (long frame = 0; frame < 5; frame++) {
-            assertTrue(AnalysisSettings.shouldAnalyze(frame, 1));
+            assertTrue(FrameSampling.shouldAnalyze(frame, 1));
         }
     }
 
@@ -22,30 +29,30 @@ public class AnalysisPerformanceTest {
     public void strideThree_analyzesOneFrameOutOfThree() {
         int analyzed = 0;
         for (long frame = 0; frame < 9; frame++) {
-            if (AnalysisSettings.shouldAnalyze(frame, 3)) analyzed++;
+            if (FrameSampling.shouldAnalyze(frame, 3)) analyzed++;
         }
         assertEquals(3, analyzed);
     }
 
     @Test
     public void invalidStride_fallsBackToEveryFrame() {
-        assertTrue(AnalysisSettings.shouldAnalyze(1, 0));
-        assertEquals(1, AnalysisSettings.clampStride(0));
-        assertEquals(AnalysisSettings.MAX_FRAME_STRIDE,
-                AnalysisSettings.clampStride(AnalysisSettings.MAX_FRAME_STRIDE + 4));
+        assertTrue(FrameSampling.shouldAnalyze(1, 0));
+        assertEquals(1, FrameSampling.clampStride(0));
+        assertEquals(FrameSampling.MAX_FRAME_STRIDE,
+                FrameSampling.clampStride(FrameSampling.MAX_FRAME_STRIDE + 4));
     }
 
     @Test
-    public void defaults_areTheLightModelOnEveryFrame_withoutStorage() {
-        assertEquals(AnalysisSettings.Model.LITE, AnalysisSettings.getModel());
-        assertEquals(1, AnalysisSettings.getFrameStride());
-        assertEquals("model=lite;frame_stride=1", AnalysisSettings.snapshot());
+    public void defaults_areTheLightModelOnEveryFrame_whenNothingIsStored() {
+        assertEquals(AnalysisModel.LITE, settings.getModel());
+        assertEquals(1, settings.getFrameStride());
+        assertEquals("model=lite;frame_stride=1", settings.snapshot());
     }
 
     @Test
     public void unknownModelKey_fallsBackToLite() {
-        assertEquals(AnalysisSettings.Model.LITE, AnalysisSettings.Model.fromKey("inconnu"));
-        assertEquals(AnalysisSettings.Model.FULL, AnalysisSettings.Model.fromKey("full"));
+        assertEquals(AnalysisModel.LITE, AnalysisModel.fromKey("inconnu"));
+        assertEquals(AnalysisModel.FULL, AnalysisModel.fromKey("full"));
     }
 
     @Test

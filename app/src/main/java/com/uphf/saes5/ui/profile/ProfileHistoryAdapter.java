@@ -8,13 +8,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.uphf.saes5.R;
+import com.uphf.saes5.domain.statistics.ProfileHistoryEntry;
+
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import com.uphf.saes5.R;
-import com.uphf.saes5.domain.statistics.ProfileHistoryEntry;
 
 public final class ProfileHistoryAdapter
         extends RecyclerView.Adapter<ProfileHistoryAdapter.HistoryViewHolder> {

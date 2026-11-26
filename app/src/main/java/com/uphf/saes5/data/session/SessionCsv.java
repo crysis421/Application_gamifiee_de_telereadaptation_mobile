@@ -1,12 +1,13 @@
 package com.uphf.saes5.data.session;
 
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /**
  * Le journal des séances au format CSV, ouvrable tel quel dans un tableur (US-7.2).

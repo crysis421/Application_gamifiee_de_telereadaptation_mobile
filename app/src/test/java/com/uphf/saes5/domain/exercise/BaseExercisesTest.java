@@ -6,8 +6,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
-
 import org.junit.Test;
+
+import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.Movement;
+import com.uphf.saes5.domain.movement.ModelAnimation;
+import com.uphf.saes5.domain.movement.MovementComparisonEngine;
+import com.uphf.saes5.domain.movement.MovementMath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,11 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.Movement;
-import com.uphf.saes5.domain.movement.ModelAnimation;
-import com.uphf.saes5.domain.movement.MovementComparisonEngine;
-import com.uphf.saes5.domain.movement.MovementMath;
 
 /**
  * Exercices de base et leurs modèles calculés.

@@ -7,11 +7,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.uphf.saes5.domain.statistics.ExerciseStatistic;
+import com.uphf.saes5.domain.statistics.MuscleStatistic;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.uphf.saes5.domain.statistics.ExerciseStatistic;
-import com.uphf.saes5.domain.statistics.MuscleStatistic;
 
 public class StatisticsListMapperTest {
     @Test

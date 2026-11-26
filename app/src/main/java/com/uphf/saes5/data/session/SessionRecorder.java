@@ -1,9 +1,11 @@
 package com.uphf.saes5.data.session;
 
-import com.uphf.saes5.data.settings.AnalysisSettings;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.data.settings.AnalysisSettingsRepository;
+import com.uphf.saes5.data.settings.GameSettingsRepository;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.SessionEntry;
+
+import java.time.Clock;
 
 /**
  * Construit et journalise l'entrée d'une séance (US-7.1), qu'elle soit terminée ou abandonnée.
@@ -14,19 +16,27 @@ import com.uphf.saes5.domain.model.SessionEntry;
  */
 public final class SessionRecorder {
 
-    private SessionRecorder() {}
+    private final GameSettingsRepository gameSettings;
+    private final AnalysisSettingsRepository analysisSettings;
+    private final Clock clock;
+
+    public SessionRecorder(GameSettingsRepository gameSettings,
+                           AnalysisSettingsRepository analysisSettings, Clock clock) {
+        this.gameSettings = gameSettings;
+        this.analysisSettings = analysisSettings;
+        this.clock = clock;
+    }
 
     /**
      * @param similarityScore      moyenne des scores, ou {@link SessionEntry#SCORE_UNAVAILABLE}
      * @param averageLatencyMillis latence moyenne, ou {@link SessionEntry#LATENCY_UNAVAILABLE}
      * @param arcadePoints         points gagnés, ou {@link SessionEntry#POINTS_UNAVAILABLE}
      */
-    public static SessionEntry build(Exercise exercise, int validatedReps, int failedReps,
-                                     long durationMillis, int similarityScore,
-                                     int averageLatencyMillis, int arcadePoints,
-                                     boolean abandoned) {
+    public SessionEntry build(Exercise exercise, int validatedReps, int failedReps,
+                              long durationMillis, int similarityScore,
+                              int averageLatencyMillis, int arcadePoints, boolean abandoned) {
         return new SessionEntry(
-                System.currentTimeMillis(),
+                clock.millis(),
                 exercise.getId(),
                 exercise.getName(),
                 validatedReps,
@@ -34,20 +44,20 @@ public final class SessionRecorder {
                 exercise.getTargetReps(),
                 durationMillis,
                 similarityScore,
-                GameSettings.snapshot(),
-                GameSettings.getConditionName(),
+                gameSettings.snapshot(),
+                gameSettings.getConditionName(),
                 // US-1.4 : le modèle et la latence n'ont de sens que si la caméra a tourné.
                 averageLatencyMillis == SessionEntry.LATENCY_UNAVAILABLE
                         ? ""
-                        : AnalysisSettings.snapshot(),
+                        : analysisSettings.snapshot(),
                 averageLatencyMillis,
                 arcadePoints,
                 abandoned);
     }
 
-    public static void record(Exercise exercise, int validatedReps, int failedReps,
-                              long durationMillis, int similarityScore,
-                              int averageLatencyMillis, int arcadePoints, boolean abandoned) {
+    public void record(Exercise exercise, int validatedReps, int failedReps,
+                       long durationMillis, int similarityScore,
+                       int averageLatencyMillis, int arcadePoints, boolean abandoned) {
         SessionLog.record(build(exercise, validatedReps, failedReps, durationMillis,
                 similarityScore, averageLatencyMillis, arcadePoints, abandoned));
     }

@@ -5,8 +5,11 @@ import android.media.AudioAttributes;
 import android.media.SoundPool;
 
 import androidx.annotation.RawRes;
+
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.data.settings.GameSettingsRepository;
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.domain.model.GameFeature;
 
 /**
  * Retours sonores de la séance (US-3.3).
@@ -29,6 +32,7 @@ public final class SoundFeedback {
     private final int validId;
     private final int failedId;
     private final int finishId;
+    private final GameSettingsRepository gameSettings;
 
     public SoundFeedback(Context context) {
         pool = new SoundPool.Builder()
@@ -40,6 +44,7 @@ public final class SoundFeedback {
                 .build();
 
         Context app = context.getApplicationContext();
+        gameSettings = AppContainer.from(app).gameSettings;
         validId = pool.load(app, R.raw.feedback_valid, 1);
         failedId = pool.load(app, R.raw.feedback_failed, 1);
         finishId = pool.load(app, R.raw.exercise_finish, 1);
@@ -61,7 +66,7 @@ public final class SoundFeedback {
     }
 
     private void play(int soundId) {
-        if (!GameSettings.isEnabled(GameSettings.Feature.SOUNDS)) {
+        if (!gameSettings.isEnabled(GameFeature.SOUNDS)) {
             return;
         }
         // Un son encore en cours de chargement ne joue tout simplement pas : mieux vaut un

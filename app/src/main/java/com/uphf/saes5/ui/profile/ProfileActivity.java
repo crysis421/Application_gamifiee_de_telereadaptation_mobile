@@ -1,8 +1,8 @@
 package com.uphf.saes5.ui.profile;
 
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -11,12 +11,14 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.session.SessionLog;
 import com.uphf.saes5.data.session.StatisticsRepository;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.game.Progression;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.statistics.ProfileCalculator;
 import com.uphf.saes5.domain.statistics.ProfileSummary;
 import com.uphf.saes5.ui.common.Navigation;
@@ -44,7 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void render() {
-        boolean progressionEnabled = GameSettings.isEnabled(GameSettings.Feature.STARS);
+        boolean progressionEnabled = AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.STARS);
         findViewById(R.id.profile_progression)
                 .setVisibility(progressionEnabled ? View.VISIBLE : View.GONE);
         if (progressionEnabled) {

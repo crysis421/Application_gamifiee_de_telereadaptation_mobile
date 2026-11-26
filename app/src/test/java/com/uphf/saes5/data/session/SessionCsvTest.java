@@ -5,10 +5,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.TimeZone;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /** Export du journal lisible directement par un tableur (US-7.2). */
 public class SessionCsvTest {

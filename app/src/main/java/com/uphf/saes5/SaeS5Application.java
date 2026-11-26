@@ -1,29 +1,27 @@
 package com.uphf.saes5;
 
 import android.app.Application;
+
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.session.SessionLog;
-import com.uphf.saes5.data.settings.AnalysisSettings;
-import com.uphf.saes5.data.settings.Consent;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.di.AppContainer;
 
 /**
- * Point d'entrée de l'application.
- *
- * <p>Sert à brancher le catalogue sur son stockage avant qu'un écran ne l'interroge : sans ça,
- * les exercices créés ou modifiés seraient perdus à la fermeture.</p>
- *
- * <p>Idem pour les réglages de gamification (US-4.1), lus dès le premier écran.</p>
+ * Point d'entrée de l'application : crée le conteneur de dépendances avant le premier écran.
  */
 public class SaeS5Application extends Application {
+
+    private AppContainer container;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        container = new AppContainer(this);
         ExerciseRepository.init(this);
-        GameSettings.init(this);
-        AnalysisSettings.init(this);
-        Consent.init(this);
         SessionLog.init(this);
+    }
+
+    public AppContainer getContainer() {
+        return container;
     }
 }

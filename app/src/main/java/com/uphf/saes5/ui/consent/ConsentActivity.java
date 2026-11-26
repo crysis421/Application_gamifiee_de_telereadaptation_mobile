@@ -14,13 +14,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.text.DateFormat;
-import java.util.Date;
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.session.SessionLog;
-import com.uphf.saes5.data.settings.Consent;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
 import com.uphf.saes5.ui.home.HomeActivity;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * Notice d'information et consentement de recherche (US-9.1).
@@ -48,7 +49,7 @@ public class ConsentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_consent);
         EdgeToEdgeSupport.applySystemBarInsets(findViewById(R.id.consent_root));
 
-        if (getIntent().getBooleanExtra(EXTRA_REVIEW, false) && !Consent.isRequired()) {
+        if (getIntent().getBooleanExtra(EXTRA_REVIEW, false) && !AppContainer.from(getApplicationContext()).consent.isRequired()) {
             bindReview();
         } else {
             bindFirstLaunch();
@@ -60,7 +61,7 @@ public class ConsentActivity extends AppCompatActivity {
         Button accept = findViewById(R.id.consent_accept);
         checkbox.setOnCheckedChangeListener((button, checked) -> accept.setEnabled(checked));
         accept.setOnClickListener(v -> {
-            Consent.accept();
+            AppContainer.from(getApplicationContext()).consent.accept();
             startActivity(new Intent(this, HomeActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
@@ -82,7 +83,7 @@ public class ConsentActivity extends AppCompatActivity {
         TextView acceptedOn = findViewById(R.id.consent_accepted_on);
         acceptedOn.setVisibility(View.VISIBLE);
         acceptedOn.setText(getString(R.string.consent_accepted_on,
-                DateFormat.getDateInstance(DateFormat.LONG).format(new Date(Consent.acceptedAt()))));
+                DateFormat.getDateInstance(DateFormat.LONG).format(new Date(AppContainer.from(getApplicationContext()).consent.acceptedAt()))));
 
         Button close = findViewById(R.id.consent_accept);
         close.setEnabled(true);
@@ -100,7 +101,7 @@ public class ConsentActivity extends AppCompatActivity {
 
     private void withdraw() {
         SessionLog.clear();
-        Consent.withdraw();
+        AppContainer.from(getApplicationContext()).consent.withdraw();
         finishAffinity();
     }
 }

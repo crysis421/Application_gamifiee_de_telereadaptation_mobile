@@ -23,20 +23,16 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import com.uphf.saes5.databinding.ActivityExerciseBinding;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.uphf.saes5.R;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.exercise.MovementStorage;
 import com.uphf.saes5.data.home.DailyExerciseTracker;
-import com.uphf.saes5.data.session.SessionRecorder;
-import com.uphf.saes5.data.settings.GameSettings;
+import com.uphf.saes5.databinding.ActivityExerciseBinding;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.exercise.BaseExercises;
 import com.uphf.saes5.domain.game.ArcadeScore;
 import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.model.Movement;
 import com.uphf.saes5.domain.model.SessionEntry;
 import com.uphf.saes5.domain.movement.BodyVisibility;
@@ -51,6 +47,10 @@ import com.uphf.saes5.ui.camera.SoundFeedback;
 import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
 import com.uphf.saes5.ui.common.ExerciseFormatter;
 import com.uphf.saes5.ui.summary.SummaryActivity;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Écran d'exécution d'un exercice.
@@ -371,7 +371,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     }
 
     private boolean isArcadeEnabled() {
-        return GameSettings.isEnabled(GameSettings.Feature.ARCADE);
+        return AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.ARCADE);
     }
 
     /** Score et multiplicateur en temps réel (US-4.4). */
@@ -482,7 +482,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
      */
     private void abandon() {
         handler.removeCallbacks(autoFinish);
-        SessionRecorder.record(exercise, validatedReps, failedReps, elapsedMillis(),
+        AppContainer.from(getApplicationContext()).sessionRecorder.record(exercise, validatedReps, failedReps, elapsedMillis(),
                 averageSimilarity(), latencyTracker.getAverageMillis(), arcadePointsOrNone(),
                 true);
         finish();

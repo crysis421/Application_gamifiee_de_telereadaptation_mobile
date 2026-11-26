@@ -1,10 +1,11 @@
 package com.uphf.saes5.ui.statistics;
 
+import com.uphf.saes5.domain.statistics.ExerciseStatistic;
+import com.uphf.saes5.domain.statistics.StatisticsSummary;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.uphf.saes5.domain.statistics.ExerciseStatistic;
-import com.uphf.saes5.domain.statistics.StatisticsSummary;
 
 public final class StatisticsScreenState {
     public enum DisplayMode { MUSCLES, EXERCISES }

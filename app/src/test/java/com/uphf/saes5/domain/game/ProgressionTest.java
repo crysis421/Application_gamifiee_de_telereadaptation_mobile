@@ -6,11 +6,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /** Rangs par groupe musculaire et étoiles par exercice (US-4.5). */
 public class ProgressionTest {

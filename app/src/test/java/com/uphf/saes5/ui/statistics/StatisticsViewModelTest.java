@@ -9,12 +9,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import com.uphf.saes5.domain.statistics.ExerciseStatistic;
 import com.uphf.saes5.domain.statistics.ScoredSession;
 import com.uphf.saes5.domain.statistics.StatisticsExercise;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StatisticsViewModelTest {
     @Rule

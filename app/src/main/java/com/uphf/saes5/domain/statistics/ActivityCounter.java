@@ -1,8 +1,9 @@
 package com.uphf.saes5.domain.statistics;
 
+import com.uphf.saes5.domain.model.SessionEntry;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.uphf.saes5.domain.model.SessionEntry;
 
 /**
  * Nombre d'exercices réalisés (US-5.2), tiré du journal des séances.

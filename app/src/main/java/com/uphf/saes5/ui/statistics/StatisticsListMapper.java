@@ -1,9 +1,10 @@
 package com.uphf.saes5.ui.statistics;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.uphf.saes5.domain.statistics.ExerciseStatistic;
 import com.uphf.saes5.domain.statistics.MuscleStatistic;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class StatisticsListMapper {
     private StatisticsListMapper() {}
