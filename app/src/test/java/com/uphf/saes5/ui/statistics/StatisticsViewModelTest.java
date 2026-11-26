@@ -13,6 +13,7 @@ import com.uphf.saes5.domain.statistics.ExerciseStatistic;
 import com.uphf.saes5.domain.statistics.ScoredSession;
 import com.uphf.saes5.domain.statistics.StatisticsExercise;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,17 +22,21 @@ public class StatisticsViewModelTest {
     @Rule
     public final InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
 
+    private final List<ScoredSession> sessions = new ArrayList<>();
     private StatisticsViewModel viewModel;
 
     @Before
     public void setUp() {
-        viewModel = new StatisticsViewModel(EXERCISES, SESSIONS);
+        sessions.addAll(SESSIONS);
+        viewModel = new StatisticsViewModel(() -> EXERCISES, () -> new ArrayList<>(sessions));
     }
 
     @Test
     public void refresh_keepsTheSelection_andShowsTheNewSessions() {
         viewModel.showExerciseMode();
-        viewModel.refresh(EXERCISES, Arrays.asList(session("squat", 0, 100)));
+        sessions.clear();
+        sessions.add(session("squat", 0, 100));
+        viewModel.refresh();
 
         StatisticsScreenState state = viewModel.getState().getValue();
         assertEquals(StatisticsScreenState.DisplayMode.EXERCISES, state.getDisplayMode());
@@ -102,5 +107,24 @@ public class StatisticsViewModelTest {
         StatisticsScreenState state = viewModel.getState().getValue();
         assertEquals("Bras", state.getSelectedMuscle());
         assertEquals(0, state.getVisibleExerciseStatistics().size());
+    }
+
+    @Test
+    public void selectingAMuscle_inMuscleMode_listsOnlyThatMuscle() {
+        viewModel.selectMuscle("Jambes");
+
+        StatisticsScreenState state = viewModel.getState().getValue();
+        assertEquals(1, state.getItems().size());
+        assertEquals("Jambes", state.getItems().get(0).getTitle());
+        assertEquals(StatisticsScreenState.Heading.MUSCLE_SELECTED, state.getHeading());
+    }
+
+    @Test
+    public void exerciseMode_listsEveryExercise_underTheExercisesHeading() {
+        viewModel.showExerciseMode();
+
+        StatisticsScreenState state = viewModel.getState().getValue();
+        assertEquals(5, state.getItems().size());
+        assertEquals(StatisticsScreenState.Heading.EXERCISES_ALL, state.getHeading());
     }
 }

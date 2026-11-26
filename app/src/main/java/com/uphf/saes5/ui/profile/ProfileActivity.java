@@ -2,63 +2,70 @@ package com.uphf.saes5.ui.profile;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uphf.saes5.R;
 import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.game.Progression;
-import com.uphf.saes5.domain.model.GameFeature;
-import com.uphf.saes5.domain.statistics.ProfileCalculator;
 import com.uphf.saes5.domain.statistics.ProfileSummary;
-import com.uphf.saes5.ui.common.Navigation;
-import com.uphf.saes5.ui.common.TabSwipe;
+import com.uphf.saes5.ui.common.TabActivity;
 
 /**
  * Profil : rangs par muscle et étoiles par exercice (US-4.5), puis historique des séances.
  *
- * <p>Tout est calculé à partir du journal des séances. L'écran est relu à chaque retour, car
- * l'onglet est réutilisé (singleTop) et une séance a pu se terminer entre-temps.</p>
+ * <p>Vue du MVVM : elle affiche l'état de {@link ProfileViewModel}. L'état est relu à chaque
+ * retour, car l'onglet est réutilisé (singleTop) et une séance a pu se terminer entre-temps.</p>
  */
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends TabActivity {
+
+    private ProfileViewModel viewModel;
+
+    @Override
+    protected int tabId() {
+        return R.id.nav_profile;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        render();
-        Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_profile);
-        Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
-                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
+        AppContainer container = AppContainer.from(this);
+        viewModel = new ViewModelProvider(this, ViewModelFactory.of(ProfileViewModel.class,
+                () -> new ProfileViewModel(container.exerciseRepository,
+                        container.sessionRepository, container.statisticsRepository,
+                        container.gameSettings)))
+                .get(ProfileViewModel.class);
+        setupTabs(findViewById(R.id.bottom_nav));
+        viewModel.getState().observe(this, this::render);
+        viewModel.refresh();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        render();
+        viewModel.refresh();
     }
 
-    private void render() {
-        boolean progressionEnabled = AppContainer.from(getApplicationContext()).gameSettings.isEnabled(GameFeature.STARS);
+    private void render(ProfileUiState state) {
+        showStatisticsTab(state.isStatisticsTabVisible());
         findViewById(R.id.profile_progression)
-                .setVisibility(progressionEnabled ? View.VISIBLE : View.GONE);
-        if (progressionEnabled) {
-            Progression.Summary progression = Progression.calculate(
-                    AppContainer.from(getApplicationContext()).exerciseRepository.getAll(), AppContainer.from(getApplicationContext()).sessionRepository.readAll());
+                .setVisibility(state.isProgressionVisible() ? View.VISIBLE : View.GONE);
+        Progression.Summary progression = state.getProgression();
+        if (progression != null) {
             ((TextView) findViewById(R.id.profile_star_count)).setText(
                     getString(R.string.profile_stars_count, progression.getTotalStars()));
             renderMuscleRanks(progression);
             renderExerciseStars(progression);
         }
-
-        renderHistory(ProfileCalculator.calculate(
-                AppContainer.from(getApplicationContext()).statisticsRepository.getExercises(), AppContainer.from(getApplicationContext()).statisticsRepository.getSessions()));
+        renderHistory(state.getHistory());
     }
 
     private void renderMuscleRanks(Progression.Summary progression) {
@@ -137,11 +144,5 @@ public class ProfileActivity extends AppCompatActivity {
         adapter.submitList(summary.getHistory());
         history.setAdapter(adapter);
         history.setNestedScrollingEnabled(false);
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
-        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }

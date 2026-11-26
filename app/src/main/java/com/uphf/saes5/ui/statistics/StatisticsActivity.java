@@ -1,70 +1,56 @@
 package com.uphf.saes5.ui.statistics;
 
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.databinding.ActivityStatisticsBinding;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.di.ViewModelFactory;
-import com.uphf.saes5.domain.model.GameFeature;
-import com.uphf.saes5.domain.statistics.MuscleStatistic;
-import com.uphf.saes5.ui.common.Navigation;
-import com.uphf.saes5.ui.common.TabSwipe;
-import com.uphf.saes5.ui.widget.MuscleBodyView;
+import com.uphf.saes5.ui.common.TabActivity;
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * Statistiques (US-5.3) : vue du MVVM, elle affiche l'état de {@link StatisticsViewModel}
+ * et lui transmet la sélection d'un muscle et le changement de mode.
+ */
+public class StatisticsActivity extends TabActivity {
 
-public class StatisticsActivity extends AppCompatActivity {
+    private ActivityStatisticsBinding binding;
     private StatisticsViewModel viewModel;
-    private StatisticsListAdapter adapter;
-    private MuscleBodyView muscleBody;
-    private MaterialButtonToggleGroup modeGroup;
-    private TextView globalValue;
-    private TextView detailHeading;
-    private TextView emptyState;
-    private RecyclerView recycler;
+    private final StatisticsListAdapter adapter = new StatisticsListAdapter();
+
+    @Override
+    protected int tabId() {
+        return R.id.nav_statistics;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_statistics);
+        binding = ActivityStatisticsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
+        AppContainer container = AppContainer.from(this);
         viewModel = new ViewModelProvider(this, ViewModelFactory.of(StatisticsViewModel.class,
-                () -> new StatisticsViewModel(AppContainer.from(this).statisticsRepository)))
+                () -> new StatisticsViewModel(container.statisticsRepository, container.gameSettings)))
                 .get(StatisticsViewModel.class);
-        globalValue = findViewById(R.id.statistics_global_value);
-        detailHeading = findViewById(R.id.statistics_detail_heading);
-        emptyState = findViewById(R.id.statistics_empty_state);
-        muscleBody = findViewById(R.id.statistics_muscle_body);
-        modeGroup = findViewById(R.id.statistics_mode_group);
-        recycler = findViewById(R.id.statistics_recycler);
 
-        adapter = new StatisticsListAdapter();
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setAdapter(adapter);
-        recycler.setNestedScrollingEnabled(false);
+        binding.statisticsRecycler.setLayoutManager(new LinearLayoutManager(this));
+        binding.statisticsRecycler.setAdapter(adapter);
+        binding.statisticsRecycler.setNestedScrollingEnabled(false);
 
-        muscleBody.setOnMuscleSelectedListener(viewModel::selectMuscle);
-        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+        binding.statisticsMuscleBody.setOnMuscleSelectedListener(viewModel::selectMuscle);
+        binding.statisticsModeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
             if (checkedId == R.id.statistics_mode_muscles) viewModel.showMuscleMode();
             if (checkedId == R.id.statistics_mode_exercises) viewModel.showExerciseMode();
         });
 
+        setupTabs(findViewById(R.id.bottom_nav));
         viewModel.getState().observe(this, this::render);
-        Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_statistics);
-        Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
-                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
     }
 
     @Override
@@ -76,48 +62,36 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void render(StatisticsScreenState state) {
-        globalValue.setText(getString(
+        showStatisticsTab(state.isStatisticsTabVisible());
+        binding.statisticsGlobalValue.setText(getString(
                 R.string.statistics_percentage, state.getSummary().getGlobalPerfectPercentage()));
-        muscleBody.setMuscleStatistics(state.getSummary().getMuscleStatistics());
-        muscleBody.setSelectedMuscle(state.getSelectedMuscle());
+        binding.statisticsMuscleBody.setMuscleStatistics(state.getSummary().getMuscleStatistics());
+        binding.statisticsMuscleBody.setSelectedMuscle(state.getSelectedMuscle());
 
-        List<StatisticListItem> items;
-        int checkedId;
-        if (state.getDisplayMode() == StatisticsScreenState.DisplayMode.MUSCLES) {
-            checkedId = R.id.statistics_mode_muscles;
-            items = StatisticsListMapper.fromMuscles(
-                    visibleMuscles(state.getSummary().getMuscleStatistics(), state.getSelectedMuscle()));
-            detailHeading.setText(state.getSelectedMuscle() == null
-                    ? getString(R.string.statistics_muscle_heading)
-                    : getString(R.string.statistics_selected_muscle_heading, state.getSelectedMuscle()));
-        } else {
-            checkedId = R.id.statistics_mode_exercises;
-            items = StatisticsListMapper.fromExercises(state.getVisibleExerciseStatistics());
-            detailHeading.setText(state.getSelectedMuscle() == null
-                    ? getString(R.string.statistics_exercise_heading)
-                    : getString(R.string.statistics_filtered_heading, state.getSelectedMuscle()));
+        int checkedId = state.getDisplayMode() == StatisticsScreenState.DisplayMode.MUSCLES
+                ? R.id.statistics_mode_muscles
+                : R.id.statistics_mode_exercises;
+        if (binding.statisticsModeGroup.getCheckedButtonId() != checkedId) {
+            binding.statisticsModeGroup.check(checkedId);
         }
-        if (modeGroup.getCheckedButtonId() != checkedId) modeGroup.check(checkedId);
+        binding.statisticsDetailHeading.setText(heading(state));
 
-        adapter.submitList(items);
-        boolean isEmpty = items.isEmpty();
-        emptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        recycler.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        adapter.submitList(state.getItems());
+        boolean isEmpty = state.getItems().isEmpty();
+        binding.statisticsEmptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        binding.statisticsRecycler.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
-    private List<MuscleStatistic> visibleMuscles(List<MuscleStatistic> statistics,
-                                                 String selectedMuscle) {
-        if (selectedMuscle == null) return statistics;
-        List<MuscleStatistic> result = new ArrayList<>();
-        for (MuscleStatistic statistic : statistics) {
-            if (selectedMuscle.equals(statistic.getMuscleGroup())) result.add(statistic);
+    private String heading(StatisticsScreenState state) {
+        switch (state.getHeading()) {
+            case MUSCLE_SELECTED:
+                return getString(R.string.statistics_selected_muscle_heading, state.getSelectedMuscle());
+            case EXERCISES_ALL:
+                return getString(R.string.statistics_exercise_heading);
+            case EXERCISES_FILTERED:
+                return getString(R.string.statistics_filtered_heading, state.getSelectedMuscle());
+            default:
+                return getString(R.string.statistics_muscle_heading);
         }
-        return result;
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        // Balayer vers la gauche ou la droite change d'onglet (voir TabSwipe).
-        return TabSwipe.dispatch(this, event) || super.dispatchTouchEvent(event);
     }
 }
