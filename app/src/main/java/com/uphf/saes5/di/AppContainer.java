@@ -3,8 +3,12 @@ package com.uphf.saes5.di;
 import android.content.Context;
 
 import com.uphf.saes5.SaeS5Application;
+import com.uphf.saes5.data.activity.StepCounter;
+import com.uphf.saes5.data.activity.StepSource;
 import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.exercise.MovementRepository;
+import com.uphf.saes5.data.home.DailyExerciseRepository;
+import com.uphf.saes5.data.home.FavoritesRepository;
 import com.uphf.saes5.data.session.SessionRecorder;
 import com.uphf.saes5.data.session.SessionRepository;
 import com.uphf.saes5.data.session.StatisticsRepository;
@@ -41,6 +45,9 @@ public final class AppContainer {
     public final SessionRepository sessionRepository;
     public final SessionRecorder sessionRecorder;
     public final StatisticsRepository statisticsRepository;
+    public final FavoritesRepository favoritesRepository;
+    public final DailyExerciseRepository dailyExerciseRepository;
+    public final StepSource stepSource;
 
     public AppContainer(Context context) {
         Context app = context.getApplicationContext();
@@ -63,6 +70,9 @@ public final class AppContainer {
         sessionRecorder = new SessionRecorder(
                 sessionRepository, gameSettings, analysisSettings, clock);
         statisticsRepository = new StatisticsRepository(exerciseRepository, sessionRepository);
+        favoritesRepository = new FavoritesRepository(preferences);
+        dailyExerciseRepository = new DailyExerciseRepository(preferences, exerciseRepository, clock);
+        stepSource = new StepCounter(app);
     }
 
     /** Le conteneur de l'application, depuis n'importe quel écran. */

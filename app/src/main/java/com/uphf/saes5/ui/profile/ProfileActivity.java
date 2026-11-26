@@ -34,6 +34,8 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         render();
         Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_profile);
+        Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
+                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
     }
 
     @Override

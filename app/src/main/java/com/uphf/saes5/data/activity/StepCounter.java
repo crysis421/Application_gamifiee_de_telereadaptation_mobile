@@ -33,16 +33,9 @@ import java.util.concurrent.TimeUnit;
  * qu'un zéro trompeur : permission refusée, Play services absent ou trop ancien, lecture en
  * échec.</p>
  */
-public final class StepCounter {
+public final class StepCounter implements StepSource {
 
     private static final String TAG = "StepCounter";
-
-    public enum Availability { AVAILABLE, PERMISSION_MISSING, UNSUPPORTED }
-
-    public interface Callback {
-        void onSteps(int steps);
-        void onUnavailable(@NonNull Availability reason);
-    }
 
     private final Context context;
 
@@ -50,7 +43,7 @@ public final class StepCounter {
         this.context = context.getApplicationContext();
     }
 
-    public Availability availability() {
+    private Availability availability() {
         int playServices = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
                 context, LocalRecordingClient.LOCAL_RECORDING_CLIENT_MIN_VERSION_CODE);
         if (playServices != ConnectionResult.SUCCESS) return Availability.UNSUPPORTED;
@@ -62,6 +55,7 @@ public final class StepCounter {
     }
 
     /** Lit les pas depuis minuit. S'abonne au passage : sans abonnement, rien n'est compté. */
+    @Override
     public void readToday(@NonNull Callback callback) {
         Availability availability = availability();
         if (availability != Availability.AVAILABLE) {

@@ -24,7 +24,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.home.DailyExerciseTracker;
+import com.uphf.saes5.data.home.DailyExerciseRepository;
 import com.uphf.saes5.databinding.ActivityExerciseBinding;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.game.ArcadeScore;
@@ -66,7 +66,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
     private ActivityExerciseBinding binding;
     private Exercise exercise;
-    private DailyExerciseTracker dailyExerciseTracker;
+    private DailyExerciseRepository dailyExerciseRepository;
     private SoundFeedback soundFeedback;
     private MovementComparisonEngine comparisonEngine;
     private PostureFeedback postureFeedback;
@@ -135,7 +135,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         // caméra passe ainsi sous la barre d'état et la barre de navigation, en plein écran.
         EdgeToEdgeSupport.applySystemBarInsets(binding.hud);
 
-        dailyExerciseTracker = new DailyExerciseTracker(this);
+        dailyExerciseRepository = AppContainer.from(this).dailyExerciseRepository;
         soundFeedback = new SoundFeedback(this);
         startElapsedRealtime = SystemClock.elapsedRealtime();
 
@@ -502,7 +502,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
 
         // Une session sans aucune répétition validée n'est pas comptée comme réalisée (US-4.2).
         if (validatedReps > 0) {
-            dailyExerciseTracker.markCompletedToday();
+            dailyExerciseRepository.markCompletedToday();
         }
 
         startActivity(SummaryActivity.newIntent(

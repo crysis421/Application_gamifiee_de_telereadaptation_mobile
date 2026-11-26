@@ -15,6 +15,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.uphf.saes5.R;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.di.ViewModelFactory;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.statistics.MuscleStatistic;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.common.TabSwipe;
@@ -62,6 +63,8 @@ public class StatisticsActivity extends AppCompatActivity {
 
         viewModel.getState().observe(this, this::render);
         Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_statistics);
+        Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
+                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
     }
 
     @Override

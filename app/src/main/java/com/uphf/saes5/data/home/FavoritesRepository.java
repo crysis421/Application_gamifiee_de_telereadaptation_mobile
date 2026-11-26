@@ -1,61 +1,44 @@
 package com.uphf.saes5.data.home;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import com.uphf.saes5.data.storage.PreferenceStore;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Exercices mis en favori par l'utilisateur.
+ * Exercices mis en favori par l'utilisateur, conservés d'une session à l'autre.
  *
- * <p>Stockage volontairement simple (SharedPreferences) : il suffit pour la fonctionnalité et
- * sera migré vers la base de données en même temps que le reste.</p>
- *
- * <p><strong>Fonctionnalité incomplète.</strong> Marquer un favori fonctionne et l'état est
- * conservé d'une session à l'autre, mais aucun écran ne permet de consulter ses favoris :
- * {@link #getFavoriteIds()} n'est appelé nulle part dans l'application. Il reste à les
- * afficher et à les filtrer dans le catalogue (US-6.1) pour que la fonctionnalité serve à
- * quelque chose.</p>
+ * <p><strong>Fonctionnalité incomplète.</strong> Marquer un favori fonctionne, mais aucun
+ * écran ne permet encore de consulter ses favoris : {@link #getFavoriteIds()} n'est appelé
+ * nulle part. Il reste à les afficher et à les filtrer dans le catalogue (US-6.1).</p>
  */
-public class FavoritesRepository {
+public final class FavoritesRepository {
 
-    private static final String PREFS_NAME = "exergame_prefs";
     private static final String KEY_FAVORITE_IDS = "favorite_exercise_ids";
 
-    private final SharedPreferences preferences;
+    private final PreferenceStore store;
 
-    public FavoritesRepository(Context context) {
-        this.preferences = context.getApplicationContext()
-                .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    public FavoritesRepository(PreferenceStore store) {
+        this.store = store;
     }
 
-    /** Les identifiants des exercices favoris. */
+    /** Les identifiants des exercices favoris (copie non modifiable). */
     public Set<String> getFavoriteIds() {
-        // Copie défensive : l'ensemble renvoyé par SharedPreferences ne doit jamais être modifié.
-        return Collections.unmodifiableSet(
-                new HashSet<>(preferences.getStringSet(KEY_FAVORITE_IDS, Collections.emptySet())));
+        return store.getStringSet(KEY_FAVORITE_IDS);
     }
 
     public boolean isFavorite(String exerciseId) {
         return getFavoriteIds().contains(exerciseId);
     }
 
-    public void setFavorite(String exerciseId, boolean favorite) {
-        Set<String> updated = new HashSet<>(getFavoriteIds());
-        if (favorite) {
-            updated.add(exerciseId);
-        } else {
-            updated.remove(exerciseId);
-        }
-        preferences.edit().putStringSet(KEY_FAVORITE_IDS, updated).apply();
-    }
-
     /** Bascule l'état favori et renvoie le nouvel état. */
     public boolean toggleFavorite(String exerciseId) {
-        boolean newState = !isFavorite(exerciseId);
-        setFavorite(exerciseId, newState);
-        return newState;
+        Set<String> updated = new HashSet<>(getFavoriteIds());
+        boolean favorite = !updated.remove(exerciseId);
+        if (favorite) {
+            updated.add(exerciseId);
+        }
+        store.putStringSet(KEY_FAVORITE_IDS, updated);
+        return favorite;
     }
 }

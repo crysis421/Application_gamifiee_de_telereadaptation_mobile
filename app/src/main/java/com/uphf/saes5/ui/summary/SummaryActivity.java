@@ -77,7 +77,7 @@ public class SummaryActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         EdgeToEdgeSupport.applySystemBarInsets(binding.main);
 
-        favoritesRepository = new FavoritesRepository(this);
+        favoritesRepository = AppContainer.from(this).favoritesRepository;
 
         SessionResult session = new SessionResult(
                 exerciseId,

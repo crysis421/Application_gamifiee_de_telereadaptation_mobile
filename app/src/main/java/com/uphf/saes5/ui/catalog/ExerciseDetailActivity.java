@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.uphf.saes5.R;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.exercise.ExerciseActivity;
 
@@ -36,5 +37,7 @@ public class ExerciseDetailActivity extends AppCompatActivity {
                     startActivity(ExerciseActivity.newIntent(this, selected.getId())));
         }
         Navigation.setupTabs(this, findViewById(R.id.bottom_nav), R.id.nav_catalog);
+        Navigation.setStatisticsVisible(findViewById(R.id.bottom_nav),
+                AppContainer.from(this).gameSettings.isEnabled(GameFeature.STATISTICS));
     }
 }

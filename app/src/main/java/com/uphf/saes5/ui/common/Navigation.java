@@ -11,8 +11,6 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.di.AppContainer;
-import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.ui.catalog.ExerciseCatalogActivity;
 import com.uphf.saes5.ui.home.HomeActivity;
 import com.uphf.saes5.ui.profile.ProfileActivity;
@@ -63,8 +61,9 @@ public final class Navigation {
     /**
      * Installe la barre d'onglets d'un écran.
      *
-     * <p>Applique les réglages de gamification, marque l'onglet courant, branche la
-     * navigation vers les trois autres et oriente l'animation de retour.</p>
+     * <p>Marque l'onglet courant, branche la navigation vers les trois autres et oriente
+     * l'animation de retour. La visibilité de l'onglet Statistiques vient de l'état de
+     * l'écran : voir {@link #setStatisticsVisible}.</p>
      *
      * @param selectedItemId l'onglet à marquer comme actif, ou {@code 0} pour n'en marquer
      *                       aucun — un écran qui n'est pas lui-même un onglet
@@ -75,7 +74,6 @@ public final class Navigation {
         if (navigation == null) {
             return;
         }
-        applyGameSettings(navigation);
         if (selectedItemId != 0) {
             navigation.setSelectedItemId(selectedItemId);
         }
@@ -146,16 +144,17 @@ public final class Navigation {
     }
 
     /**
-     * Masque les onglets dont l'élément de jeu est désactivé (US-4.1).
+     * Affiche ou masque l'onglet Statistiques, élément de jeu désactivable (US-4.1).
      *
-     * <p>Appelé par {@link #setupTabs}, et à rappeler depuis {@code onResume} des écrans qui
-     * peuvent voir les réglages changer pendant leur affichage : un onglet laissé visible
-     * mènerait à un écran que la condition de test est censée retirer.</p>
+     * <p>Un onglet laissé visible mènerait à un écran que la condition de test est censée
+     * retirer : chaque écran à onglets l'applique à chaque nouvel état.</p>
      */
-    public static void applyGameSettings(BottomNavigationView navigation) {
+    public static void setStatisticsVisible(@Nullable BottomNavigationView navigation,
+                                            boolean visible) {
+        if (navigation == null) return;
         MenuItem statistics = navigation.getMenu().findItem(R.id.nav_statistics);
         if (statistics != null) {
-            statistics.setVisible(AppContainer.from(navigation.getContext()).gameSettings.isEnabled(GameFeature.STATISTICS));
+            statistics.setVisible(visible);
         }
     }
 
