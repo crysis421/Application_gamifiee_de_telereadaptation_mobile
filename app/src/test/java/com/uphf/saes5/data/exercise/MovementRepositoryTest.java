@@ -18,7 +18,6 @@ import com.uphf.saes5.testing.FileAssetSource;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /** Modèles de mouvement enregistrés sur le téléphone, et démonstrations livrées. */
 public class MovementRepositoryTest {
@@ -56,7 +55,6 @@ public class MovementRepositoryTest {
         assertEquals("squat_lent", loaded.name);
         assertEquals(25, loaded.frames.size());
         assertTrue(movements.exists("squat_lent"));
-        assertEquals(Arrays.asList("squat_lent"), movements.list());
     }
 
     @Test

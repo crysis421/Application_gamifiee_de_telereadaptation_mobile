@@ -1,17 +1,16 @@
 package com.uphf.saes5.ui.profile;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.StringRes;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.databinding.ActivityProfileBinding;
+import com.uphf.saes5.databinding.ItemProfileMuscleBinding;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.game.Progression;
@@ -26,7 +25,9 @@ import com.uphf.saes5.ui.common.TabActivity;
  */
 public class ProfileActivity extends TabActivity {
 
+    private ActivityProfileBinding binding;
     private ProfileViewModel viewModel;
+    private final ProfileHistoryAdapter historyAdapter = new ProfileHistoryAdapter();
 
     @Override
     protected int tabId() {
@@ -36,7 +37,12 @@ public class ProfileActivity extends TabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        binding = ActivityProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        binding.profileHistoryList.setLayoutManager(new LinearLayoutManager(this));
+        binding.profileHistoryList.setAdapter(historyAdapter);
+        binding.profileHistoryList.setNestedScrollingEnabled(false);
+
         AppContainer container = AppContainer.from(this);
         viewModel = new ViewModelProvider(this, ViewModelFactory.of(ProfileViewModel.class,
                 () -> new ProfileViewModel(container.exerciseRepository,
@@ -56,11 +62,11 @@ public class ProfileActivity extends TabActivity {
 
     private void render(ProfileUiState state) {
         showStatisticsTab(state.isStatisticsTabVisible());
-        findViewById(R.id.profile_progression)
-                .setVisibility(state.isProgressionVisible() ? View.VISIBLE : View.GONE);
+        binding.profileProgression.setVisibility(
+                state.isProgressionVisible() ? View.VISIBLE : View.GONE);
         Progression.Summary progression = state.getProgression();
         if (progression != null) {
-            ((TextView) findViewById(R.id.profile_star_count)).setText(
+            binding.profileStarCount.setText(
                     getString(R.string.profile_stars_count, progression.getTotalStars()));
             renderMuscleRanks(progression);
             renderExerciseStars(progression);
@@ -69,46 +75,39 @@ public class ProfileActivity extends TabActivity {
     }
 
     private void renderMuscleRanks(Progression.Summary progression) {
-        LinearLayout container = findViewById(R.id.profile_muscle_ranks);
-        container.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
+        binding.profileMuscleRanks.removeAllViews();
         for (Progression.MuscleRank muscle : progression.getMuscles()) {
-            View row = inflater.inflate(R.layout.item_profile_muscle, container, false);
-            ((TextView) row.findViewById(R.id.profile_muscle_name))
-                    .setText(muscle.getMuscleGroup());
-            ((TextView) row.findViewById(R.id.profile_muscle_rank))
-                    .setText(rankLabel(muscle.getRank()));
-            ((TextView) row.findViewById(R.id.profile_muscle_score))
-                    .setText(getString(R.string.profile_points, muscle.getPoints()));
-
             Progression.Rank next = muscle.getRank().next();
-            ((TextView) row.findViewById(R.id.profile_muscle_sessions)).setText(next == null
-                    ? getString(R.string.profile_max_rank)
-                    : getString(R.string.profile_next_rank,
-                            muscle.getPointsToNextRank(), getString(rankLabel(next))));
-            container.addView(row);
+            addCard(binding.profileMuscleRanks, muscle.getMuscleGroup(),
+                    getString(rankLabel(muscle.getRank())), muscle.getPoints(),
+                    next == null
+                            ? getString(R.string.profile_max_rank)
+                            : getString(R.string.profile_next_rank,
+                                    muscle.getPointsToNextRank(), getString(rankLabel(next))));
         }
     }
 
     private void renderExerciseStars(Progression.Summary progression) {
-        LinearLayout container = findViewById(R.id.profile_exercise_stars);
-        container.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
+        binding.profileExerciseStars.removeAllViews();
         for (Progression.ExerciseStars exercise : progression.getExercises()) {
-            // Même carte que les muscles : nom, étoiles, points et prochain palier.
-            View row = inflater.inflate(R.layout.item_profile_muscle, container, false);
-            ((TextView) row.findViewById(R.id.profile_muscle_name)).setText(exercise.getName());
-            ((TextView) row.findViewById(R.id.profile_muscle_rank))
-                    .setText(starLine(exercise.getStars()));
-            ((TextView) row.findViewById(R.id.profile_muscle_score))
-                    .setText(getString(R.string.profile_points, exercise.getPoints()));
-            ((TextView) row.findViewById(R.id.profile_muscle_sessions)).setText(
+            addCard(binding.profileExerciseStars, exercise.getName(),
+                    starLine(exercise.getStars()), exercise.getPoints(),
                     exercise.getPointsToNextStar() == 0
                             ? getString(R.string.profile_all_stars)
-                            : getString(R.string.profile_next_star,
-                                    exercise.getPointsToNextStar()));
-            container.addView(row);
+                            : getString(R.string.profile_next_star, exercise.getPointsToNextStar()));
         }
+    }
+
+    /** Une carte de progression : nom, rang ou étoiles, points et prochain palier. */
+    private void addCard(LinearLayout container, String name, String badge, int points,
+                         String nextStep) {
+        ItemProfileMuscleBinding card =
+                ItemProfileMuscleBinding.inflate(getLayoutInflater(), container, false);
+        card.profileMuscleName.setText(name);
+        card.profileMuscleRank.setText(badge);
+        card.profileMuscleScore.setText(getString(R.string.profile_points, points));
+        card.profileMuscleSessions.setText(nextStep);
+        container.addView(card.getRoot());
     }
 
     private static String starLine(int stars) {
@@ -129,20 +128,9 @@ public class ProfileActivity extends TabActivity {
     }
 
     private void renderHistory(ProfileSummary summary) {
-        TextView emptyState = findViewById(R.id.profile_history_empty);
-        RecyclerView history = findViewById(R.id.profile_history_list);
-        if (summary.getHistory().isEmpty()) {
-            emptyState.setVisibility(View.VISIBLE);
-            history.setVisibility(View.GONE);
-            return;
-        }
-
-        emptyState.setVisibility(View.GONE);
-        history.setVisibility(View.VISIBLE);
-        history.setLayoutManager(new LinearLayoutManager(this));
-        ProfileHistoryAdapter adapter = new ProfileHistoryAdapter();
-        adapter.submitList(summary.getHistory());
-        history.setAdapter(adapter);
-        history.setNestedScrollingEnabled(false);
+        boolean empty = summary.getHistory().isEmpty();
+        binding.profileHistoryEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+        binding.profileHistoryList.setVisibility(empty ? View.GONE : View.VISIBLE);
+        historyAdapter.submitList(summary.getHistory());
     }
 }

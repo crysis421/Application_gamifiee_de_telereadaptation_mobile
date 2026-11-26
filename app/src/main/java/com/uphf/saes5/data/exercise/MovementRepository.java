@@ -21,9 +21,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Modèles de mouvement : ceux enregistrés sur le téléphone (un fichier JSON par modèle) et
@@ -68,20 +65,6 @@ public final class MovementRepository {
 
     public synchronized boolean exists(@Nullable String name) {
         return name != null && !name.trim().isEmpty() && fileFor(name).isFile();
-    }
-
-    /** Noms des modèles enregistrés, par ordre alphabétique. */
-    public synchronized List<String> list() {
-        List<String> names = new ArrayList<>();
-        File[] files = directory().listFiles((dir, file) -> file.endsWith(".json"));
-        if (files != null) {
-            for (File file : files) {
-                String fileName = file.getName();
-                names.add(fileName.substring(0, fileName.length() - ".json".length()));
-            }
-        }
-        Collections.sort(names);
-        return names;
     }
 
     /** Un modèle livré avec l'application, ou {@code null} s'il est illisible. */
