@@ -2,6 +2,8 @@ package com.uphf.saes5.ui.recording;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -56,6 +58,20 @@ public class MovementRecordingActivity extends AppCompatActivity
     private static final int MIN_FRAMES = 20;
 
     private enum State { WAITING, COUNTDOWN, RECORDING, DONE }
+
+    /** Enregistre le modèle associé à un exercice précis. */
+    public static Intent recordIntent(Context context, String movementId) {
+        return new Intent(context, MovementRecordingActivity.class)
+                .putExtra(EXTRA_MODE, MODE_RECORD)
+                .putExtra(EXTRA_NAME, movementId);
+    }
+
+    /** Compare la caméra au modèle déjà enregistré pour l'exercice. */
+    public static Intent compareIntent(Context context, String movementId) {
+        return new Intent(context, MovementRecordingActivity.class)
+                .putExtra(EXTRA_MODE, MODE_COMPARE)
+                .putExtra(EXTRA_NAME, movementId);
+    }
 
     private PreviewView viewFinder;
     private OverlayView overlay;
