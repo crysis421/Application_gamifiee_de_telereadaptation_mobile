@@ -6,7 +6,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.exercise.ExerciseActivity;
@@ -18,7 +18,7 @@ public class ExerciseDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_exercise_player);
         String exerciseId = getIntent().getStringExtra("exercise_id");
         Exercise exercise = null;
-        for (Exercise candidate : ExerciseRepository.getAll()) {
+        for (Exercise candidate : AppContainer.from(getApplicationContext()).exerciseRepository.getAll()) {
             if (candidate.getId().equals(exerciseId)) {
                 exercise = candidate;
                 break;

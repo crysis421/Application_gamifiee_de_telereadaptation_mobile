@@ -1,6 +1,5 @@
 package com.uphf.saes5.data.session;
 
-import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -18,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,10 +35,9 @@ import java.util.TimeZone;
  * <p>Seules les données listées par {@link SessionEntry} sont conservées. Aucune image ni
  * vidéo n'est écrite, conformément à la contrainte de l'US.</p>
  */
-public final class SessionLog {
+public final class SessionRepository {
 
-    private static final String TAG = "SessionLog";
-    private static final String FILE_NAME = "sessions.json";
+    private static final String TAG = "SessionRepository";
 
     private static final String F_TIMESTAMP = "timestamp";
     private static final String F_TIMESTAMP_MILLIS = "timestampMillis";
@@ -63,35 +62,36 @@ public final class SessionLog {
     private static final SimpleDateFormat READABLE =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 
-    @Nullable
-    private static File file;
+    private final File file;
+    private final File exportDirectory;
+    private final Clock clock;
 
-    private SessionLog() {}
-
-    /** Branche le journal sur son fichier. Appelé au démarrage, depuis SaeS5Application. */
-    public static synchronized void init(Context context) {
-        file = new File(context.getApplicationContext().getFilesDir(), FILE_NAME);
+    /**
+     * @param file            le journal ({@code sessions.json} dans le stockage privé)
+     * @param exportDirectory dossier des fichiers d'export partagés (cache de l'application)
+     */
+    public SessionRepository(File file, File exportDirectory, Clock clock) {
+        this.file = file;
+        this.exportDirectory = exportDirectory;
+        this.clock = clock;
     }
 
     /**
      * Ajoute une séance au journal.
      *
-     * <p>Sans effet tant que {@link #init(Context)} n'a pas été appelé : journaliser ne doit
-     * jamais faire échouer une fin de séance.</p>
+     * <p>Une erreur d'écriture est consignée sans être levée : journaliser ne doit jamais faire
+     * échouer une fin de séance.</p>
      */
-    public static synchronized void record(@NonNull SessionEntry entry) {
-        if (file == null) {
-            return;
-        }
+    public synchronized void record(@NonNull SessionEntry entry) {
         List<SessionEntry> all = readAll();
         all.add(entry);
         write(all);
     }
 
     /** Toutes les séances journalisées, de la plus ancienne à la plus récente. */
-    public static synchronized List<SessionEntry> readAll() {
+    public synchronized List<SessionEntry> readAll() {
         List<SessionEntry> result = new ArrayList<>();
-        if (file == null || !file.exists()) {
+        if (!file.exists()) {
             return result;
         }
         String content = read();
@@ -117,7 +117,7 @@ public final class SessionLog {
      * @param fromMillis début inclus, ou 0 pour ne pas borner
      * @param toMillis   fin incluse, ou {@link Long#MAX_VALUE} pour ne pas borner
      */
-    public static synchronized String exportJson(long fromMillis, long toMillis) {
+    public synchronized String exportJson(long fromMillis, long toMillis) {
         return toJsonArray(filterByPeriod(readAll(), fromMillis, toMillis));
     }
 
@@ -156,14 +156,12 @@ public final class SessionLog {
 
     /** Écrit l'export dans un fichier partageable, et le renvoie. */
     @Nullable
-    public static synchronized File writeExport(Context context, long fromMillis, long toMillis,
-                                                ExportFormat format) {
-        File exports = new File(context.getCacheDir(), "exports");
-        if (!exports.exists() && !exports.mkdirs()) {
+    public synchronized File writeExport(long fromMillis, long toMillis, ExportFormat format) {
+        if (!exportDirectory.exists() && !exportDirectory.mkdirs()) {
             Log.w(TAG, "Dossier d'export impossible à créer");
             return null;
         }
-        File target = new File(exports, "sessions-" + READABLE.format(new Date())
+        File target = new File(exportDirectory, "sessions-" + READABLE.format(new Date(clock.millis()))
                 .replace(':', '-') + "." + format.extension);
         String content = format == ExportFormat.CSV
                 ? SessionCsv.toCsv(filterByPeriod(readAll(), fromMillis, toMillis),
@@ -179,14 +177,14 @@ public final class SessionLog {
     }
 
     /** Efface tout le journal : retrait du consentement du participant (US-9.1). */
-    public static synchronized void clear() {
-        if (file != null && file.exists() && !file.delete()) {
+    public synchronized void clear() {
+        if (file.exists() && !file.delete()) {
             Log.w(TAG, "Journal impossible à effacer");
         }
     }
 
     /** Nombre de séances journalisées. */
-    public static synchronized int count() {
+    public synchronized int count() {
         return readAll().size();
     }
 
@@ -266,7 +264,7 @@ public final class SessionLog {
 
     // --- fichier ----------------------------------------------------------
 
-    private static String read() {
+    private String read() {
         try (Scanner scanner = new Scanner(file, StandardCharsets.UTF_8.name())) {
             scanner.useDelimiter("\\A");
             return scanner.hasNext() ? scanner.next() : "";
@@ -276,7 +274,7 @@ public final class SessionLog {
         }
     }
 
-    private static void write(List<SessionEntry> entries) {
+    private void write(List<SessionEntry> entries) {
         try (FileOutputStream out = new FileOutputStream(file)) {
             out.write(toJsonArray(entries).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {

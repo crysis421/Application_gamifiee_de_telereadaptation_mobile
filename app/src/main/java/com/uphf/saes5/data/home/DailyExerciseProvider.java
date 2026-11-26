@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.uphf.saes5.data.exercise.ExerciseRepository;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
 
 import java.text.SimpleDateFormat;
@@ -39,10 +40,12 @@ public final class DailyExerciseProvider {
     private static final String KEY_EXERCISE_ID = "daily_exercise_id";
 
     private final SharedPreferences preferences;
+    private final ExerciseRepository exercises;
 
     public DailyExerciseProvider(Context context) {
         this.preferences = context.getApplicationContext()
                 .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.exercises = AppContainer.from(context).exerciseRepository;
     }
 
     /** Clé de la journée en cours, au format {@code yyyy-MM-dd}. */
@@ -55,14 +58,14 @@ public final class DailyExerciseProvider {
      */
     @Nullable
     public Exercise ofTheDay() {
-        List<Exercise> catalogue = ExerciseRepository.getAll();
+        List<Exercise> catalogue = exercises.getAll();
         if (catalogue.isEmpty()) {
             return null;
         }
 
         String today = todayKey();
         if (today.equals(preferences.getString(KEY_DAY, null))) {
-            Exercise retained = ExerciseRepository.findById(preferences.getString(KEY_EXERCISE_ID, null));
+            Exercise retained = exercises.findById(preferences.getString(KEY_EXERCISE_ID, null));
             if (retained != null) {
                 return retained;
             }

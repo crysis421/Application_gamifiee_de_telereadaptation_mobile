@@ -1,26 +1,20 @@
 package com.uphf.saes5.data.exercise;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.uphf.saes5.SaeS5Application;
+import com.uphf.saes5.data.storage.PreferenceStore;
 import com.uphf.saes5.domain.exercise.BaseExercises;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.Movement;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,23 +22,20 @@ import java.util.UUID;
 /**
  * Catalogue d'exercices.
  *
- * <p>Le contenu est conservé d'une ouverture à l'autre dans les SharedPreferences, sérialisé en
+ * <p>Le contenu est conservé d'une ouverture à l'autre dans les préférences, sérialisé en
  * JSON. C'est volontairement sommaire : ce stockage tient le temps que la base de données
- * arrive (voir le remaniement « base de données et modèle de données » du backlog), et seule
- * cette classe sera à remplacer le jour venu.</p>
+ * arrive, et seule cette classe sera à remplacer le jour venu.</p>
  *
  * <p>Un exercice n'existe qu'avec son modèle de référence : c'est à lui que le mouvement est
  * comparé. Le catalogue démarre avec les exercices de base ({@link BaseExercises}), livrés
- * avec leur modèle, puis ne s'enrichit que d'exercices créés avec le leur (voir
- * {@code ExerciseEditorActivity}).</p>
+ * avec leur modèle, puis ne s'enrichit que d'exercices créés avec le leur.</p>
  *
- * <p>{@link #init(Context)} doit être appelé au démarrage de l'application. Sans lui — en test
- * unitaire par exemple — le catalogue fonctionne en mémoire et n'écrit rien.</p>
+ * <p>{@link #initialize()} est appelé une fois, à la création du conteneur de
+ * l'application.</p>
  */
 public final class ExerciseRepository {
 
     private static final String TAG = "ExerciseRepository";
-    private static final String PREFS_NAME = "exergame_prefs";
     private static final String KEY_EXERCISES = "catalogue_exercises";
     /** Posée une fois les exercices sans modèle retirés des catalogues déjà enregistrés. */
     private static final String KEY_WITHOUT_MODEL_REMOVED = "catalogue_without_model_removed";
@@ -63,24 +54,18 @@ public final class ExerciseRepository {
     private static final String FIELD_REFERENCE_MOVEMENT = "referenceMovementId";
     private static final String FIELD_SIMILARITY_THRESHOLD = "similarityThreshold";
 
-    @Nullable
-    private static SharedPreferences preferences;
+    private final PreferenceStore store;
+    private final MovementRepository movements;
+    private final List<Exercise> exercises = new ArrayList<>();
 
-    /** Liste modifiable, vide au départ puis remplie par init(). */
-    private static final List<Exercise> exercises = new ArrayList<>();
+    public ExerciseRepository(PreferenceStore store, MovementRepository movements) {
+        this.store = store;
+        this.movements = movements;
+    }
 
-    private ExerciseRepository() {}
-
-    /**
-     * Branche le catalogue sur le stockage et recharge son contenu.
-     *
-     * <p>Appelé une fois au démarrage, depuis {@link SaeS5Application}.</p>
-     */
-    public static synchronized void init(Context context) {
-        preferences = context.getApplicationContext()
-                .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
-        String stored = preferences.getString(KEY_EXERCISES, null);
+    /** Recharge le catalogue enregistré, puis applique les deux mises à niveau « une fois ». */
+    public synchronized void initialize() {
+        String stored = store.getString(KEY_EXERCISES, null);
         if (stored != null) {
             List<Exercise> loaded = deserialize(stored);
             if (loaded != null) {
@@ -88,8 +73,8 @@ public final class ExerciseRepository {
                 exercises.addAll(loaded);
             }
         }
-        removeExercisesWithoutModelOnce(context);
-        installBaseExercisesOnce(context);
+        removeExercisesWithoutModelOnce();
+        installBaseExercisesOnce();
     }
 
     /**
@@ -99,31 +84,31 @@ public final class ExerciseRepository {
      * l'utilisateur lui a peut-être enregistré. Le modèle est copié avant l'exercice : si la
      * copie échoue, l'exercice n'est pas ajouté.</p>
      */
-    private static void installBaseExercisesOnce(Context context) {
-        if (preferences.getBoolean(KEY_BASE_INSTALLED, false)) {
+    private void installBaseExercisesOnce() {
+        if (store.getBoolean(KEY_BASE_INSTALLED, false)) {
             return;
         }
-        Gson gson = new Gson();
         for (Exercise base : BaseExercises.all()) {
             if (isAlreadyInCatalogue(base)) {
                 continue;
             }
-            String asset = BaseExercises.ASSET_DIRECTORY + "/" + base.getReferenceMovementId() + ".json";
-            try (Reader reader = new InputStreamReader(
-                    context.getAssets().open(asset), StandardCharsets.UTF_8)) {
-                if (!MovementStorage.exists(context, base.getReferenceMovementId())) {
-                    MovementStorage.save(context, gson.fromJson(reader, Movement.class));
+            if (!movements.exists(base.getReferenceMovementId())) {
+                Movement model = movements.loadAsset(BaseExercises.modelAssetFor(base));
+                try {
+                    if (model == null) throw new IOException("modèle illisible");
+                    movements.save(model);
+                } catch (IOException e) {
+                    Log.w(TAG, "Exercice de base non installé : " + base.getId(), e);
+                    continue;
                 }
-                exercises.add(base);
-            } catch (IOException | RuntimeException e) {
-                Log.w(TAG, "Exercice de base non installé, modèle illisible : " + asset, e);
             }
+            exercises.add(base);
         }
         save();
-        preferences.edit().putBoolean(KEY_BASE_INSTALLED, true).apply();
+        store.putBoolean(KEY_BASE_INSTALLED, true);
     }
 
-    private static boolean isAlreadyInCatalogue(Exercise candidate) {
+    private boolean isAlreadyInCatalogue(Exercise candidate) {
         for (Exercise exercise : exercises) {
             if (exercise.getId().equals(candidate.getId())
                     || exercise.getName().trim().equalsIgnoreCase(candidate.getName().trim())) {
@@ -135,29 +120,27 @@ public final class ExerciseRepository {
 
     /**
      * Retire, une seule fois par appareil, les exercices enregistrés avant que le modèle ne
-     * devienne obligatoire : les cinq exercices autrefois livrés avec l'application, et ceux
-     * créés sans enregistrer de mouvement. Ceux dont le modèle a été enregistré entre-temps
-     * sont conservés.
+     * devienne obligatoire. Ceux dont le modèle a été enregistré entre-temps sont conservés.
      */
-    private static void removeExercisesWithoutModelOnce(Context context) {
-        if (preferences.getBoolean(KEY_WITHOUT_MODEL_REMOVED, false)) {
+    private void removeExercisesWithoutModelOnce() {
+        if (store.getBoolean(KEY_WITHOUT_MODEL_REMOVED, false)) {
             return;
         }
         for (int i = exercises.size() - 1; i >= 0; i--) {
-            if (!MovementStorage.exists(context, exercises.get(i).getReferenceMovementId())) {
+            if (!movements.exists(exercises.get(i).getReferenceMovementId())) {
                 Log.i(TAG, "Exercice sans modèle retiré : " + exercises.get(i).getId());
                 exercises.remove(i);
             }
         }
         save();
-        preferences.edit().putBoolean(KEY_WITHOUT_MODEL_REMOVED, true).apply();
+        store.putBoolean(KEY_WITHOUT_MODEL_REMOVED, true);
     }
 
-    public static synchronized List<Exercise> getAll() {
+    public synchronized List<Exercise> getAll() {
         return new ArrayList<>(exercises);
     }
 
-    public static synchronized void add(Exercise exercise) {
+    public synchronized void add(Exercise exercise) {
         exercises.add(exercise);
         save();
     }
@@ -167,7 +150,7 @@ public final class ExerciseRepository {
      *
      * @return {@code false} si l'exercice n'est plus au catalogue, auquel cas rien n'est modifié.
      */
-    public static synchronized boolean update(Exercise exercise) {
+    public synchronized boolean update(Exercise exercise) {
         if (exercise == null) {
             return false;
         }
@@ -186,7 +169,7 @@ public final class ExerciseRepository {
      *
      * @return {@code false} s'il n'y était déjà plus.
      */
-    public static synchronized boolean remove(String id) {
+    public synchronized boolean remove(String id) {
         if (id == null) {
             return false;
         }
@@ -202,7 +185,7 @@ public final class ExerciseRepository {
 
     /** L'exercice portant cet identifiant, ou {@code null} s'il n'est plus au catalogue. */
     @Nullable
-    public static synchronized Exercise findById(String id) {
+    public synchronized Exercise findById(String id) {
         if (id == null) {
             return null;
         }
@@ -214,16 +197,13 @@ public final class ExerciseRepository {
         return null;
     }
 
-    public static String newId() {
+    /** Identifiant d'un nouvel exercice créé par l'utilisateur. */
+    public String newId() {
         return "custom_" + UUID.randomUUID();
     }
 
-    /** Écrit le catalogue. Sans effet tant que {@link #init(Context)} n'a pas été appelé. */
-    private static void save() {
-        if (preferences == null) {
-            return;
-        }
-        preferences.edit().putString(KEY_EXERCISES, serialize(exercises)).apply();
+    private void save() {
+        store.putString(KEY_EXERCISES, serialize(exercises));
     }
 
     @VisibleForTesting

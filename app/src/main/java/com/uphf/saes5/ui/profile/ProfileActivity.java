@@ -13,9 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
-import com.uphf.saes5.data.session.SessionLog;
-import com.uphf.saes5.data.session.StatisticsRepository;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.game.Progression;
 import com.uphf.saes5.domain.model.GameFeature;
@@ -51,7 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .setVisibility(progressionEnabled ? View.VISIBLE : View.GONE);
         if (progressionEnabled) {
             Progression.Summary progression = Progression.calculate(
-                    ExerciseRepository.getAll(), SessionLog.readAll());
+                    AppContainer.from(getApplicationContext()).exerciseRepository.getAll(), AppContainer.from(getApplicationContext()).sessionRepository.readAll());
             ((TextView) findViewById(R.id.profile_star_count)).setText(
                     getString(R.string.profile_stars_count, progression.getTotalStars()));
             renderMuscleRanks(progression);
@@ -59,7 +56,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         renderHistory(ProfileCalculator.calculate(
-                StatisticsRepository.getExercises(), StatisticsRepository.getAll()));
+                AppContainer.from(getApplicationContext()).statisticsRepository.getExercises(), AppContainer.from(getApplicationContext()).statisticsRepository.getSessions()));
     }
 
     private void renderMuscleRanks(Progression.Summary progression) {

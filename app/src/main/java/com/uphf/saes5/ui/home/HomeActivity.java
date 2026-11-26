@@ -19,7 +19,6 @@ import com.uphf.saes5.data.activity.StepCounter;
 import com.uphf.saes5.data.home.DailyExerciseProvider;
 import com.uphf.saes5.data.home.DailyExerciseTracker;
 import com.uphf.saes5.data.home.FavoritesRepository;
-import com.uphf.saes5.data.session.SessionLog;
 import com.uphf.saes5.databinding.ActivityMainBinding;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
@@ -155,7 +154,7 @@ public class HomeActivity extends AppCompatActivity {
     /** Exercices réalisés au total et sur les sept derniers jours (US-5.2). */
     private void bindExercisesDone() {
         ActivityCounter.Counts counts =
-                ActivityCounter.count(SessionLog.readAll(), System.currentTimeMillis());
+                ActivityCounter.count(AppContainer.from(getApplicationContext()).sessionRepository.readAll(), System.currentTimeMillis());
         binding.exercisesDoneTile.statValue.setText(String.valueOf(counts.getTotal()));
         binding.exercisesDoneTile.statLabel.setText(getResources().getQuantityString(
                 R.plurals.home_exercises_done, counts.getTotal(), counts.getLastSevenDays()));

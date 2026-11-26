@@ -20,7 +20,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.session.SessionLog;
+import com.uphf.saes5.data.session.SessionRepository;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.FrameSampling;
@@ -236,7 +236,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void refreshSessionCount() {
         ((TextView) findViewById(R.id.settings_session_count))
-                .setText(getString(R.string.settings_sessions_recorded, SessionLog.count()));
+                .setText(getString(R.string.settings_sessions_recorded, AppContainer.from(getApplicationContext()).sessionRepository.count()));
     }
 
     /**
@@ -246,7 +246,7 @@ public class SettingsActivity extends AppCompatActivity {
      * fichier contenant {@code []}.</p>
      */
     private void askPeriodThenExport() {
-        if (SessionLog.count() == 0) {
+        if (AppContainer.from(getApplicationContext()).sessionRepository.count() == 0) {
             Toast.makeText(this, R.string.settings_export_empty, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -270,9 +270,9 @@ public class SettingsActivity extends AppCompatActivity {
                 getString(R.string.settings_export_format_csv),
                 getString(R.string.settings_export_format_json),
         };
-        SessionLog.ExportFormat[] formats = {
-                SessionLog.ExportFormat.CSV,
-                SessionLog.ExportFormat.JSON,
+        SessionRepository.ExportFormat[] formats = {
+                SessionRepository.ExportFormat.CSV,
+                SessionRepository.ExportFormat.JSON,
         };
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_export_format)
@@ -281,9 +281,9 @@ public class SettingsActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void export(int days, SessionLog.ExportFormat format) {
+    private void export(int days, SessionRepository.ExportFormat format) {
         long from = days == 0 ? 0L : System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days);
-        File exported = SessionLog.writeExport(this, from, Long.MAX_VALUE, format);
+        File exported = AppContainer.from(getApplicationContext()).sessionRepository.writeExport(from, Long.MAX_VALUE, format);
         if (exported == null) {
             Toast.makeText(this, R.string.settings_export_failed, Toast.LENGTH_SHORT).show();
             return;

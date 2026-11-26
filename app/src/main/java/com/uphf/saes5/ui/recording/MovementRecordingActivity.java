@@ -29,7 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mediapipe.tasks.vision.core.RunningMode;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.MovementStorage;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Movement;
 import com.uphf.saes5.domain.movement.MovementMath;
 import com.uphf.saes5.ui.camera.HolisticLandmarkerHelper;
@@ -106,7 +106,7 @@ public class MovementRecordingActivity extends AppCompatActivity
         if (movementName == null || movementName.trim().isEmpty()) movementName = "mouvement";
 
         if (MODE_COMPARE.equals(mode)) {
-            reference = MovementStorage.load(this, movementName);
+            reference = AppContainer.from(getApplicationContext()).movementRepository.load(movementName);
             if (reference == null || reference.frames == null || reference.frames.isEmpty()) {
                 Toast.makeText(this, "Mouvement introuvable : " + movementName,
                         Toast.LENGTH_LONG).show();
@@ -257,7 +257,7 @@ public class MovementRecordingActivity extends AppCompatActivity
             m.landmarkCount = MovementMath.LANDMARKS;
             m.frames = new ArrayList<>(frames);
             try {
-                MovementStorage.save(this, m);
+                AppContainer.from(getApplicationContext()).movementRepository.save(m);
                 setResult(RESULT_OK);
                 tvStatus.setText("« " + movementName + " » enregistré (" + frames.size() + " images)");
             } catch (IOException e) {

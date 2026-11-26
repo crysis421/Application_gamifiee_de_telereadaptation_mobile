@@ -16,12 +16,14 @@ import java.time.Clock;
  */
 public final class SessionRecorder {
 
+    private final SessionRepository sessions;
     private final GameSettingsRepository gameSettings;
     private final AnalysisSettingsRepository analysisSettings;
     private final Clock clock;
 
-    public SessionRecorder(GameSettingsRepository gameSettings,
+    public SessionRecorder(SessionRepository sessions, GameSettingsRepository gameSettings,
                            AnalysisSettingsRepository analysisSettings, Clock clock) {
+        this.sessions = sessions;
         this.gameSettings = gameSettings;
         this.analysisSettings = analysisSettings;
         this.clock = clock;
@@ -58,7 +60,7 @@ public final class SessionRecorder {
     public void record(Exercise exercise, int validatedReps, int failedReps,
                        long durationMillis, int similarityScore,
                        int averageLatencyMillis, int arcadePoints, boolean abandoned) {
-        SessionLog.record(build(exercise, validatedReps, failedReps, durationMillis,
+        sessions.record(build(exercise, validatedReps, failedReps, durationMillis,
                 similarityScore, averageLatencyMillis, arcadePoints, abandoned));
     }
 }

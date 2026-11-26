@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.MovementStorage;
+import com.uphf.saes5.di.AppContainer;
 
 public final class HolisticLauncher {
 
@@ -18,7 +18,7 @@ public final class HolisticLauncher {
 
     /** Teste la caméra contre le modèle explicitement associé à l'exercice. */
     public static void startComparison(Context activityContext, String referenceMovementId) {
-        if (!MovementStorage.exists(activityContext, referenceMovementId)) {
+        if (!AppContainer.from(activityContext).movementRepository.exists(referenceMovementId)) {
             Toast.makeText(activityContext, R.string.reference_model_missing_toast,
                     Toast.LENGTH_SHORT).show();
             return;

@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.data.home.FavoritesRepository;
 import com.uphf.saes5.databinding.ActivitySummaryBinding;
 import com.uphf.saes5.di.AppContainer;
@@ -68,7 +67,7 @@ public class SummaryActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         String exerciseId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
-        exercise = ExerciseRepository.findById(exerciseId);
+        exercise = AppContainer.from(getApplicationContext()).exerciseRepository.findById(exerciseId);
         if (exercise == null) {
             finish();
             return;

@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.uphf.saes5.data.settings.AnalysisSettingsRepository;
 import com.uphf.saes5.data.settings.GameSettingsRepository;
@@ -12,6 +14,7 @@ import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.SessionEntry;
 import com.uphf.saes5.testing.InMemoryPreferenceStore;
 
+import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -19,13 +22,19 @@ import java.time.ZoneOffset;
 /** Ce qui accompagne chaque séance journalisée (US-7.1). */
 public class SessionRecorderTest {
 
+    @ClassRule
+    public static final TemporaryFolder FOLDER = new TemporaryFolder();
+
     private static final long NOW = 1_700_000_000_000L;
 
     private final InMemoryPreferenceStore store = new InMemoryPreferenceStore();
+    private final SessionRepository sessions = new SessionRepository(
+            new File(FOLDER.getRoot(), "sessions-" + System.nanoTime() + ".json"),
+            FOLDER.getRoot(), Clock.systemUTC());
     private final GameSettingsRepository gameSettings = new GameSettingsRepository(store);
     private final AnalysisSettingsRepository analysisSettings =
             new AnalysisSettingsRepository(store);
-    private final SessionRecorder recorder = new SessionRecorder(
+    private final SessionRecorder recorder = new SessionRecorder(sessions,
             gameSettings, analysisSettings, Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
 
     private static final Exercise SQUAT =
@@ -60,5 +69,13 @@ public class SessionRecorderTest {
 
         assertEquals("", manual.getAnalysisSettings());
         assertFalse(manual.hasLatency());
+    }
+
+    @Test
+    public void record_writesTheEntryToTheJournal() {
+        recorder.record(SQUAT, 9, 2, 60_000, 84, 45, 1_200, false);
+
+        assertEquals(1, sessions.count());
+        assertEquals("squat", sessions.readAll().get(0).getExerciseId());
     }
 }

@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.session.SessionLog;
 import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
 import com.uphf.saes5.ui.home.HomeActivity;
@@ -100,7 +99,7 @@ public class ConsentActivity extends AppCompatActivity {
     }
 
     private void withdraw() {
-        SessionLog.clear();
+        AppContainer.from(getApplicationContext()).sessionRepository.clear();
         AppContainer.from(getApplicationContext()).consent.withdraw();
         finishAffinity();
     }

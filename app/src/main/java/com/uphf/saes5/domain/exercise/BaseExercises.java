@@ -1,20 +1,9 @@
 package com.uphf.saes5.domain.exercise;
 
-import android.content.Context;
-import android.util.Log;
-
 import androidx.annotation.Nullable;
 
-import com.google.gson.Gson;
-
-import com.uphf.saes5.data.exercise.ExerciseRepository;
 import com.uphf.saes5.domain.model.Exercise;
-import com.uphf.saes5.domain.model.Movement;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +17,7 @@ import java.util.List;
  * donc comment placer le téléphone, sans quoi la comparaison ne peut pas reconnaître le
  * mouvement.</p>
  *
- * <p>Ils sont ajoutés une seule fois par {@link ExerciseRepository#init}, sans remplacer un
+ * <p>Ils sont ajoutés une seule fois par le catalogue ({@code ExerciseRepository}), sans remplacer un
  * exercice existant du même nom ni le modèle qu'un utilisateur aurait enregistré.</p>
  *
  * <p>Chacun a aussi sa démonstration, dans {@code assets/demos/<id>.json} : le même mouvement
@@ -70,18 +59,9 @@ public final class BaseExercises {
         return null;
     }
 
-    /** Charge la démonstration d'un exercice, ou {@code null} s'il n'en a pas ou qu'elle est illisible. */
-    @Nullable
-    public static Movement loadDemo(Context context, Exercise exercise) {
-        String asset = demoAssetFor(exercise);
-        if (asset == null) return null;
-        try (Reader reader = new InputStreamReader(
-                context.getAssets().open(asset), StandardCharsets.UTF_8)) {
-            return new Gson().fromJson(reader, Movement.class);
-        } catch (IOException | RuntimeException e) {
-            Log.w("BaseExercises", "Démonstration illisible : " + asset, e);
-            return null;
-        }
+    /** Chemin, dans les assets, du modèle livré avec un exercice de base. */
+    public static String modelAssetFor(Exercise exercise) {
+        return ASSET_DIRECTORY + "/" + exercise.getReferenceMovementId() + ".json";
     }
 
     public static List<Exercise> all() {

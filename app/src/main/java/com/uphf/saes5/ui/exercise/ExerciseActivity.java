@@ -24,12 +24,9 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
-import com.uphf.saes5.data.exercise.MovementStorage;
 import com.uphf.saes5.data.home.DailyExerciseTracker;
 import com.uphf.saes5.databinding.ActivityExerciseBinding;
 import com.uphf.saes5.di.AppContainer;
-import com.uphf.saes5.domain.exercise.BaseExercises;
 import com.uphf.saes5.domain.game.ArcadeScore;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.GameFeature;
@@ -125,7 +122,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
         EdgeToEdge.enable(this);
 
         String exerciseId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
-        exercise = ExerciseRepository.findById(exerciseId);
+        exercise = AppContainer.from(getApplicationContext()).exerciseRepository.findById(exerciseId);
         if (exercise == null) {
             // L'exercice n'existe plus (catalogue modifié) : on ne peut rien afficher.
             finish();
@@ -191,7 +188,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
     }
 
     private void prepareReferenceComparison() {
-        Movement reference = MovementStorage.load(this, exercise.getReferenceMovementId());
+        Movement reference = AppContainer.from(getApplicationContext()).movementRepository.load(exercise.getReferenceMovementId());
         if (!hasUsableReference(reference)) {
             enableManualFallback(R.string.exercise_reference_missing_fallback);
             return;
@@ -206,7 +203,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                 exercise.getSimilarityThreshold()));
         // Le mannequin montre le geste attendu : la démonstration de l'exercice de base, vue
         // sous l'angle le plus lisible, ou à défaut le modèle lui-même.
-        Movement demo = BaseExercises.loadDemo(this, exercise);
+        Movement demo = AppContainer.from(getApplicationContext()).movementRepository.loadDemo(exercise);
         Movement shown = demo != null ? demo : reference;
         if (binding.modelPreview.setMovement(shown.frames, shown.sampleIntervalMs)) {
             binding.modelPreview.setVisibility(View.VISIBLE);

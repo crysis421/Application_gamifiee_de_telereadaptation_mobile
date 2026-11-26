@@ -12,13 +12,15 @@ import java.util.List;
 
 public class CatalogViewModel extends ViewModel {
     private final MutableLiveData<List<Exercise>> filteredExercises = new MutableLiveData<>();
+    private final ExerciseRepository exercises;
 
     private String muscle = "";
     private String difficulty = "";
     private Integer maxDuration = null;
     private String equipment = "";
 
-    public CatalogViewModel() {
+    public CatalogViewModel(ExerciseRepository exercises) {
+        this.exercises = exercises;
         applyFilters();
     }
 
@@ -44,7 +46,7 @@ public class CatalogViewModel extends ViewModel {
 
     private void applyFilters() {
         List<Exercise> result = new ArrayList<>();
-        for (Exercise exercise : ExerciseRepository.getAll()) {
+        for (Exercise exercise : exercises.getAll()) {
             if (!muscle.isEmpty() && !exercise.getMuscleGroup().equalsIgnoreCase(muscle)) continue;
             if (!difficulty.isEmpty() && !exercise.getDifficulty().equalsIgnoreCase(difficulty)) continue;
             if (maxDuration != null && exercise.getDurationMinutes() > maxDuration) continue;

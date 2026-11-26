@@ -18,7 +18,8 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.common.TabSwipe;
@@ -30,7 +31,9 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exercise_catalog);
-        viewModel = new ViewModelProvider(this).get(CatalogViewModel.class);
+        viewModel = new ViewModelProvider(this, ViewModelFactory.of(CatalogViewModel.class,
+                () -> new CatalogViewModel(AppContainer.from(this).exerciseRepository)))
+                .get(CatalogViewModel.class);
 
         RecyclerView recycler = findViewById(R.id.exercises_recycler);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -129,7 +132,7 @@ public class ExerciseCatalogActivity extends AppCompatActivity {
                 .setMessage(getString(R.string.delete_exercise_message, exercise.getName()))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete_exercise, (dialog, which) -> {
-                    ExerciseRepository.remove(exercise.getId());
+                    AppContainer.from(getApplicationContext()).exerciseRepository.remove(exercise.getId());
                     viewModel.refresh();
                     Toast.makeText(this, R.string.exercise_deleted, Toast.LENGTH_SHORT).show();
                 })

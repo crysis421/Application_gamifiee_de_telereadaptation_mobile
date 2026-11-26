@@ -16,21 +16,27 @@ import java.util.Map;
  *
  * <p>Jusqu'ici ce dépôt contenait quinze séances écrites en dur : l'écran affichait les mêmes
  * chiffres quoi que fasse l'utilisateur. Il lit désormais le journal des séances
- * ({@link SessionLog}, US-7.1) et le catalogue ({@link ExerciseRepository}). Il n'y a donc
- * plus qu'une source de vérité : une séance terminée apparaît partout.</p>
+ * ({@link SessionRepository}, US-7.1) et le catalogue ({@link ExerciseRepository}). Il n'y a
+ * donc plus qu'une source de vérité : une séance terminée apparaît partout.</p>
  *
  * <p>Les conversions sont statiques et sans Android, pour être testées hors émulateur.</p>
  */
 public final class StatisticsRepository {
 
-    private StatisticsRepository() {}
+    private final ExerciseRepository exercises;
+    private final SessionRepository sessions;
 
-    public static List<StatisticsExercise> getExercises() {
-        return toStatisticsExercises(ExerciseRepository.getAll(), SessionLog.readAll());
+    public StatisticsRepository(ExerciseRepository exercises, SessionRepository sessions) {
+        this.exercises = exercises;
+        this.sessions = sessions;
     }
 
-    public static List<ScoredSession> getAll() {
-        return toStatisticsSessions(SessionLog.readAll());
+    public List<StatisticsExercise> getExercises() {
+        return toStatisticsExercises(exercises.getAll(), sessions.readAll());
+    }
+
+    public List<ScoredSession> getSessions() {
+        return toStatisticsSessions(sessions.readAll());
     }
 
     /**

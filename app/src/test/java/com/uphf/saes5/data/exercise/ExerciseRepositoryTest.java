@@ -6,27 +6,42 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import com.uphf.saes5.domain.exercise.BaseExercises;
 import com.uphf.saes5.domain.model.Exercise;
+import com.uphf.saes5.testing.FileAssetSource;
+import com.uphf.saes5.testing.InMemoryPreferenceStore;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Modification et suppression d'un exercice du catalogue.
+ * Catalogue d'exercices : modification, suppression, et installation des exercices de base.
  *
- * <p>Le dépôt est un singleton statique partagé par toute l'application : chaque test ne touche
- * qu'à son propre exercice et le retire ensuite, pour ne pas perturber les autres.</p>
+ * <p>Chaque test part d'un catalogue neuf, en mémoire, avec les vrais modèles livrés.</p>
  */
 public class ExerciseRepositoryTest {
 
     private static final String ID = "test_exercice_temporaire";
 
-    @After
-    public void cleanUp() {
-        ExerciseRepository.remove(ID);
+    @Rule
+    public final TemporaryFolder folder = new TemporaryFolder();
+
+    private InMemoryPreferenceStore store;
+    private MovementRepository movements;
+    private ExerciseRepository repository;
+
+    @Before
+    public void setUp() {
+        store = new InMemoryPreferenceStore();
+        movements = new MovementRepository(
+                new File(folder.getRoot(), "movements"), FileAssetSource.appAssets());
+        repository = new ExerciseRepository(store, movements);
     }
 
     private static Exercise sample(String name, int stars) {
@@ -36,15 +51,15 @@ public class ExerciseRepositoryTest {
 
     @Test
     public void update_replacesEveryField_andKeepsPosition() {
-        ExerciseRepository.add(sample("Avant", 2));
+        repository.add(sample("Avant", 2));
         int positionBefore = indexOf(ID);
 
-        boolean updated = ExerciseRepository.update(new Exercise(
+        boolean updated = repository.update(new Exercise(
                 ID, "Après", "Dos", "Difficile", 9, "Élastique", 5,
                 "Nouvelle consigne.", 20));
 
         assertTrue(updated);
-        Exercise result = ExerciseRepository.findById(ID);
+        Exercise result = repository.findById(ID);
         assertNotNull(result);
         assertEquals("Après", result.getName());
         assertEquals("Dos", result.getMuscleGroup());
@@ -59,25 +74,25 @@ public class ExerciseRepositoryTest {
 
     @Test
     public void update_keepsTheSameId_soFavoritesKeepPointingToIt() {
-        ExerciseRepository.add(sample("Avant", 2));
+        repository.add(sample("Avant", 2));
 
-        ExerciseRepository.update(new Exercise(
+        repository.update(new Exercise(
                 ID, "Après", "Dos", "Difficile", 9, "Élastique", 5, "", 20));
 
         // Les favoris et l'exercice du jour stockent un identifiant : il doit survivre.
-        assertNotNull(ExerciseRepository.findById(ID));
+        assertNotNull(repository.findById(ID));
         assertEquals(1, countOccurrences(ID));
     }
 
     @Test
     public void update_preservesExplicitReferenceAndSimilarityThreshold() {
-        ExerciseRepository.add(sample("Avant", 2));
+        repository.add(sample("Avant", 2));
 
-        ExerciseRepository.update(new Exercise(
+        repository.update(new Exercise(
                 ID, "Après", "Dos", "Difficile", 9, "Élastique", 5,
                 "", 20, "modele_squat_lent", 76));
 
-        Exercise updated = ExerciseRepository.findById(ID);
+        Exercise updated = repository.findById(ID);
         assertNotNull(updated);
         assertEquals("modele_squat_lent", updated.getReferenceMovementId());
         assertEquals(76, updated.getSimilarityThreshold());
@@ -85,30 +100,30 @@ public class ExerciseRepositoryTest {
 
     @Test
     public void update_isIgnored_whenExerciseIsNotInTheCatalogue() {
-        int sizeBefore = ExerciseRepository.getAll().size();
+        int sizeBefore = repository.getAll().size();
 
-        boolean updated = ExerciseRepository.update(sample("Fantôme", 1));
+        boolean updated = repository.update(sample("Fantôme", 1));
 
         assertFalse(updated);
-        assertEquals(sizeBefore, ExerciseRepository.getAll().size());
+        assertEquals(sizeBefore, repository.getAll().size());
     }
 
     @Test
     public void remove_takesTheExerciseOut() {
-        ExerciseRepository.add(sample("À supprimer", 3));
-        int sizeWithIt = ExerciseRepository.getAll().size();
+        repository.add(sample("À supprimer", 3));
+        int sizeWithIt = repository.getAll().size();
 
-        boolean removed = ExerciseRepository.remove(ID);
+        boolean removed = repository.remove(ID);
 
         assertTrue(removed);
-        assertNull(ExerciseRepository.findById(ID));
-        assertEquals(sizeWithIt - 1, ExerciseRepository.getAll().size());
+        assertNull(repository.findById(ID));
+        assertEquals(sizeWithIt - 1, repository.getAll().size());
     }
 
     @Test
     public void remove_returnsFalse_whenAlreadyGone() {
-        assertFalse(ExerciseRepository.remove(ID));
-        assertFalse(ExerciseRepository.remove(null));
+        assertFalse(repository.remove(ID));
+        assertFalse(repository.remove(null));
     }
 
     @Test
@@ -154,8 +169,52 @@ public class ExerciseRepositoryTest {
                 restored.get(0).getSimilarityThreshold());
     }
 
+    @Test
+    public void initialize_installsTheBaseExercisesWithTheirModels_once() {
+        repository.initialize();
+        int installed = repository.getAll().size();
+
+        repository.initialize();
+        new ExerciseRepository(store, movements).initialize();
+
+        assertEquals(BaseExercises.all().size(), installed);
+        assertEquals(installed, repository.getAll().size());
+        for (Exercise exercise : repository.getAll()) {
+            assertTrue(exercise.getId(), movements.exists(exercise.getReferenceMovementId()));
+        }
+    }
+
+    @Test
+    public void initialize_removesExercisesWithoutModel_butNotADeletedBaseExercise() {
+        store.putString("catalogue_exercises", ExerciseRepository.serialize(
+                Collections.singletonList(sample("Sans modèle", 2))));
+        repository.initialize();
+        assertNull(repository.findById(ID));
+
+        repository.remove("base_squat");
+        ExerciseRepository reopened = new ExerciseRepository(store, movements);
+        reopened.initialize();
+
+        // Un exercice de base supprimé par l'utilisateur ne revient pas au lancement suivant.
+        assertNull(reopened.findById("base_squat"));
+    }
+
+    @Test
+    public void initialize_keepsAnExistingExerciseWithTheSameName() {
+        Exercise userSquat = new Exercise("squat", "Squat", "Jambes", "Facile", 5, "Aucun", 3,
+                "", 10, "squat", Exercise.DEFAULT_SIMILARITY_THRESHOLD);
+        store.putBoolean("catalogue_without_model_removed", true);
+        store.putString("catalogue_exercises",
+                ExerciseRepository.serialize(Collections.singletonList(userSquat)));
+
+        repository.initialize();
+
+        assertNotNull(repository.findById("squat"));
+        assertNull(repository.findById("base_squat"));
+    }
+
     private int indexOf(String id) {
-        List<Exercise> all = ExerciseRepository.getAll();
+        List<Exercise> all = repository.getAll();
         for (int i = 0; i < all.size(); i++) {
             if (all.get(i).getId().equals(id)) return i;
         }
@@ -164,7 +223,7 @@ public class ExerciseRepositoryTest {
 
     private int countOccurrences(String id) {
         int count = 0;
-        for (Exercise exercise : ExerciseRepository.getAll()) {
+        for (Exercise exercise : repository.getAll()) {
             if (exercise.getId().equals(id)) count++;
         }
         return count;

@@ -36,6 +36,11 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    // Les dépôts consignent leurs erreurs avec android.util.Log : en test unitaire, ces appels
+    // ne font rien au lieu de faire échouer le test.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {

@@ -19,20 +19,24 @@ public class StatisticsViewModel extends ViewModel {
     private StatisticsSummary summary;
     private StatisticsScreenState.DisplayMode displayMode = StatisticsScreenState.DisplayMode.MUSCLES;
     private String selectedMuscle;
+    private final StatisticsRepository repository;
 
-    public StatisticsViewModel() {
-        this(StatisticsRepository.getExercises(), StatisticsRepository.getAll());
+    public StatisticsViewModel(StatisticsRepository repository) {
+        this.repository = repository;
+        summary = StatisticsCalculator.calculate(repository.getExercises(), repository.getSessions());
+        publishState();
     }
 
     /** Données fournies directement : sert aux tests, qui n'ont pas de journal sur disque. */
     StatisticsViewModel(List<StatisticsExercise> exercises, List<ScoredSession> sessions) {
+        repository = null;
         summary = StatisticsCalculator.calculate(exercises, sessions);
         publishState();
     }
 
     /** Relit le journal : une séance a pu se terminer depuis l'ouverture de l'écran. */
     public void refresh() {
-        refresh(StatisticsRepository.getExercises(), StatisticsRepository.getAll());
+        refresh(repository.getExercises(), repository.getSessions());
     }
 
     void refresh(List<StatisticsExercise> exercises, List<ScoredSession> sessions) {

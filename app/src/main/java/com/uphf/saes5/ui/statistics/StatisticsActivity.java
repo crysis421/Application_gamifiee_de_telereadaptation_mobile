@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import com.uphf.saes5.R;
+import com.uphf.saes5.di.AppContainer;
+import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.statistics.MuscleStatistic;
 import com.uphf.saes5.ui.common.Navigation;
 import com.uphf.saes5.ui.common.TabSwipe;
@@ -36,7 +38,9 @@ public class StatisticsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
 
-        viewModel = new ViewModelProvider(this).get(StatisticsViewModel.class);
+        viewModel = new ViewModelProvider(this, ViewModelFactory.of(StatisticsViewModel.class,
+                () -> new StatisticsViewModel(AppContainer.from(this).statisticsRepository)))
+                .get(StatisticsViewModel.class);
         globalValue = findViewById(R.id.statistics_global_value);
         detailHeading = findViewById(R.id.statistics_detail_heading);
         emptyState = findViewById(R.id.statistics_empty_state);

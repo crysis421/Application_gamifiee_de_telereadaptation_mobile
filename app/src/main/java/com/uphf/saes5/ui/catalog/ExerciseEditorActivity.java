@@ -19,8 +19,7 @@ import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputLayout;
 
 import com.uphf.saes5.R;
-import com.uphf.saes5.data.exercise.ExerciseRepository;
-import com.uphf.saes5.data.exercise.MovementStorage;
+import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.ui.recording.HolisticLauncher;
 
@@ -79,7 +78,7 @@ public class ExerciseEditorActivity extends AppCompatActivity {
 
         // En modification, l'exercice d'origine ; null en création.
         String editedId = getIntent().getStringExtra(EXTRA_EXERCISE_ID);
-        final Exercise edited = ExerciseRepository.findById(editedId);
+        final Exercise edited = AppContainer.from(getApplicationContext()).exerciseRepository.findById(editedId);
 
         // Modification demandée sur un exercice qui n'est plus au catalogue : sans ce garde-fou
         // le formulaire basculerait silencieusement en création et enregistrerait un doublon.
@@ -90,9 +89,9 @@ public class ExerciseEditorActivity extends AppCompatActivity {
         }
 
         draftExerciseId = savedInstanceState == null
-                ? (edited != null ? edited.getId() : ExerciseRepository.newId())
+                ? (edited != null ? edited.getId() : AppContainer.from(getApplicationContext()).exerciseRepository.newId())
                 : savedInstanceState.getString(STATE_DRAFT_ID,
-                        edited != null ? edited.getId() : ExerciseRepository.newId());
+                        edited != null ? edited.getId() : AppContainer.from(getApplicationContext()).exerciseRepository.newId());
         referenceMovementId = edited != null
                 ? edited.getReferenceMovementId()
                 : draftExerciseId;
@@ -160,7 +159,7 @@ public class ExerciseEditorActivity extends AppCompatActivity {
 
             // Un exercice n'existe qu'avec son modèle : sans lui, rien à quoi comparer le
             // mouvement. La création attend donc qu'il ait été enregistré.
-            if (edited == null && !MovementStorage.exists(this, referenceMovementId)) {
+            if (edited == null && !AppContainer.from(getApplicationContext()).movementRepository.exists(referenceMovementId)) {
                 Toast.makeText(this, R.string.reference_model_missing_toast,
                         Toast.LENGTH_LONG).show();
                 return;
@@ -182,10 +181,10 @@ public class ExerciseEditorActivity extends AppCompatActivity {
                     similarityThreshold);
 
             if (edited != null) {
-                ExerciseRepository.update(result);
+                AppContainer.from(getApplicationContext()).exerciseRepository.update(result);
                 Toast.makeText(this, R.string.exercise_updated, Toast.LENGTH_SHORT).show();
             } else {
-                ExerciseRepository.add(result);
+                AppContainer.from(getApplicationContext()).exerciseRepository.add(result);
                 Toast.makeText(this, R.string.exercise_created, Toast.LENGTH_SHORT).show();
             }
             finish(); // retour au catalogue, qui se rafraîchit dans onResume()
@@ -209,7 +208,7 @@ public class ExerciseEditorActivity extends AppCompatActivity {
     private void updateReferenceAvailability() {
         if (referenceStatus == null || compareMovementButton == null
                 || referenceMovementId == null) return;
-        boolean available = MovementStorage.exists(this, referenceMovementId);
+        boolean available = AppContainer.from(getApplicationContext()).movementRepository.exists(referenceMovementId);
         referenceStatus.setText(available
                 ? R.string.reference_model_available
                 : R.string.reference_model_missing);
