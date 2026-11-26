@@ -22,13 +22,14 @@ import com.uphf.saes5.data.session.SessionRepository;
 import com.uphf.saes5.data.settings.AnalysisSettingsRepository;
 import com.uphf.saes5.data.settings.GameSettingsRepository;
 import com.uphf.saes5.domain.exercise.BaseExercises;
+import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.model.Movement;
 import com.uphf.saes5.domain.model.SessionEntry;
+import com.uphf.saes5.domain.movement.PoseFrame;
 import com.uphf.saes5.testing.FileAssetSource;
 import com.uphf.saes5.testing.InMemoryPreferenceStore;
-import com.uphf.saes5.ui.camera.PoseFrame;
 import com.uphf.saes5.ui.summary.SummaryArgs;
 
 import java.io.File;
@@ -53,6 +54,7 @@ public class ExerciseSessionViewModelTest {
     private SessionRepository sessions;
     private SessionRecorder recorder;
     private DailyExerciseRepository daily;
+    private AnalysisSettingsRepository analysisSettings;
     private Movement squatModel;
     private long now = 1_000_000L;
     /** Événements reçus, dans l'ordre, comme les consommerait l'écran. */
@@ -68,8 +70,8 @@ public class ExerciseSessionViewModelTest {
         exercises.initialize();
         sessions = new SessionRepository(new File(folder.getRoot(), "sessions.json"),
                 new File(folder.getRoot(), "exports"), Clock.systemUTC());
-        recorder = new SessionRecorder(sessions, gameSettings,
-                new AnalysisSettingsRepository(store), Clock.systemUTC());
+        analysisSettings = new AnalysisSettingsRepository(store);
+        recorder = new SessionRecorder(sessions, gameSettings, analysisSettings, Clock.systemUTC());
         daily = new DailyExerciseRepository(store, exercises, Clock.systemUTC());
         squatModel = movements.loadAsset("movements/base_squat.json");
     }
@@ -84,7 +86,8 @@ public class ExerciseSessionViewModelTest {
 
     private ExerciseSessionViewModel viewModel(Exercise exercise, Movement reference) {
         ExerciseSessionViewModel viewModel = new ExerciseSessionViewModel(exercise, reference,
-                null, gameSettings, recorder, daily, () -> now, Runnable::run, Runnable::run);
+                null, gameSettings, analysisSettings, recorder, daily, () -> now,
+                Runnable::run, Runnable::run);
         viewModel.getEvents().observeForever(event -> {
             ExerciseEvent content = event.getContentIfNotHandled();
             if (content != null) events.add(content);
@@ -233,6 +236,34 @@ public class ExerciseSessionViewModelTest {
 
         assertTrue(state(viewModel).isManualMode());
         assertEquals(ExerciseUiState.Status.MANUAL_PERMISSION_REFUSED, state(viewModel).getStatus());
+    }
+
+    @Test
+    public void cameraPermission_isAskedOnce_perSession() {
+        // Écran restauré par le système après le retrait de la permission : ViewModel neuf,
+        // il faut redemander. Après une rotation (même ViewModel), on ne redemande pas.
+        ExerciseSessionViewModel viewModel = viewModel(squat(12), squatModel);
+
+        assertTrue(viewModel.shouldRequestCameraPermission(false));
+        assertFalse(viewModel.shouldRequestCameraPermission(false));
+        assertTrue(viewModel(squat(12), squatModel).shouldRequestCameraPermission(false));
+    }
+
+    @Test
+    public void cameraPermission_isNotAsked_whenGranted_orInManualMode() {
+        assertFalse(viewModel(squat(12), squatModel).shouldRequestCameraPermission(true));
+        assertFalse(viewModel(squat(12), null).shouldRequestCameraPermission(false));
+    }
+
+    @Test
+    public void theAnalysisSettings_comeFromTheState() {
+        analysisSettings.setModel(AnalysisModel.FULL);
+        analysisSettings.setFrameStride(2);
+
+        ExerciseUiState state = state(viewModel(squat(12), squatModel));
+
+        assertEquals(AnalysisModel.FULL, state.getAnalysisModel());
+        assertEquals(2, state.getFrameStride());
     }
 
     @Test

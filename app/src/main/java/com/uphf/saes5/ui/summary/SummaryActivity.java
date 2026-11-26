@@ -29,11 +29,38 @@ import com.uphf.saes5.ui.exercise.ExerciseActivity;
  */
 public class SummaryActivity extends AppCompatActivity {
 
+    // Noms d'extras des versions précédentes de l'écran.
+    private static final String EXTRA_EXERCISE_ID = "extra_exercise_id";
+    private static final String EXTRA_VALIDATED_REPS = "extra_validated_reps";
+    private static final String EXTRA_FAILED_REPS = "extra_failed_reps";
+    private static final String EXTRA_DURATION_MILLIS = "extra_duration_millis";
+    private static final String EXTRA_SIMILARITY_SCORE = "extra_similarity_score";
+    private static final String EXTRA_AVERAGE_LATENCY = "extra_average_latency";
+    private static final String EXTRA_ARCADE_POINTS = "extra_arcade_points";
+
     private ActivitySummaryBinding binding;
     private SummaryViewModel viewModel;
 
     public static Intent newIntent(Context context, SummaryArgs args) {
-        return args.writeTo(new Intent(context, SummaryActivity.class));
+        return new Intent(context, SummaryActivity.class)
+                .putExtra(EXTRA_EXERCISE_ID, args.getExerciseId())
+                .putExtra(EXTRA_VALIDATED_REPS, args.getValidatedReps())
+                .putExtra(EXTRA_FAILED_REPS, args.getFailedReps())
+                .putExtra(EXTRA_DURATION_MILLIS, args.getDurationMillis())
+                .putExtra(EXTRA_SIMILARITY_SCORE, args.getSimilarityScore())
+                .putExtra(EXTRA_AVERAGE_LATENCY, args.getAverageLatencyMillis())
+                .putExtra(EXTRA_ARCADE_POINTS, args.getArcadePoints());
+    }
+
+    private static SummaryArgs argsOf(Intent intent) {
+        return new SummaryArgs(
+                intent.getStringExtra(EXTRA_EXERCISE_ID),
+                intent.getIntExtra(EXTRA_VALIDATED_REPS, 0),
+                intent.getIntExtra(EXTRA_FAILED_REPS, 0),
+                intent.getLongExtra(EXTRA_DURATION_MILLIS, 0L),
+                intent.getIntExtra(EXTRA_SIMILARITY_SCORE, SessionEntry.SCORE_UNAVAILABLE),
+                intent.getIntExtra(EXTRA_AVERAGE_LATENCY, SessionEntry.LATENCY_UNAVAILABLE),
+                intent.getIntExtra(EXTRA_ARCADE_POINTS, SessionEntry.POINTS_UNAVAILABLE));
     }
 
     @Override
@@ -41,7 +68,7 @@ public class SummaryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        SummaryArgs args = SummaryArgs.fromIntent(getIntent());
+        SummaryArgs args = argsOf(getIntent());
         AppContainer container = AppContainer.from(this);
         viewModel = new ViewModelProvider(this, ViewModelFactory.of(SummaryViewModel.class,
                 () -> new SummaryViewModel(args, container.exerciseRepository,

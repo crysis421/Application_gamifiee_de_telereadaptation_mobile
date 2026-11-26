@@ -8,8 +8,10 @@ import androidx.lifecycle.ViewModel;
 import com.uphf.saes5.data.exercise.MovementRepository;
 import com.uphf.saes5.data.home.DailyExerciseRepository;
 import com.uphf.saes5.data.session.SessionRecorder;
+import com.uphf.saes5.data.settings.AnalysisSettingsRepository;
 import com.uphf.saes5.data.settings.GameSettingsRepository;
 import com.uphf.saes5.domain.game.ArcadeScore;
+import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.GameFeature;
 import com.uphf.saes5.domain.model.Movement;
@@ -19,8 +21,8 @@ import com.uphf.saes5.domain.movement.LatencyTracker;
 import com.uphf.saes5.domain.movement.MovementComparisonEngine;
 import com.uphf.saes5.domain.movement.MovementComparisonResult;
 import com.uphf.saes5.domain.movement.MovementMath;
+import com.uphf.saes5.domain.movement.PoseFrame;
 import com.uphf.saes5.domain.movement.PostureFeedback;
-import com.uphf.saes5.ui.camera.PoseFrame;
 import com.uphf.saes5.ui.common.Event;
 import com.uphf.saes5.ui.summary.SummaryArgs;
 
@@ -55,6 +57,10 @@ public final class ExerciseSessionViewModel extends ViewModel {
     private final Executor mainExecutor;
     private final boolean arcadeEnabled;
     private final boolean soundsEnabled;
+    private final AnalysisModel analysisModel;
+    private final int frameStride;
+    /** La permission caméra a déjà été demandée par cette séance : on ne la redemande pas. */
+    private boolean cameraPermissionAsked;
     @Nullable private final Movement preview;
     @Nullable private final MovementComparisonEngine engine;
     private final PostureFeedback postureFeedback;
@@ -88,6 +94,7 @@ public final class ExerciseSessionViewModel extends ViewModel {
      */
     public ExerciseSessionViewModel(Exercise exercise, @Nullable Movement reference,
                                     @Nullable Movement demo, GameSettingsRepository gameSettings,
+                                    AnalysisSettingsRepository analysisSettings,
                                     SessionRecorder recorder, DailyExerciseRepository dailyExercise,
                                     LongSupplier elapsedRealtime, Executor comparisonExecutor,
                                     Executor mainExecutor) {
@@ -99,6 +106,8 @@ public final class ExerciseSessionViewModel extends ViewModel {
         this.mainExecutor = mainExecutor;
         this.arcadeEnabled = gameSettings.isEnabled(GameFeature.ARCADE);
         this.soundsEnabled = gameSettings.isEnabled(GameFeature.SOUNDS);
+        this.analysisModel = analysisSettings.getModel();
+        this.frameStride = analysisSettings.getFrameStride();
         this.postureFeedback = new PostureFeedback(exercise.getSimilarityThreshold());
         this.startedAt = elapsedRealtime.getAsLong();
 
@@ -126,6 +135,18 @@ public final class ExerciseSessionViewModel extends ViewModel {
     }
 
     // --- caméra ----------------------------------------------------------------------------
+
+    /**
+     * Faut-il demander l'accès à la caméra ? Oui, une seule fois par séance, si elle compte
+     * avec la caméra et que l'accès manque. Après une rotation, la séance l'a déjà demandé ;
+     * après un écran restauré par le système (permission retirée entre-temps), c'est une
+     * nouvelle séance, qui le redemande.
+     */
+    public boolean shouldRequestCameraPermission(boolean granted) {
+        if (granted || engine == null || manualMode || cameraPermissionAsked) return false;
+        cameraPermissionAsked = true;
+        return true;
+    }
 
     /** Réponse à la demande d'accès à la caméra. */
     public void onCameraPermission(boolean granted) {
@@ -325,7 +346,7 @@ public final class ExerciseSessionViewModel extends ViewModel {
                 manualMode, similarity, status, exercise.getSimilarityThreshold(), posture,
                 arcadeEnabled, arcade.getTotal(), arcade.getMultiplier(),
                 latency.getAverageMillis(), latency.isAboveTarget(), preview, soundsEnabled,
-                goalReachedAt));
+                goalReachedAt, analysisModel, frameStride));
     }
 
     @Override

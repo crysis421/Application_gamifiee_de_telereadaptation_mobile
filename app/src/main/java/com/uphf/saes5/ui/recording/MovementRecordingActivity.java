@@ -102,17 +102,16 @@ public class MovementRecordingActivity extends AppCompatActivity
                         container.movementRepository, SystemClock::elapsedRealtime)))
                 .get(MovementRecordingViewModel.class);
 
+        // Rien à comparer : l'écran se ferme sans ouvrir la caméra ni demander la permission.
+        if (viewModel.isMovementMissing()) {
+            Toast.makeText(this, getString(R.string.recording_movement_not_found, movementName),
+                    Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
         binding.btnAction.setOnClickListener(v -> viewModel.start());
         viewModel.getState().observe(this, this::render);
-        viewModel.getEvents().observe(this, event -> {
-            MovementRecordingViewModel.RecordingEvent content = event.getContentIfNotHandled();
-            if (content == MovementRecordingViewModel.RecordingEvent.MOVEMENT_NOT_FOUND) {
-                Toast.makeText(this, getString(R.string.recording_movement_not_found,
-                        movementName), Toast.LENGTH_LONG).show();
-                finish();
-            }
-        });
-        if (isFinishing()) return;
 
         camera = new HolisticCameraController(this, binding.viewFinder, binding.overlay, this);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)

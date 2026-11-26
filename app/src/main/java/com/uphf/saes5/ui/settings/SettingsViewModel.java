@@ -31,6 +31,8 @@ public final class SettingsViewModel extends ViewModel {
 
         public enum Kind {
             CONDITION_NAME_REQUIRED, CONDITION_SAVED, CONDITION_APPLIED,
+            /** Il y a des séances : demander la période, puis le format. */
+            CHOOSE_EXPORT_PERIOD,
             EXPORT_EMPTY, EXPORT_FAILED, EXPORT_READY
         }
 
@@ -62,6 +64,8 @@ public final class SettingsViewModel extends ViewModel {
     private final Clock clock;
     private final MutableLiveData<SettingsUiState> state = new MutableLiveData<>();
     private final MutableLiveData<Event<SettingsEvent>> events = new MutableLiveData<>();
+    /** Lu à l'ouverture et au retour sur l'écran, pas à chaque frappe : le journal grossit. */
+    private int sessionCount;
 
     public SettingsViewModel(GameSettingsRepository gameSettings, TestConditionRepository conditions,
                              AnalysisSettingsRepository analysisSettings, SessionRepository sessions,
@@ -71,7 +75,7 @@ public final class SettingsViewModel extends ViewModel {
         this.analysisSettings = analysisSettings;
         this.sessions = sessions;
         this.clock = clock;
-        publish();
+        refresh();
     }
 
     public LiveData<SettingsUiState> getState() {
@@ -84,6 +88,7 @@ public final class SettingsViewModel extends ViewModel {
 
     /** Relit les réglages et le nombre de séances : au retour sur l'écran. */
     public void refresh() {
+        sessionCount = sessions.count();
         publish();
     }
 
@@ -136,16 +141,20 @@ public final class SettingsViewModel extends ViewModel {
     }
 
     /**
-     * Produit l'export du journal (US-7.2). Exporter un journal vide n'aurait aucun sens : on
-     * le dit plutôt que de partager un fichier sans séance.
+     * Bouton d'export (US-7.2). Exporter un journal vide n'aurait aucun sens : on le dit tout
+     * de suite, plutôt qu'après avoir fait choisir une période et un format.
+     */
+    public void requestExport() {
+        emit(sessions.count() == 0 ? SettingsEvent.Kind.EXPORT_EMPTY
+                : SettingsEvent.Kind.CHOOSE_EXPORT_PERIOD, null, null, null);
+    }
+
+    /**
+     * Produit l'export du journal, une fois la période et le format choisis.
      *
      * @param days nombre de jours exportés, ou 0 pour tout l'historique
      */
     public void export(int days, SessionRepository.ExportFormat format) {
-        if (sessions.count() == 0) {
-            emit(SettingsEvent.Kind.EXPORT_EMPTY, null, null, null);
-            return;
-        }
         long from = days == 0 ? 0L : clock.millis() - TimeUnit.DAYS.toMillis(days);
         File exported = sessions.writeExport(from, Long.MAX_VALUE, format);
         if (exported == null) {
@@ -167,6 +176,6 @@ public final class SettingsViewModel extends ViewModel {
         }
         state.setValue(new SettingsUiState(toggles, analysisSettings.getModel(),
                 analysisSettings.getFrameStride(), gameSettings.getConditionName(),
-                sessions.count(), gameSettings.snapshot()));
+                sessionCount, gameSettings.snapshot()));
     }
 }

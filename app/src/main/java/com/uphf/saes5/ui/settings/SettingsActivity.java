@@ -83,7 +83,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
         binding.settingsConditionSave.setOnClickListener(v -> viewModel.saveCondition());
         binding.settingsConditionApply.setOnClickListener(v -> chooseCondition());
-        binding.settingsExportButton.setOnClickListener(v -> askPeriodThenExport());
+        binding.settingsExportButton.setOnClickListener(v -> viewModel.requestExport());
         binding.settingsBackButton.setOnClickListener(v -> finish());
         binding.settingsConsentButton.setOnClickListener(
                 v -> startActivity(ConsentActivity.reviewIntent(this)));
@@ -113,6 +113,9 @@ public class SettingsActivity extends AppCompatActivity {
             ((TextView) row.findViewById(R.id.setting_help)).setText(FeatureLabels.help(feature));
 
             MaterialSwitch toggle = row.findViewById(R.id.setting_switch);
+            // Les neuf interrupteurs partagent le même identifiant : restaurés par Android après
+            // une rotation, ils prendraient tous la valeur du dernier. L'état vient du ViewModel.
+            toggle.setSaveEnabled(false);
             toggle.setOnCheckedChangeListener(
                     (button, checked) -> viewModel.setFeatureEnabled(feature, checked));
             // Toute la ligne bascule l'interrupteur : la cible est plus large que le seul bouton.
@@ -151,6 +154,9 @@ public class SettingsActivity extends AppCompatActivity {
             case CONDITION_APPLIED:
                 binding.settingsConditionName.setText(event.getName());
                 toast(getString(R.string.settings_condition_applied, event.getName()));
+                break;
+            case CHOOSE_EXPORT_PERIOD:
+                askPeriodThenExport();
                 break;
             case EXPORT_EMPTY:
                 toast(getString(R.string.settings_export_empty));

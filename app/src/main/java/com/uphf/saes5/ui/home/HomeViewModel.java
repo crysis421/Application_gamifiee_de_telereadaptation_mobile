@@ -44,6 +44,8 @@ public final class HomeViewModel extends ViewModel {
     private boolean detailsExpanded;
     private HomeUiState.StepsStatus stepsStatus = HomeUiState.StepsStatus.LOADING;
     private int steps;
+    /** Lu dans le journal à chaque retour, pas à chaque toucher : le journal grossit. */
+    private ActivityCounter.Counts exercisesDone = ActivityCounter.Counts.NONE;
 
     public HomeViewModel(GameSettingsRepository gameSettings, ConsentRepository consent,
                          DailyExerciseRepository dailyExercise, FavoritesRepository favorites,
@@ -74,6 +76,7 @@ public final class HomeViewModel extends ViewModel {
         exerciseOfTheDay = gameSettings.isEnabled(GameFeature.DAILY_EXERCISE)
                 ? dailyExercise.exerciseOfTheDay()
                 : null;
+        exercisesDone = ActivityCounter.count(sessions.readAll(), clock.millis());
         publish();
         refreshSteps();
     }
@@ -118,7 +121,6 @@ public final class HomeViewModel extends ViewModel {
     private void publish() {
         boolean dailyEnabled = gameSettings.isEnabled(GameFeature.DAILY_EXERCISE);
         boolean hasExercise = exerciseOfTheDay != null;
-        ActivityCounter.Counts done = ActivityCounter.count(sessions.readAll(), clock.millis());
         state.setValue(new HomeUiState(
                 gameSettings.isEnabled(GameFeature.STATISTICS),
                 gameSettings.isEnabled(GameFeature.HOME_CATALOG),
@@ -131,8 +133,8 @@ public final class HomeViewModel extends ViewModel {
                 dailyExercise.isCompletedToday(),
                 detailsExpanded,
                 gameSettings.isEnabled(GameFeature.HOME_EXERCISES_DONE),
-                done.getTotal(),
-                done.getLastSevenDays(),
+                exercisesDone.getTotal(),
+                exercisesDone.getLastSevenDays(),
                 stepsStatus,
                 steps));
     }

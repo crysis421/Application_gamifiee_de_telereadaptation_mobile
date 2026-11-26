@@ -16,6 +16,8 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 
+import com.uphf.saes5.domain.movement.PoseFrame
+
 /**
  * Détection de pose en direct avec le modèle BlazePose « lite » (US-1.4).
  *

@@ -158,6 +158,19 @@ public class HomeViewModelTest {
     }
 
     @Test
+    public void foldingTheCard_doesNotRereadTheJournal() {
+        sessions.record(new SessionEntry(NOW.toEpochMilli(), "base_squat", "Squat", 3, 0, 12,
+                60_000L, SessionEntry.SCORE_UNAVAILABLE, "", ""));
+        HomeViewModel viewModel = viewModel();
+        // Le journal n'est relu qu'au retour sur l'accueil : on le retire pour le vérifier.
+        sessions.clear();
+
+        viewModel.toggleDetails();
+
+        assertEquals(1, state(viewModel).getExercisesDoneTotal());
+    }
+
+    @Test
     public void details_areCollapsedFirst_thenExpanded() {
         HomeViewModel viewModel = viewModel();
         assertFalse(state(viewModel).isDetailsExpanded());

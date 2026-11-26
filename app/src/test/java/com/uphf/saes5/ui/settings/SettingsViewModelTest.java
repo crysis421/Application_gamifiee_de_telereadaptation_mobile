@@ -100,10 +100,34 @@ public class SettingsViewModelTest {
     }
 
     @Test
-    public void exportingAnEmptyJournal_isRefused() {
-        viewModel.export(0, SessionRepository.ExportFormat.CSV);
+    public void exportingAnEmptyJournal_isRefused_beforeAskingPeriodAndFormat() {
+        viewModel.requestExport();
 
         assertEquals(SettingsViewModel.SettingsEvent.Kind.EXPORT_EMPTY, lastEvent().getKind());
+    }
+
+    @Test
+    public void exportingAJournal_asksForThePeriod() {
+        sessions.record(new SessionEntry(System.currentTimeMillis(), "base_squat", "Squat", 3, 0,
+                12, 60_000L, SessionEntry.SCORE_UNAVAILABLE, "", ""));
+        viewModel.refresh();
+
+        viewModel.requestExport();
+
+        assertEquals(SettingsViewModel.SettingsEvent.Kind.CHOOSE_EXPORT_PERIOD, lastEvent().getKind());
+    }
+
+    @Test
+    public void typingTheConditionName_doesNotRereadTheJournal() throws Exception {
+        sessions.record(new SessionEntry(System.currentTimeMillis(), "base_squat", "Squat", 3, 0,
+                12, 60_000L, SessionEntry.SCORE_UNAVAILABLE, "", ""));
+        viewModel.refresh();
+        // Le journal n'est relu qu'au retour sur l'écran : on le retire pour le vérifier.
+        sessions.clear();
+
+        viewModel.setConditionName("A");
+
+        assertEquals(1, state().getSessionCount());
     }
 
     @Test

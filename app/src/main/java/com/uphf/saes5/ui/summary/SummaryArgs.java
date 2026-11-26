@@ -1,23 +1,14 @@
 package com.uphf.saes5.ui.summary;
 
-import android.content.Intent;
-
 import com.uphf.saes5.domain.model.SessionEntry;
 
 /**
  * Ce que la séance transmet au récapitulatif : les mesures de la séance qui vient de finir.
  *
- * <p>Les noms d'extras sont ceux des versions précédentes de l'écran.</p>
+ * <p>Objet sans Android : le ViewModel de la séance le produit, et seul l'écran du
+ * récapitulatif sait le mettre dans un {@code Intent}.</p>
  */
 public final class SummaryArgs {
-
-    private static final String EXTRA_EXERCISE_ID = "extra_exercise_id";
-    private static final String EXTRA_VALIDATED_REPS = "extra_validated_reps";
-    private static final String EXTRA_FAILED_REPS = "extra_failed_reps";
-    private static final String EXTRA_DURATION_MILLIS = "extra_duration_millis";
-    private static final String EXTRA_SIMILARITY_SCORE = "extra_similarity_score";
-    private static final String EXTRA_AVERAGE_LATENCY = "extra_average_latency";
-    private static final String EXTRA_ARCADE_POINTS = "extra_arcade_points";
 
     private final String exerciseId;
     private final int validatedReps;
@@ -41,27 +32,6 @@ public final class SummaryArgs {
         this.similarityScore = similarityScore;
         this.averageLatencyMillis = averageLatencyMillis;
         this.arcadePoints = arcadePoints;
-    }
-
-    public static SummaryArgs fromIntent(Intent intent) {
-        return new SummaryArgs(
-                intent.getStringExtra(EXTRA_EXERCISE_ID),
-                intent.getIntExtra(EXTRA_VALIDATED_REPS, 0),
-                intent.getIntExtra(EXTRA_FAILED_REPS, 0),
-                intent.getLongExtra(EXTRA_DURATION_MILLIS, 0L),
-                intent.getIntExtra(EXTRA_SIMILARITY_SCORE, SessionEntry.SCORE_UNAVAILABLE),
-                intent.getIntExtra(EXTRA_AVERAGE_LATENCY, SessionEntry.LATENCY_UNAVAILABLE),
-                intent.getIntExtra(EXTRA_ARCADE_POINTS, SessionEntry.POINTS_UNAVAILABLE));
-    }
-
-    public Intent writeTo(Intent intent) {
-        return intent.putExtra(EXTRA_EXERCISE_ID, exerciseId)
-                .putExtra(EXTRA_VALIDATED_REPS, validatedReps)
-                .putExtra(EXTRA_FAILED_REPS, failedReps)
-                .putExtra(EXTRA_DURATION_MILLIS, durationMillis)
-                .putExtra(EXTRA_SIMILARITY_SCORE, similarityScore)
-                .putExtra(EXTRA_AVERAGE_LATENCY, averageLatencyMillis)
-                .putExtra(EXTRA_ARCADE_POINTS, arcadePoints);
     }
 
     public String getExerciseId() { return exerciseId; }

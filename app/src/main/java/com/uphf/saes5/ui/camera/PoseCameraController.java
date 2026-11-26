@@ -19,6 +19,7 @@ import com.google.mediapipe.tasks.vision.core.RunningMode;
 
 import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.FrameSampling;
+import com.uphf.saes5.domain.movement.PoseFrame;
 import com.uphf.saes5.ui.widget.OverlayView;
 
 import java.util.concurrent.ExecutorService;

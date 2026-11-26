@@ -1,4 +1,4 @@
-package com.uphf.saes5.ui.camera;
+package com.uphf.saes5.domain.movement;
 
 import androidx.annotation.NonNull;
 

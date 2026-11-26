@@ -32,8 +32,8 @@ import com.uphf.saes5.di.AppContainer;
 import com.uphf.saes5.di.ViewModelFactory;
 import com.uphf.saes5.domain.model.Exercise;
 import com.uphf.saes5.domain.model.Movement;
+import com.uphf.saes5.domain.movement.PoseFrame;
 import com.uphf.saes5.ui.camera.PoseCameraController;
-import com.uphf.saes5.ui.camera.PoseFrame;
 import com.uphf.saes5.ui.camera.SoundFeedback;
 import com.uphf.saes5.ui.common.EdgeToEdgeSupport;
 import com.uphf.saes5.ui.common.ExerciseFormatter;
@@ -108,7 +108,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                 () -> new ExerciseSessionViewModel(exercise,
                         movements.load(exercise.getReferenceMovementId()),
                         movements.loadDemo(exercise),
-                        container.gameSettings, container.sessionRecorder,
+                        container.gameSettings, container.analysisSettings,
+                        container.sessionRecorder,
                         container.dailyExerciseRepository, SystemClock::elapsedRealtime,
                         Executors.newSingleThreadExecutor(),
                         ContextCompat.getMainExecutor(getApplicationContext()))))
@@ -135,7 +136,7 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
             if (content != null) onEvent(content);
         });
 
-        if (!initial.isManualMode() && !hasCameraPermission() && savedInstanceState == null) {
+        if (viewModel.shouldRequestCameraPermission(hasCameraPermission())) {
             requestCameraPermission.launch(Manifest.permission.CAMERA);
         }
     }
@@ -179,9 +180,8 @@ public class ExerciseActivity extends AppCompatActivity implements PoseCameraCon
                 || isFinishing()) {
             return;
         }
-        AppContainer container = AppContainer.from(this);
         camera = new PoseCameraController(this, binding.cameraPreview, binding.poseOverlay, this,
-                container.analysisSettings.getModel(), container.analysisSettings.getFrameStride());
+                state.getAnalysisModel(), state.getFrameStride());
         camera.start();
         viewModel.onCameraStarted();
     }

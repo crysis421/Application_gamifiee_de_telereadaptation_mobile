@@ -10,7 +10,6 @@ import com.google.mediapipe.tasks.components.containers.NormalizedLandmark;
 import com.uphf.saes5.data.exercise.MovementRepository;
 import com.uphf.saes5.domain.model.Movement;
 import com.uphf.saes5.domain.movement.MovementMath;
-import com.uphf.saes5.ui.common.Event;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,11 +27,6 @@ public final class MovementRecordingViewModel extends ViewModel {
 
     public enum Mode { RECORD, COMPARE }
 
-    public enum RecordingEvent {
-        /** Mode comparaison sans modèle enregistré : l'écran se ferme. */
-        MOVEMENT_NOT_FOUND
-    }
-
     static final long COUNTDOWN_MILLIS = 3_000;
     static final long RECORD_MILLIS = 6_000;
     static final long SAMPLE_INTERVAL_MILLIS = 100;
@@ -44,7 +38,6 @@ public final class MovementRecordingViewModel extends ViewModel {
     private final LongSupplier elapsedRealtime;
     @Nullable private final Movement reference;
     private final MutableLiveData<RecordingUiState> state = new MutableLiveData<>();
-    private final MutableLiveData<Event<RecordingEvent>> events = new MutableLiveData<>();
 
     private final List<float[]> frames = new ArrayList<>();
     private RecordingUiState.Phase phase = RecordingUiState.Phase.WAITING;
@@ -61,10 +54,6 @@ public final class MovementRecordingViewModel extends ViewModel {
         this.movements = movements;
         this.elapsedRealtime = elapsedRealtime;
         this.reference = mode == Mode.COMPARE ? movements.load(movementName) : null;
-        if (mode == Mode.COMPARE && (reference == null || reference.frames == null
-                || reference.frames.isEmpty())) {
-            events.setValue(new Event<>(RecordingEvent.MOVEMENT_NOT_FOUND));
-        }
         publish();
     }
 
@@ -72,8 +61,13 @@ public final class MovementRecordingViewModel extends ViewModel {
         return state;
     }
 
-    public LiveData<Event<RecordingEvent>> getEvents() {
-        return events;
+    /**
+     * Mode comparaison sans modèle enregistré, ou modèle vide : l'écran doit se fermer avant
+     * d'ouvrir la caméra ou de demander la permission.
+     */
+    public boolean isMovementMissing() {
+        return mode == Mode.COMPARE
+                && (reference == null || reference.frames == null || reference.frames.isEmpty());
     }
 
     /** La caméra est prête : la première fois, le compte à rebours démarre de lui-même. */

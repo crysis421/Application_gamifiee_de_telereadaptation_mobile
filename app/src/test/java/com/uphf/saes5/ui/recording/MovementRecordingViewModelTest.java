@@ -2,7 +2,6 @@ package com.uphf.saes5.ui.recording;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
@@ -15,7 +14,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.uphf.saes5.data.exercise.MovementRepository;
 import com.uphf.saes5.testing.FileAssetSource;
-import com.uphf.saes5.ui.common.Event;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -110,12 +108,10 @@ public class MovementRecordingViewModelTest {
     }
 
     @Test
-    public void comparingWithoutAModel_closesTheScreen() {
-        MovementRecordingViewModel viewModel = viewModel(MovementRecordingViewModel.Mode.COMPARE);
-
-        Event<MovementRecordingViewModel.RecordingEvent> event = viewModel.getEvents().getValue();
-        assertEquals(MovementRecordingViewModel.RecordingEvent.MOVEMENT_NOT_FOUND,
-                event.getContentIfNotHandled());
+    public void comparingWithoutAModel_isKnownBeforeTheCameraStarts() {
+        // L'écran doit se fermer sans ouvrir la caméra ni demander la permission.
+        assertTrue(viewModel(MovementRecordingViewModel.Mode.COMPARE).isMovementMissing());
+        assertFalse(viewModel(MovementRecordingViewModel.Mode.RECORD).isMovementMissing());
     }
 
     @Test
@@ -145,6 +141,5 @@ public class MovementRecordingViewModelTest {
         assertEquals(RecordingUiState.Phase.UNAVAILABLE, state(viewModel).getPhase());
         assertEquals("GPU indisponible", state(viewModel).getError());
         assertFalse(state(viewModel).isActionVisible());
-        assertNull(viewModel.getEvents().getValue());
     }
 }

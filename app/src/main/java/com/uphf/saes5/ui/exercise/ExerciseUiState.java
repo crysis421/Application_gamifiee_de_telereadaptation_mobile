@@ -2,6 +2,7 @@ package com.uphf.saes5.ui.exercise;
 
 import androidx.annotation.Nullable;
 
+import com.uphf.saes5.domain.model.AnalysisModel;
 import com.uphf.saes5.domain.model.Movement;
 import com.uphf.saes5.domain.movement.PostureFeedback;
 
@@ -41,12 +42,15 @@ public final class ExerciseUiState {
     @Nullable private final Movement preview;
     private final boolean soundsEnabled;
     private final long goalReachedAtElapsed;
+    private final AnalysisModel analysisModel;
+    private final int frameStride;
 
     ExerciseUiState(String exerciseName, int validatedReps, int targetReps, long startedAtElapsed,
                     boolean manualMode, int similarity, Status status, int threshold,
                     PostureFeedback.State posture, boolean arcadeVisible, int arcadeTotal,
                     int arcadeMultiplier, int averageLatency, boolean latencyAboveTarget,
-                    @Nullable Movement preview, boolean soundsEnabled, long goalReachedAtElapsed) {
+                    @Nullable Movement preview, boolean soundsEnabled, long goalReachedAtElapsed,
+                    AnalysisModel analysisModel, int frameStride) {
         this.exerciseName = exerciseName;
         this.validatedReps = validatedReps;
         this.targetReps = targetReps;
@@ -64,6 +68,8 @@ public final class ExerciseUiState {
         this.preview = preview;
         this.soundsEnabled = soundsEnabled;
         this.goalReachedAtElapsed = goalReachedAtElapsed;
+        this.analysisModel = analysisModel;
+        this.frameStride = frameStride;
     }
 
     public String getExerciseName() { return exerciseName; }
@@ -91,4 +97,8 @@ public final class ExerciseUiState {
     public boolean isSoundsEnabled() { return soundsEnabled; }
     /** Moment où l'objectif a été atteint, ou -1 : base du délai de fin automatique. */
     public long getGoalReachedAtElapsed() { return goalReachedAtElapsed; }
+    /** Modèle de détection à utiliser par la caméra (US-1.4). */
+    public AnalysisModel getAnalysisModel() { return analysisModel; }
+    /** Une image analysée sur {@code frameStride}. */
+    public int getFrameStride() { return frameStride; }
 }

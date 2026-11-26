@@ -14,7 +14,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
-    tools:context=".HomeActivity">
+    tools:context=".ui.home.HomeActivity">
 
     <!--
         La marge d'écran est portée par le contenu et non par la racine : sinon elle

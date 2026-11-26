@@ -30,6 +30,9 @@ public final class ActivityCounter {
     }
 
     public static final class Counts {
+        /** Aucun exercice réalisé. */
+        public static final Counts NONE = new Counts(0, 0);
+
         private final int total;
         private final int lastSevenDays;
 
